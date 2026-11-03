@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "grepleo"
+version = "0.1.0"
+description = "Búsqueda de empleo con evaluación de criterios (InfoJobs, Indeed y LinkedIn)"
+readme = "README.md"
+license = "GPL-3.0-or-later"
+requires-python = ">=3.10"
+dependencies = ["keyring>=23"]
+[project.optional-dependencies]
+gui = ["PyGObject>=3.42"]
+dev = ["pytest>=7", "ruff>=0.6"]
+[project.scripts]
+grepleo = "grepleo.__main__:main"
+[tool.setuptools.packages.find]
+where = ["src"]
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+[tool.ruff]
+line-length = 115
+target-version = "py310"
