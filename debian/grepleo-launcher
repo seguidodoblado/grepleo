@@ -1,0 +1,3 @@
+#!/bin/bash
+export PYTHONPATH=/usr/share/grepleo
+exec -a grepleo python3 -m grepleo "$@"

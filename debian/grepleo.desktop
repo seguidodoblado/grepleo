@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Grepleo
+Comment=Buscar empleo y comprobar qué criterios cumples
+Comment[en]=Search for jobs and check which criteria you meet
+Exec=/usr/bin/grepleo
+Icon=grepleo
+StartupWMClass=grepleo
+Type=Application
+Categories=Office;Utility;
+Keywords=empleo;trabajo;ofertas;job;InfoJobs;Indeed;LinkedIn;
+Terminal=false

@@ -1,0 +1,15 @@
+Source: grepleo
+Section: misc
+Priority: optional
+Maintainer: Jose Antonio Seguido Doblado <jose.antonio.seguido@gmail.com>
+Standards-Version: 4.6.0
+Build-Depends: debhelper-compat (= 13), gettext
+
+Package: grepleo
+Architecture: all
+Depends: ${misc:Depends}, python3, python3-gi, gir1.2-gtk-4.0 (>= 4.10), python3-keyring
+Homepage: https://github.com/seguidodoblado/grepleo
+Description: Búsqueda de empleo con evaluación de criterios
+ Aplicación GTK que busca ofertas en InfoJobs, Indeed y LinkedIn (a
+ través de Apify), las evalúa frente a tus perfiles y muestra qué
+ criterios cumples, cuáles no y cuáles no se pueden saber.

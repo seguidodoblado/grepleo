@@ -1,0 +1,34 @@
+.TH GREPLEO 1 "" "grepleo @VERSION@"
+.SH NOMBRE
+grepleo \- búsqueda de empleo en InfoJobs, Indeed y LinkedIn con evaluación de criterios
+.SH SINOPSIS
+.B grepleo
+.SH DESCRIPCIÓN
+.B grepleo
+es una aplicación GTK que busca ofertas de empleo en InfoJobs, Indeed y LinkedIn a través de Apify, evalúa cada
+oferta frente a tus perfiles y muestra qué criterios cumples, cuáles no y cuáles no se pueden saber (las fichas
+resumidas no traen la descripción completa). También da un panorama de los requisitos más pedidos, guarda las
+ofertas que has visto y te deja marcarlas como favoritas, postuladas o descartadas, y exporta los resultados a un
+informe HTML o a una tabla CSV.
+.PP
+La evaluación se hace en tu equipo con reglas locales: solo salen de él las palabras clave y la ubicación de la
+búsqueda. Para buscar hace falta un token de Apify, que se configura en
+.IR Preferencias
+y se guarda en el llavero del sistema.
+.SH ARCHIVOS
+.TP
+.I ~/.config/grepleo/settings.json
+Ajustes del usuario: idioma, tema y gasto máximo por búsqueda.
+.TP
+.I ~/.local/share/grepleo/grepleo.db
+Base de datos local con los perfiles, las búsquedas guardadas, las ofertas y su estado.
+.SH ENTORNO
+.TP
+.B LANGUAGE
+Idioma de la interfaz cuando está en «Sistema» en las preferencias.
+.SH VÉASE TAMBIÉN
+Apify: https://apify.com/
+.PP
+Página del proyecto: https://github.com/seguidodoblado/grepleo
+.SH AUTOR
+Jose Antonio Seguido Doblado <jose.antonio.seguido@gmail.com>
