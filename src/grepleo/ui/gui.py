@@ -16,6 +16,7 @@ from .. import __version__, settings
 from .. import secrets as token_store
 from ..assistant import build_argv, build_prompt, prepare_workspace
 from ..ats import LIKELY, POSSIBLE, AtsEstimate, estimate_ats
+from ..gaps import Gap, find_gaps
 from ..i18n import _, ngettext
 from ..incremental import incremental_posted, prune_stale, same_search
 from ..matching import evaluate
@@ -147,6 +148,21 @@ def fit_tooltip(item: "JobItem") -> str:
     """Qué significa el porcentaje y cuántos criterios se cumplen."""
     return _("Puntuación ponderada: cada criterio pesa distinto.\nCumples {count} criterios (los «no se sabe» no cuentan).").format(
         count=item.evaluation.summary)
+
+
+def gap_text(gap: Gap) -> str:
+    """Una línea por hueco: qué te falta y cuántas ofertas lo piden."""
+    if gap.missing:
+        head = _("No está en tu perfil")
+    else:
+        head = _("Tu nivel: {level} de 10").format(level=gap.level)
+    detail = ngettext("la pide {count} oferta", "la piden {count} ofertas", gap.offers).format(count=gap.offers)
+    extra = []
+    if gap.required:
+        extra.append(_("{count} como requisito").format(count=gap.required))
+    if gap.relevant:
+        extra.append(_("{count} de encaje alto o medio").format(count=gap.relevant))
+    return f"{head} · {detail}" + (f" ({', '.join(extra)})" if extra else "")
 
 
 def state_icon_of(item: JobItem) -> str:
@@ -963,11 +979,50 @@ class MainWindow(Gtk.ApplicationWindow):
             grid.attach(bar, 1, row, 1, 1)
             grid.attach(Gtk.Label(label=str(item.count), xalign=1), 2, row, 1, 1)
         self.panorama_box.append(grid)
+        self._build_gaps(active, profile)
         heading = Gtk.Label(xalign=0, use_markup=True)
         heading.set_markup("<b>{}</b>".format(GLib.markup_escape_text(_("Lo que se ve en esta muestra"))))
         self.panorama_box.append(heading)
         for text in panorama.insights:
             self.panorama_box.append(Gtk.Label(label="• " + text, xalign=0, wrap=True, selectable=True))
+
+    def _build_gaps(self, active: list[Job], profile: Profile) -> None:
+        """La sección «Qué te falta más veces»: se calcula en segundo plano porque recorre todas las ofertas."""
+        if not profile.name:
+            return
+        title = Gtk.Label(xalign=0, use_markup=True, margin_top=6)
+        title.set_markup("<b>{}</b>".format(GLib.markup_escape_text(_("Qué te falta más veces"))))
+        self.panorama_box.append(title)
+        hint = Gtk.Label(label=_("Lo que piden tus ofertas y no cubres: lo que no está en tu perfil y los elementos "
+                                 "de tus radares con nivel bajo. Primero lo más repetido en las de encaje alto o medio."),
+                         xalign=0, wrap=True)
+        hint.add_css_class("dim-label")
+        self.panorama_box.append(hint)
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+        box.append(Gtk.Label(label=_("Calculando…"), xalign=0))
+        self.panorama_box.append(box)
+        self._gaps_token = getattr(self, "_gaps_token", 0) + 1
+        token, evaluations = self._gaps_token, dict(self.evaluations)
+
+        def work() -> None:
+            gaps = find_gaps(active, evaluations, profile)
+            GLib.idle_add(self._show_gaps, token, box, gaps)
+
+        Thread(target=work, daemon=True).start()
+
+    def _show_gaps(self, token: int, box: Gtk.Box, gaps: list[Gap]) -> bool:
+        if token != self._gaps_token:
+            return False   # el panorama se ha vuelto a dibujar mientras tanto
+        while (child := box.get_first_child()) is not None:
+            box.remove(child)
+        if not gaps:
+            box.append(Gtk.Label(label=_("No hay huecos que destacar con las ofertas que tienen descripción completa."),
+                                 xalign=0, wrap=True))
+        for gap in gaps:
+            row = Gtk.Label(xalign=0, wrap=True, use_markup=True)
+            row.set_markup(f"• <b>{GLib.markup_escape_text(gap.name)}</b> — {GLib.markup_escape_text(gap_text(gap))}")
+            box.append(row)
+        return False
 
     # --- detalle y estados -------------------------------------------------------------------------
     def _selected_item(self) -> JobItem | None:

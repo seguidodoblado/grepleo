@@ -51,7 +51,7 @@ does not need it).
   knock-out requirements you do not meet. It is a local, explained estimate, not an official figure: each company
   configures its own ATS. Each radar also has a side legend that explains, axis by axis, what you are seeing.
 - **Overview:** which requirements repeat across the sample and what can be concluded by counting (most
-  requested, the nice-to-haves of your profile that no offer mentions, how many offers publish a salary, how many are remote…).
+  requested, the nice-to-haves of your profile that no offer mentions, **what you lack most often** (what your offers ask for and you do not cover, by importance), how many offers publish a salary, how many are remote…).
 - **Export** what you see to a self-contained HTML report or a CSV table.
 - **Spending control:** before searching you see an estimate of the cost on Apify, and every search has a
   spending cap that you configure.

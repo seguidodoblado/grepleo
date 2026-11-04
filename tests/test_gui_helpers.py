@@ -228,3 +228,44 @@ def test_fit_column_shows_the_weighted_score_that_sorts_and_the_count_in_the_too
     assert fit_text(Item).endswith("62 %") and "1/2" in fit_tooltip(Item)
     Item.evaluation = Evaluation(Fit.UNKNOWN, None)
     assert "%" not in fit_text(Item)
+
+
+def test_the_panorama_fills_in_the_gaps_section_in_the_background():
+    from pathlib import Path
+
+    from gi.repository import GLib, Gtk
+
+    from grepleo.profiles import Profile
+    from grepleo.sources.base import SearchQuery
+    from grepleo.storage import Store
+    from grepleo.ui import gui
+    if not Gtk.init_check():
+        pytest.skip("sin pantalla para crear widgets")
+    text = "Requisitos:\n- Jenkins y Docker\n" * 6
+    store = Store(Path(":memory:"))
+    profile_id = store.save_profile(Profile(name="P", headline="DevOps", must=["Docker"]))
+    search = store.save_search(gui.LAST_SEARCH, profile_id, SearchQuery("devops"), ["indeed"])
+    store.store_results(search, [Job(key="x:1", source="indeed", title="DevOps", description=text,
+                                     full_description=True)])
+    window = gui.MainWindow(Gtk.Application(application_id="io.github.seguidodoblado.GrepleoGaps"), store)
+    context = GLib.MainContext.default()
+    shown = ""
+    for _attempt in range(200):
+        while context.iteration(False):
+            pass
+        shown = _all_labels(window.panorama_box)
+        if "Jenkins" in shown:
+            break
+        GLib.usleep(10000)
+    assert "Qué te falta más veces" in shown and "Jenkins" in shown and "Calculando" not in shown
+
+
+def _all_labels(widget) -> str:
+    """El texto de todas las etiquetas bajo un widget."""
+    parts, child = [], widget.get_first_child()
+    while child is not None:
+        if hasattr(child, "get_text") and not hasattr(child, "get_buffer") and hasattr(child, "get_label"):
+            parts.append(child.get_label() or "")
+        parts.append(_all_labels(child))
+        child = child.get_next_sibling()
+    return "\n".join(parts)

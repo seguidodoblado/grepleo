@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: grepleo 0.1.0\n"
 "Report-Msgid-Bugs-To: jose.antonio.seguido@gmail.com\n"
-"POT-Creation-Date: 2026-11-04 23:43+0100\n"
+"POT-Creation-Date: 2026-11-05 00:19+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -161,7 +161,7 @@ msgid "Pide {needed}, tienes {have}"
 msgstr ""
 
 #: src/grepleo/matching.py:85 src/grepleo/report.py:25
-#: src/grepleo/ui/gui.py:400
+#: src/grepleo/ui/gui.py:416
 msgid "Salario"
 msgstr ""
 
@@ -187,7 +187,7 @@ msgid "La oferta no dice la modalidad"
 msgstr ""
 
 #: src/grepleo/matching.py:104 src/grepleo/report.py:25
-#: src/grepleo/ui/gui.py:317 src/grepleo/ui/gui.py:399
+#: src/grepleo/ui/gui.py:333 src/grepleo/ui/gui.py:415
 msgid "Ubicación"
 msgstr ""
 
@@ -225,19 +225,19 @@ msgstr ""
 msgid "Presencial"
 msgstr ""
 
-#: src/grepleo/models.py:32 src/grepleo/ui/gui.py:91
+#: src/grepleo/models.py:32 src/grepleo/ui/gui.py:92
 msgid "Alto"
 msgstr ""
 
-#: src/grepleo/models.py:32 src/grepleo/ui/gui.py:91
+#: src/grepleo/models.py:32 src/grepleo/ui/gui.py:92
 msgid "Medio"
 msgstr ""
 
-#: src/grepleo/models.py:32 src/grepleo/ui/gui.py:91
+#: src/grepleo/models.py:32 src/grepleo/ui/gui.py:92
 msgid "Bajo"
 msgstr ""
 
-#: src/grepleo/models.py:33 src/grepleo/ui/gui.py:91
+#: src/grepleo/models.py:33 src/grepleo/ui/gui.py:92
 msgid "Sin datos"
 msgstr ""
 
@@ -245,13 +245,13 @@ msgstr ""
 msgid "Nueva"
 msgstr ""
 
-#: src/grepleo/models.py:60 src/grepleo/ui/gui.py:526
-#: src/grepleo/ui/gui.py:1000
+#: src/grepleo/models.py:60 src/grepleo/ui/gui.py:542
+#: src/grepleo/ui/gui.py:1055
 msgid "Favorita"
 msgstr ""
 
-#: src/grepleo/models.py:61 src/grepleo/ui/gui.py:526
-#: src/grepleo/ui/gui.py:1000
+#: src/grepleo/models.py:61 src/grepleo/ui/gui.py:542
+#: src/grepleo/ui/gui.py:1055
 msgid "Postulada"
 msgstr ""
 
@@ -303,7 +303,7 @@ msgstr ""
 msgid "Prueba o examen"
 msgstr ""
 
-#: src/grepleo/models.py:99 src/grepleo/ui/gui.py:556
+#: src/grepleo/models.py:99 src/grepleo/ui/gui.py:572
 msgid "Oferta"
 msgstr ""
 
@@ -311,45 +311,45 @@ msgstr ""
 msgid "Otro"
 msgstr ""
 
-#: src/grepleo/panorama.py:93
+#: src/grepleo/panorama.py:94
 #, python-brace-format
 msgid "Lo más pedido: {names} (sobre {count} oferta con detalle)."
 msgid_plural "Lo más pedido: {names} (sobre {count} ofertas con detalle)."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/grepleo/panorama.py:104
+#: src/grepleo/panorama.py:105
 #, python-brace-format
 msgid "Ninguna oferta con detalle cita tus deseables: {names}."
 msgstr ""
 
-#: src/grepleo/panorama.py:110
+#: src/grepleo/panorama.py:111
 #, python-brace-format
 msgid ""
 "Tu requisito «{name}» solo aparece en {hits} de {detailed} ofertas con "
 "detalle."
 msgstr ""
 
-#: src/grepleo/panorama.py:114
+#: src/grepleo/panorama.py:115
 #, python-brace-format
 msgid "Encaje: {high} alto, {medium} medio y {low} bajo."
 msgstr ""
 
-#: src/grepleo/panorama.py:118
+#: src/grepleo/panorama.py:119
 #, python-brace-format
 msgid ""
 "{count} de {total} ofertas publican salario; la mediana es de {median} € al "
 "año."
 msgstr ""
 
-#: src/grepleo/panorama.py:122
+#: src/grepleo/panorama.py:123
 #, python-brace-format
 msgid "{count} oferta es en remoto."
 msgid_plural "{count} ofertas son en remoto."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/grepleo/panorama.py:127
+#: src/grepleo/panorama.py:128
 #, python-brace-format
 msgid ""
 "{count} oferta es una ficha resumida: no se puede saber qué requisitos no "
@@ -487,7 +487,7 @@ msgstr ""
 msgid "Tipo"
 msgstr ""
 
-#: src/grepleo/report.py:26 src/grepleo/ui/gui.py:401
+#: src/grepleo/report.py:26 src/grepleo/ui/gui.py:417
 msgid "Encaje"
 msgstr ""
 
@@ -495,7 +495,7 @@ msgstr ""
 msgid "Criterios"
 msgstr ""
 
-#: src/grepleo/report.py:26 src/grepleo/ui/gui.py:405
+#: src/grepleo/report.py:26 src/grepleo/ui/gui.py:421
 msgid "Fuente"
 msgstr ""
 
@@ -693,509 +693,555 @@ msgstr ""
 msgid "imprescindible"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:71
+#: src/grepleo/ui/gui.py:72
 msgid "Cualquier fecha"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:71
+#: src/grepleo/ui/gui.py:72
 msgid "Últimas 24 horas"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:71
+#: src/grepleo/ui/gui.py:72
 msgid "Última semana"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:71
+#: src/grepleo/ui/gui.py:72
 msgid "Último mes"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:75
+#: src/grepleo/ui/gui.py:76
 msgid "Candidatas"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:75
+#: src/grepleo/ui/gui.py:76
 msgid "Todas"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:75
+#: src/grepleo/ui/gui.py:76
 msgid "Favoritas"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:75
+#: src/grepleo/ui/gui.py:76
 msgid "Postuladas"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:75
+#: src/grepleo/ui/gui.py:76
 msgid "Descartadas"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:76
+#: src/grepleo/ui/gui.py:77
 msgid "Proceso abierto"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:76
+#: src/grepleo/ui/gui.py:77
 msgid "Con notas o seguimiento"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:80
+#: src/grepleo/ui/gui.py:81
 msgid "ATS: todas"
-msgstr ""
-
-#: src/grepleo/ui/gui.py:80
-#, python-brace-format
-msgid "Probable (≥ {percent} %)"
 msgstr ""
 
 #: src/grepleo/ui/gui.py:81
 #, python-brace-format
-msgid "Posible ({low}–{high} %)"
+msgid "Probable (≥ {percent} %)"
 msgstr ""
 
 #: src/grepleo/ui/gui.py:82
 #, python-brace-format
+msgid "Posible ({low}–{high} %)"
+msgstr ""
+
+#: src/grepleo/ui/gui.py:83
+#, python-brace-format
 msgid "Poco probable (< {percent} %)"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:86
+#: src/grepleo/ui/gui.py:87
 msgid "Modalidad: todas"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:87 src/grepleo/ui/profile_dialog.py:34
+#: src/grepleo/ui/gui.py:88 src/grepleo/ui/profile_dialog.py:34
 msgid "Sin indicar"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:91
+#: src/grepleo/ui/gui.py:92
 msgid "Encaje: todos"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:136
+#: src/grepleo/ui/gui.py:137
 msgid "Calculando la compatibilidad ATS…"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:137 src/grepleo/ui/radar_legend.py:85
+#: src/grepleo/ui/gui.py:138 src/grepleo/ui/radar_legend.py:85
 #, python-brace-format
 msgid "fiabilidad {level}"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:148
+#: src/grepleo/ui/gui.py:149
 #, python-brace-format
 msgid ""
 "Puntuación ponderada: cada criterio pesa distinto.\n"
 "Cumples {count} criterios (los «no se sabe» no cuentan)."
 msgstr ""
 
-#: src/grepleo/ui/gui.py:186
+#: src/grepleo/ui/gui.py:156
+msgid "No está en tu perfil"
+msgstr ""
+
+#: src/grepleo/ui/gui.py:158
+#, python-brace-format
+msgid "Tu nivel: {level} de 10"
+msgstr ""
+
+#: src/grepleo/ui/gui.py:159
+#, python-brace-format
+msgid "la pide {count} oferta"
+msgid_plural "la piden {count} ofertas"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/grepleo/ui/gui.py:162
+#, python-brace-format
+msgid "{count} como requisito"
+msgstr ""
+
+#: src/grepleo/ui/gui.py:164
+#, python-brace-format
+msgid "{count} de encaje alto o medio"
+msgstr ""
+
+#: src/grepleo/ui/gui.py:202
 #, python-brace-format
 msgid "Fase: {stage}"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:188
+#: src/grepleo/ui/gui.py:204
 #, python-brace-format
 msgid "Próximos pasos: {steps}"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:190
+#: src/grepleo/ui/gui.py:206
 #, python-brace-format
 msgid "{count} anotación en el histórico"
 msgid_plural "{count} anotaciones en el histórico"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/grepleo/ui/gui.py:193
+#: src/grepleo/ui/gui.py:209
 #, python-brace-format
 msgid "Recordatorio: {date}"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:202
+#: src/grepleo/ui/gui.py:218
 msgid "(est.)"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:232
+#: src/grepleo/ui/gui.py:248
 msgid "Ofertas"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:233
+#: src/grepleo/ui/gui.py:249
 msgid "Panorama"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:244
+#: src/grepleo/ui/gui.py:260
 msgid "Crea un perfil con tus criterios para ver qué ofertas encajan contigo."
 msgstr ""
 
-#: src/grepleo/ui/gui.py:262 src/grepleo/ui/preferences.py:31
+#: src/grepleo/ui/gui.py:278 src/grepleo/ui/preferences.py:31
 msgid "Preferencias"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:263
+#: src/grepleo/ui/gui.py:279
 msgid "Acerca de Grepleo"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:269
+#: src/grepleo/ui/gui.py:285
 msgid "Menú principal"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:277
+#: src/grepleo/ui/gui.py:293
 msgid "Informe HTML…"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:277
+#: src/grepleo/ui/gui.py:293
 msgid "Tabla CSV…"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:282
+#: src/grepleo/ui/gui.py:298
 msgid "Exportar"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:282
+#: src/grepleo/ui/gui.py:298
 msgid "Exporta las ofertas que se ven ahora"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:293 src/grepleo/ui/profile_dialog.py:79
+#: src/grepleo/ui/gui.py:309 src/grepleo/ui/profile_dialog.py:79
 msgid "Perfil"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:294
+#: src/grepleo/ui/gui.py:310
 msgid "Nuevo"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:295 src/grepleo/ui/tracking_panel.py:165
+#: src/grepleo/ui/gui.py:311 src/grepleo/ui/tracking_panel.py:165
 msgid "Editar"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:296 src/grepleo/ui/gui.py:306
-#: src/grepleo/ui/gui.py:624 src/grepleo/ui/gui.py:682
+#: src/grepleo/ui/gui.py:312 src/grepleo/ui/gui.py:322
+#: src/grepleo/ui/gui.py:640 src/grepleo/ui/gui.py:698
 #: src/grepleo/ui/tracking_panel.py:167
 msgid "Borrar"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:303
+#: src/grepleo/ui/gui.py:319
 msgid "Búsquedas guardadas"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:304 src/grepleo/ui/preferences.py:106
+#: src/grepleo/ui/gui.py:320 src/grepleo/ui/preferences.py:106
 #: src/grepleo/ui/profile_dialog.py:259
 msgid "Guardar"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:313
+#: src/grepleo/ui/gui.py:329
 msgid "Por ejemplo: product owner"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:315
+#: src/grepleo/ui/gui.py:331
 msgid "Puesto o palabras clave"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:316
+#: src/grepleo/ui/gui.py:332
 msgid "Madrid"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:321
+#: src/grepleo/ui/gui.py:337
 msgid "Ofertas por fuente"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:323
+#: src/grepleo/ui/gui.py:339
 msgid "Publicadas"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:324
+#: src/grepleo/ui/gui.py:340
 msgid "Solo remoto"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:326
+#: src/grepleo/ui/gui.py:342
 msgid "Solo novedades"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:327
+#: src/grepleo/ui/gui.py:343
 msgid ""
 "Si repites una búsqueda, pide solo lo publicado desde la última vez y lo "
 "suma a lo que ya tienes: gasta menos en Apify."
 msgstr ""
 
-#: src/grepleo/ui/gui.py:350 src/grepleo/ui/gui.py:766
+#: src/grepleo/ui/gui.py:366 src/grepleo/ui/gui.py:782
 msgid "Buscar"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:360
+#: src/grepleo/ui/gui.py:376
 msgid "Buscar empresa, puesto o requisito"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:367
+#: src/grepleo/ui/gui.py:383
 msgid "Filtra las ofertas ya encontradas por modalidad de trabajo"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:371
+#: src/grepleo/ui/gui.py:387
 msgid ""
 "Filtra por la compatibilidad ATS estimada: lo que tu CV tiene de pasar el "
 "filtro automático de la empresa"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:375 src/grepleo/ui/gui.py:895
+#: src/grepleo/ui/gui.py:391 src/grepleo/ui/gui.py:911
 msgid "Tipo: todos"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:398
+#: src/grepleo/ui/gui.py:414
 msgid "Empresa · Puesto"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:402 src/grepleo/ui/gui.py:887
+#: src/grepleo/ui/gui.py:418 src/grepleo/ui/gui.py:903
 msgid "ATS"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:403
+#: src/grepleo/ui/gui.py:419
 msgid "Estado"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:404 src/grepleo/ui/gui.py:556
+#: src/grepleo/ui/gui.py:420 src/grepleo/ui/gui.py:572
 msgid "Notas"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:517
+#: src/grepleo/ui/gui.py:533
 msgid "Abrir oferta"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:520
+#: src/grepleo/ui/gui.py:536
 msgid "Adaptar CV"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:521
+#: src/grepleo/ui/gui.py:537
 msgid ""
 "Abre un terminal con tu propia IA (Claude Code, OpenCode, Codex…) para "
 "adaptar tu currículum a esta oferta"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:527 src/grepleo/ui/gui.py:1001
+#: src/grepleo/ui/gui.py:543 src/grepleo/ui/gui.py:1056
 msgid "Descartar"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:556 src/grepleo/ui/radar_editor.py:126
+#: src/grepleo/ui/gui.py:572 src/grepleo/ui/radar_editor.py:126
 msgid "Radar"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:556
+#: src/grepleo/ui/gui.py:572
 msgid "Seguimiento"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:577
+#: src/grepleo/ui/gui.py:593
 msgid "(Sin perfil)"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:605
+#: src/grepleo/ui/gui.py:621
 msgid "No hay ningún perfil seleccionado."
 msgstr ""
 
-#: src/grepleo/ui/gui.py:605
+#: src/grepleo/ui/gui.py:621
 msgid "Crea uno con «Nuevo»."
 msgstr ""
 
-#: src/grepleo/ui/gui.py:623
+#: src/grepleo/ui/gui.py:639
 #, python-brace-format
 msgid "¿Borrar el perfil «{name}»?"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:624
+#: src/grepleo/ui/gui.py:640
 msgid "Las ofertas guardadas no se borran."
 msgstr ""
 
-#: src/grepleo/ui/gui.py:631
+#: src/grepleo/ui/gui.py:647
 msgid "(Búsqueda nueva)"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:658
+#: src/grepleo/ui/gui.py:674
 msgid "Escribe primero el puesto o las palabras clave."
 msgstr ""
 
-#: src/grepleo/ui/gui.py:669
+#: src/grepleo/ui/gui.py:685
 #, python-brace-format
 msgid "Búsqueda «{name}» guardada."
 msgstr ""
 
-#: src/grepleo/ui/gui.py:671
+#: src/grepleo/ui/gui.py:687
 msgid "Guardar búsqueda"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:671
+#: src/grepleo/ui/gui.py:687
 msgid "Nombre de la búsqueda"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:682
+#: src/grepleo/ui/gui.py:698
 #, python-brace-format
 msgid "¿Borrar la búsqueda «{name}»?"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:704 src/grepleo/ui/gui.py:742
+#: src/grepleo/ui/gui.py:720 src/grepleo/ui/gui.py:758
 msgid "Elige al menos una fuente."
 msgstr ""
 
-#: src/grepleo/ui/gui.py:709
+#: src/grepleo/ui/gui.py:725
 msgid "Sin coste: se lee directamente de su web"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:711
+#: src/grepleo/ui/gui.py:727
 #, python-brace-format
 msgid "Coste estimado en Apify: ≈ {cost} $ (tope {cap} $)"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:715
+#: src/grepleo/ui/gui.py:731
 #, python-brace-format
 msgid "solo novedades desde el {date}"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:739
+#: src/grepleo/ui/gui.py:755
 msgid "Escribe el puesto o las palabras clave."
 msgstr ""
 
-#: src/grepleo/ui/gui.py:749
+#: src/grepleo/ui/gui.py:765
 msgid "No hay un llavero disponible."
 msgstr ""
 
-#: src/grepleo/ui/gui.py:752
+#: src/grepleo/ui/gui.py:768
 msgid "Falta el token de Apify."
 msgstr ""
 
-#: src/grepleo/ui/gui.py:752
+#: src/grepleo/ui/gui.py:768
 msgid "Añádelo en Preferencias (menú principal)."
 msgstr ""
 
-#: src/grepleo/ui/gui.py:764
+#: src/grepleo/ui/gui.py:780
 #, python-brace-format
 msgid "Esta búsqueda costará aproximadamente {cost} $ en Apify."
 msgstr ""
 
-#: src/grepleo/ui/gui.py:765
+#: src/grepleo/ui/gui.py:781
 #, python-brace-format
 msgid ""
 "Es una estimación con los precios del plan gratuito; el tope de gasto es de "
 "{cap} $."
 msgstr ""
 
-#: src/grepleo/ui/gui.py:776
+#: src/grepleo/ui/gui.py:792
 #, python-brace-format
 msgid "Buscando en {source}…"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:802
+#: src/grepleo/ui/gui.py:818
 #, python-brace-format
 msgid "{count} oferta de {sources} fuente(s)."
 msgid_plural "{count} ofertas de {sources} fuente(s)."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/grepleo/ui/gui.py:807
+#: src/grepleo/ui/gui.py:823
 #, python-brace-format
 msgid "{new} nueva."
 msgid_plural "{new} nuevas."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/grepleo/ui/gui.py:809
+#: src/grepleo/ui/gui.py:825
 msgid "Alguna fuente ha fallado."
 msgstr ""
 
-#: src/grepleo/ui/gui.py:811
+#: src/grepleo/ui/gui.py:827
 msgid "La búsqueda no ha devuelto ofertas."
 msgstr ""
 
-#: src/grepleo/ui/gui.py:895
+#: src/grepleo/ui/gui.py:911
 msgid "Otros"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:936
+#: src/grepleo/ui/gui.py:952
 #, python-brace-format
 msgid "{shown} de {total} ofertas"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:947
+#: src/grepleo/ui/gui.py:963
 msgid "Todavía no hay ofertas: lanza una búsqueda."
 msgstr ""
 
-#: src/grepleo/ui/gui.py:952
+#: src/grepleo/ui/gui.py:968
 #, python-brace-format
 msgid "Qué piden: {detailed} oferta con detalle de {total}"
 msgid_plural "Qué piden: {detailed} ofertas con detalle de {total}"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/grepleo/ui/gui.py:967
+#: src/grepleo/ui/gui.py:984
 msgid "Lo que se ve en esta muestra"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:983
+#: src/grepleo/ui/gui.py:994
+msgid "Qué te falta más veces"
+msgstr ""
+
+#: src/grepleo/ui/gui.py:996
+msgid ""
+"Lo que piden tus ofertas y no cubres: lo que no está en tu perfil y los "
+"elementos de tus radares con nivel bajo. Primero lo más repetido en las de "
+"encaje alto o medio."
+msgstr ""
+
+#: src/grepleo/ui/gui.py:1002
+msgid "Calculando…"
+msgstr ""
+
+#: src/grepleo/ui/gui.py:1019
+msgid ""
+"No hay huecos que destacar con las ofertas que tienen descripción completa."
+msgstr ""
+
+#: src/grepleo/ui/gui.py:1038
 msgid "Elige una oferta para ver qué criterios cumple."
 msgstr ""
 
-#: src/grepleo/ui/gui.py:1001
+#: src/grepleo/ui/gui.py:1056
 msgid "Quitar marca"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:1052
+#: src/grepleo/ui/gui.py:1107
 #, python-brace-format
 msgid "Tienes {count} recordatorio para hoy o vencido: {titles}."
 msgid_plural "Tienes {count} recordatorios para hoy o vencidos: {titles}."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/grepleo/ui/gui.py:1062
+#: src/grepleo/ui/gui.py:1117
 msgid "Crea un perfil con tus datos para poder adaptar tu currículum."
 msgstr ""
 
-#: src/grepleo/ui/gui.py:1065
+#: src/grepleo/ui/gui.py:1120
 msgid "Falta el terminal embebido: instala el paquete gir1.2-vte-3.91."
 msgstr ""
 
-#: src/grepleo/ui/gui.py:1072
+#: src/grepleo/ui/gui.py:1127
 msgid "No se pudo preparar el asistente."
 msgstr ""
 
-#: src/grepleo/ui/gui.py:1081
+#: src/grepleo/ui/gui.py:1136
 msgid "Esta oferta no tiene un enlace utilizable."
 msgstr ""
 
-#: src/grepleo/ui/gui.py:1092
+#: src/grepleo/ui/gui.py:1147
 msgid "No hay ofertas que exportar."
 msgstr ""
 
-#: src/grepleo/ui/gui.py:1092
+#: src/grepleo/ui/gui.py:1147
 msgid "Lanza una búsqueda o cambia los filtros."
 msgstr ""
 
-#: src/grepleo/ui/gui.py:1094
+#: src/grepleo/ui/gui.py:1149
 msgid "Exportar ofertas"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:1110
+#: src/grepleo/ui/gui.py:1165
 #, python-brace-format
 msgid "Radar de ofertas: {query}"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:1113
+#: src/grepleo/ui/gui.py:1168
 msgid "No se pudo guardar el archivo."
 msgstr ""
 
-#: src/grepleo/ui/gui.py:1115
+#: src/grepleo/ui/gui.py:1170
 #, python-brace-format
 msgid "Exportado: {path}"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:1128
+#: src/grepleo/ui/gui.py:1183
 msgid ""
 "Busca empleo en InfoJobs, Indeed, LinkedIn, Tecnoempleo y Michael Page, y "
 "comprueba qué criterios cumples en cada oferta."
 msgstr ""
 
-#: src/grepleo/ui/gui.py:1131
+#: src/grepleo/ui/gui.py:1186
 msgid "translator-credits"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:1139
+#: src/grepleo/ui/gui.py:1194
 msgid "Servicios de terceros"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:1141
+#: src/grepleo/ui/gui.py:1196
 msgid ""
 "Actors de la comunidad de Apify para InfoJobs, Indeed, LinkedIn y Tecnoempleo"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:1143
+#: src/grepleo/ui/gui.py:1198
 msgid "Michael Page se lee directamente de su web pública, sin Apify"
 msgstr ""
 

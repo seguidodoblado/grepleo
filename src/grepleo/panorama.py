@@ -24,7 +24,8 @@ DEFAULT_CATALOG: tuple[str, ...] = (
     # infraestructura y DevOps
     "Terraform", "Ansible", "Jenkins", "CI/CD|ci cd|integración continua", "GitHub Actions", "GitLab", "Helm",
     "Prometheus", "Grafana", "Bash", "PowerShell", "Cloud", "Redes|networking", "Windows Server", "VMware",
-    "Serverless|lambda", "Microservicios|microservices",
+    "Serverless|lambda", "Microservicios|microservices", "OpenShift", "ArgoCD|argo cd", "Azure DevOps",
+    "CloudFormation", "Datadog", "Splunk", "Vault|hashicorp vault", "SonarQube", "ELK|elasticsearch",
     # desarrollo y datos
     ".NET|dotnet", "C#", "PHP", "Node.js|nodejs", "PostgreSQL", "MySQL", "MongoDB", "Oracle", "Kafka", "Spark",
     "Airflow", "dbt",
