@@ -2,6 +2,7 @@
 import os
 import re
 import signal
+import time
 
 import gi
 
@@ -19,6 +20,7 @@ TERMINAL_FONT = "Ubuntu Sans Mono, Monospace"   # tipografía del terminal; la s
 TERMINAL_FONT_SIZE = 11
 CHECK_MS = 1500                                  # cada cuánto se mira si ya existe el CV generado
 TERMINATE_AFTER_MS = (1500, 4000)                # al cerrar: SIGTERM a los 1,5 s y SIGKILL a los 4 s si la CLI sigue viva
+DESTROY_AFTER_MS = 8000                          # si aun así la CLI no ha terminado, la ventana se destruye de todos modos
 
 
 def _signal_session_leader(pid: int, sig: int) -> bool:
@@ -32,6 +34,17 @@ def _signal_session_leader(pid: int, sig: int) -> bool:
     return False
 
 
+def _alive(pid: int) -> bool:
+    """Si el proceso sigue vivo (un zombi ya ha terminado) y es el líder de la sesión que lanzó el terminal."""
+    try:
+        if os.getsid(pid) != pid:
+            return False
+        with open(f"/proc/{pid}/stat", encoding="utf-8") as handle:
+            return handle.read().rsplit(") ", 1)[-1].split()[0] != "Z"
+    except (OSError, IndexError):
+        return False
+
+
 class AssistantWindow(Gtk.Window):
     """Una sesión de tu CLI de IA en un terminal embebido, con la carpeta de la oferta como directorio de trabajo."""
 
@@ -43,6 +56,8 @@ class AssistantWindow(Gtk.Window):
         self._workspace = workspace
         self._job = job
         self._pid = 0   # el proceso de la CLI mientras viva: es líder de su propia sesión
+        self._closing = False     # el usuario ha cerrado la ventana, pero la CLI aún no ha terminado
+        self._destroyed = False
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6, margin_top=8, margin_bottom=8,
                       margin_start=8, margin_end=8)
         note = Gtk.Label(xalign=0, wrap=True, label=_(
@@ -57,7 +72,7 @@ class AssistantWindow(Gtk.Window):
         font.set_size(TERMINAL_FONT_SIZE * Pango.SCALE)
         self.terminal.set_font(font)
         self.terminal.set_scrollback_lines(10000)
-        self.terminal.connect("child-exited", self._child_exited)
+        self._exit_handler = self.terminal.connect("child-exited", self._child_exited)
         box.append(self.terminal)
 
         bar = Gtk.Box(spacing=8)
@@ -94,22 +109,64 @@ class AssistantWindow(Gtk.Window):
 
     def _child_exited(self, _terminal, _status) -> None:
         self._pid = 0
+        if self._closing:
+            GLib.idle_add(self._destroy_now)   # fuera del manejador de la señal del terminal
+            return
         self._refresh(True)
 
     def _on_close(self, *_args) -> bool:
-        GLib.source_remove(self._timer)
+        """Con la CLI viva, la ventana no se destruye: se oculta, se termina la CLI y se destruye cuando haya salido.
+        Destruir el terminal con su proceso aún vivo dejaba que el aviso «child-exited» llegara a un objeto ya liberado
+        y la aplicación se caía con un fallo de memoria."""
+        if self._closing:
+            return True   # ya se está cerrando
+        if self._timer:
+            GLib.source_remove(self._timer)
+            self._timer = 0
+        if not self._pid:
+            self._destroyed = True
+            return False
+        self._closing = True
+        self.set_visible(False)
         self._terminate()
+        GLib.timeout_add(DESTROY_AFTER_MS, self._destroy_now)
+        return True
+
+    def is_destroyed(self) -> bool:
+        return self._destroyed
+
+    def _destroy_now(self) -> bool:
+        if self._destroyed:
+            return False
+        self._destroyed = True
+        if self.terminal.handler_is_connected(self._exit_handler):
+            self.terminal.disconnect(self._exit_handler)
+        self.destroy()
         return False
 
     def _terminate(self) -> None:
-        """La CLI recibe SIGHUP al destruirse el terminal, pero una CLI interactiva puede ignorarlo: si sigue viva se le
-        manda SIGTERM y, si aun así no sale, SIGKILL, para que no quede un proceso suelto tras cerrar la ventana."""
+        """La CLI recibe SIGHUP al destruirse el terminal, pero una CLI interactiva puede ignorarlo: se le manda SIGHUP
+        ya y, si sigue viva, SIGTERM y después SIGKILL, para que no quede un proceso suelto tras cerrar la ventana."""
         pid = self._pid
-        self._pid = 0
         if not pid:
             return
+        _signal_session_leader(pid, signal.SIGHUP)
         for delay, sig in zip(TERMINATE_AFTER_MS, (signal.SIGTERM, signal.SIGKILL), strict=True):
             GLib.timeout_add(delay, _signal_session_leader, pid, sig)
+
+    def shutdown(self, wait: float = 1.5) -> None:
+        """Al cerrar la aplicación: termina la CLI ahora mismo (SIGHUP, SIGTERM y SIGKILL en ese orden) y espera a que
+        salga, como máximo `wait` segundos en total, porque ya no habrá bucle de eventos que ejecute los temporizadores."""
+        pid = self._pid
+        if not pid:
+            return
+        for sig, share in ((signal.SIGHUP, 0.5), (signal.SIGTERM, 0.3), (signal.SIGKILL, 0.2)):
+            _signal_session_leader(pid, sig)
+            deadline = time.monotonic() + wait * share
+            while time.monotonic() < deadline and _alive(pid):
+                time.sleep(0.02)
+            if not _alive(pid):
+                return
 
     def _output(self):
         return self._workspace.folder / self._workspace.output

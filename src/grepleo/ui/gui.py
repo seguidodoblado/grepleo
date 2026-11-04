@@ -239,6 +239,7 @@ class MainWindow(Gtk.ApplicationWindow):
         for window in getattr(self, "_assistant_windows", []):   # que no quede una sesión de IA abierta sin ventana madre
             if window.is_visible():
                 window.close()
+            window.shutdown()   # incluso las ocultas que esperaban a que su CLI terminara: la aplicación se va ya
         return False
 
     # --- construcción ------------------------------------------------------------------------------
@@ -1058,7 +1059,7 @@ class MainWindow(Gtk.ApplicationWindow):
             message(self, _("No se pudo preparar el asistente."), str(error))
             return
         window = AssistantWindow(self, work, argv, item.job)
-        self._assistant_windows = [w for w in getattr(self, "_assistant_windows", []) if w.is_visible()] + [window]
+        self._assistant_windows = [w for w in getattr(self, "_assistant_windows", []) if not w.is_destroyed()] + [window]
         window.present()
 
     def _open_job(self, _button) -> None:

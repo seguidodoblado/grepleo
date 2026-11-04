@@ -96,3 +96,73 @@ def test_a_signal_is_only_sent_to_the_session_leader_and_never_to_a_missing_proc
     assert _signal_session_leader(2_000_000_000, 15) is False          # un pid que no existe: no falla
     import os
     assert _signal_session_leader(os.getpid(), 15) is False            # el de pytest no es líder de su sesión: no se toca
+
+
+def _pump(context, seconds, until=lambda: False):
+    import time
+    deadline = time.monotonic() + seconds
+    while time.monotonic() < deadline and not until():
+        context.iteration(False)
+        time.sleep(0.01)
+
+
+def _open(argv, monkeypatch=None):
+    from grepleo.ui import assistant_window
+    if monkeypatch is not None:
+        monkeypatch.setattr(assistant_window, "TERMINATE_AFTER_MS", (200, 600))
+    import pathlib
+    workspace = Workspace(pathlib.Path("/tmp"), "oferta.md", "cv-base.md", "", OUTPUT_NAME)
+    window = AssistantWindow(Gtk.Window(), workspace, argv, Job(key="x:1", source="x", title="DevOps"))
+    window.present()
+    from gi.repository import GLib
+    context = GLib.MainContext.default()
+    _pump(context, 5, lambda: bool(window._pid))
+    return window, context
+
+
+def test_closing_with_a_live_cli_hides_the_window_and_only_destroys_it_once_the_cli_has_exited(monkeypatch):
+    import os
+    window, context = _open(["sh", "-c", "trap '' HUP TERM; exec sleep 61.7"], monkeypatch)
+    pid = window._pid
+    assert pid and os.getsid(pid) == pid
+    window.close()
+    # no se destruye aún: el terminal sigue con su proceso y un «child-exited» tardío no debe llegar a un objeto liberado
+    assert not window.get_visible() and window._closing and not window.is_destroyed()
+    window.close()                                              # un segundo cierre no hace nada
+    assert not window.is_destroyed()
+    _pump(context, 8, window.is_destroyed)
+    assert window.is_destroyed(), "la ventana debe destruirse cuando la CLI ha terminado"
+
+
+def test_a_window_whose_cli_has_already_exited_is_destroyed_by_closing_it():
+    window, context = _open(["true"])
+    _pump(context, 5, lambda: not window._pid)                  # la CLI de prueba sale al instante
+    assert not window._pid
+    window.close()
+    _pump(context, 1)
+    assert window.is_destroyed() and not window._closing
+
+
+def test_shutdown_ends_a_cli_that_ignores_hangup_and_terminate_without_waiting_for_the_event_loop():
+    import os
+    import time
+    window, context = _open(["sh", "-c", "trap '' HUP TERM; exec sleep 61.9"])
+    pid = window._pid
+    assert pid
+    started = time.monotonic()
+    window.shutdown(wait=1.5)
+    assert time.monotonic() - started < 2.5
+    deadline = time.monotonic() + 2
+    while time.monotonic() < deadline:                          # el hijo ya está muerto (a lo sumo, zombi hasta que el bucle lo recoja)
+        context.iteration(False)
+        try:
+            with open(f"/proc/{pid}/stat", encoding="utf-8") as handle:
+                if handle.read().rsplit(") ", 1)[-1].split()[0] == "Z":
+                    break
+        except FileNotFoundError:
+            break
+        time.sleep(0.02)
+    else:
+        raise AssertionError("la CLI sigue viva tras shutdown()")
+    assert os.getsid(os.getpid()) != pid
+    window.shutdown()                                           # sin CLI no hace nada
