@@ -1,19 +1,17 @@
 """La pestaña «Radar» de una oferta: la compatibilidad ATS estimada y, por tema, un radar con su leyenda lateral."""
 import gi
 
+gi.require_version("Graphene", "1.0")
 gi.require_version("Gtk", "4.0")
-from gi.repository import GLib, Gtk
+from gi.repository import GLib, Graphene, Gtk
 
 from ..ats import AtsEstimate
 from ..i18n import _
 from ..models import Fit
 from ..radar import RadarData, known_axes, total_overlap
 from .radar_legend import build_ats, build_legend
+from .radar_minimap import RadarMinimap, percent
 from .radar_view import RadarView
-
-
-def percent(value: float | None) -> str:
-    return "—" if value is None else f"{round(value * 100)} %"
 
 
 class RadarPanel(Gtk.ScrolledWindow):
@@ -29,13 +27,15 @@ class RadarPanel(Gtk.ScrolledWindow):
         self.summary.add_css_class("title-4")
         self.views: list[RadarView] = []
         self.legends: list[Gtk.Box] = []
+        self.heads: list[Gtk.Label] = []
+        self.minimap: RadarMinimap | None = None
         self.ats_box: Gtk.Box | None = None
         self.set_data([], Fit.UNKNOWN)
 
     def set_data(self, radars: list[RadarData], fit: Fit, ats: AtsEstimate | None = None) -> None:
         while (child := self._box.get_first_child()) is not None:
             self._box.remove(child)
-        self.views, self.legends, self.ats_box = [], [], None
+        self.views, self.legends, self.heads, self.minimap, self.ats_box = [], [], [], None, None
         if not radars:
             self._box.append(Gtk.Label(label=_("Elige una oferta para ver sus radares."), xalign=0))
             return
@@ -52,6 +52,9 @@ class RadarPanel(Gtk.ScrolledWindow):
         self.summary.set_tooltip_text(_("Cuánto de lo que pide la oferta cubres con tus niveles: más solape, más "
                                         "posibilidades de encaje."))
         self._box.append(self.summary)
+        if len(radars) >= 2:   # con un solo radar no hay nada que resumir
+            self.minimap = RadarMinimap(radars, fit, self.scroll_to_radar)
+            self._box.append(self.minimap)
         for radar in radars:
             head = Gtk.Label(xalign=0)
             overlap = radar.overlap
@@ -61,6 +64,7 @@ class RadarPanel(Gtk.ScrolledWindow):
                     _("solape {percent}").format(percent=percent(overlap)) if overlap is not None
                     else _("la oferta no pide nada de esto"))))
             self._box.append(head)
+            self.heads.append(head)
             view = RadarView(width_request=320)
             view.set_content_height(340)
             view.set_data(radar.labels, radar.levels, radar.demand, fit)
@@ -72,3 +76,12 @@ class RadarPanel(Gtk.ScrolledWindow):
             self.views.append(view)
             self.legends.append(legend)
             self._box.append(flow)
+
+    def scroll_to_radar(self, index: int) -> bool:
+        """Desplaza el panel hasta el radar `index` (al pulsar su miniatura)."""
+        if 0 <= index < len(self.heads):
+            point = self.heads[index].compute_point(self._box, Graphene.Point().init(0, 0))
+            if point[0]:
+                adjustment = self.get_vadjustment()
+                adjustment.set_value(max(0.0, point[1].y - 6))
+        return False

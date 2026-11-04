@@ -31,3 +31,22 @@ def test_percent_and_the_panel_show_one_radar_per_topic_with_its_overlap():
     assert panel.views == []
     panel.set_data([radars[2]], Fit.LOW)                       # la oferta no pide nada medible
     assert "no pide nada" in panel.summary.get_text()
+
+
+def test_the_minimap_has_one_thumbnail_per_radar_coloured_by_overlap_and_scrolls_to_it():
+    from grepleo.ui.radar_minimap import overlap_class
+    assert [overlap_class(value) for value in (None, 0.2, 0.5, 0.9)] == ["none", "low", "medium", "high"]
+    panel = RadarPanel()
+    radars = [RadarData("General", ["a", "b", "c"], [8, 4, 6], [6, 8, 6]),
+              RadarData("Cloud", ["AWS", "Docker", "Helm"], [9, 5, 2], [10, 7, 0]),
+              RadarData("Sin demanda", ["x", "y", "z"], [5, 5, 5], [0, None, 0])]
+    panel.set_data(radars, Fit.HIGH)
+    assert panel.minimap is not None and len(panel.minimap.thumbs) == 3
+    assert len(panel.heads) == 3
+    first, second = panel.minimap.thumbs[0], panel.minimap.thumbs[1]
+    assert first.get_first_child().get_size_request()[0] > second.get_first_child().get_size_request()[0]   # el general, mayor
+    assert second.has_css_class("radar-thumb-high") and panel.minimap.thumbs[2].has_css_class("radar-thumb-none")
+    assert "Cloud" in second.get_tooltip_text() and "solape" in second.get_tooltip_text()
+    assert panel.scroll_to_radar(2) is False and panel.scroll_to_radar(9) is False      # fuera de rango: no hace nada
+    panel.set_data(radars[:1], Fit.HIGH)
+    assert panel.minimap is None                                                       # con un solo radar no hay minimapa

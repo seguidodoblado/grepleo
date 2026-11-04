@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: grepleo 0.1.0\n"
 "Report-Msgid-Bugs-To: jose.antonio.seguido@gmail.com\n"
-"POT-Creation-Date: 2026-11-05 00:35+0100\n"
+"POT-Creation-Date: 2026-11-05 00:51+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -651,11 +651,11 @@ msgstr ""
 msgid "CV guardado en {path}."
 msgstr ""
 
-#: src/grepleo/ui/common.py:117 src/grepleo/ui/common.py:145
+#: src/grepleo/ui/common.py:122 src/grepleo/ui/common.py:150
 msgid "Aceptar"
 msgstr ""
 
-#: src/grepleo/ui/common.py:122 src/grepleo/ui/common.py:144
+#: src/grepleo/ui/common.py:127 src/grepleo/ui/common.py:149
 #: src/grepleo/ui/profile_dialog.py:258 src/grepleo/ui/tracking_panel.py:79
 msgid "Cancelar"
 msgstr ""
@@ -1742,6 +1742,15 @@ msgstr ""
 msgid "Se ha leído tu CV base (un PDF subido no se lee)."
 msgstr ""
 
+#: src/grepleo/ui/radar_minimap.py:60 src/grepleo/ui/radar_panel.py:64
+#, python-brace-format
+msgid "solape {percent}"
+msgstr ""
+
+#: src/grepleo/ui/radar_minimap.py:61 src/grepleo/ui/radar_panel.py:65
+msgid "la oferta no pide nada de esto"
+msgstr ""
+
 #: src/grepleo/ui/radar_panel.py:40
 msgid "Elige una oferta para ver sus radares."
 msgstr ""
@@ -1766,25 +1775,16 @@ msgid ""
 "posibilidades de encaje."
 msgstr ""
 
-#: src/grepleo/ui/radar_panel.py:61
-#, python-brace-format
-msgid "solape {percent}"
-msgstr ""
-
-#: src/grepleo/ui/radar_panel.py:62
-msgid "la oferta no pide nada de esto"
-msgstr ""
-
-#: src/grepleo/ui/radar_view.py:42
+#: src/grepleo/ui/radar_view.py:48
 #, python-brace-format
 msgid "{axis}: tú {mine} · oferta {asked}"
 msgstr ""
 
-#: src/grepleo/ui/radar_view.py:123
+#: src/grepleo/ui/radar_view.py:137
 msgid "Tú"
 msgstr ""
 
-#: src/grepleo/ui/radar_view.py:135
+#: src/grepleo/ui/radar_view.py:149
 msgid "Lo que pide la oferta"
 msgstr ""
 
