@@ -7,14 +7,16 @@ from typing import Any
 
 from ..models import Job
 from .apify import ApifyError, run_actor
-from .base import POSTED, SearchQuery, Source
+from .base import POSTED, SearchQuery, Source, SourceError
 from .indeed import Indeed
 from .infojobs import InfoJobs
 from .linkedin import LinkedIn
+from .michaelpage import MichaelPage
+from .tecnoempleo import Tecnoempleo
 
-SOURCES: dict[str, Source] = {source.id: source for source in (InfoJobs(), Indeed(), LinkedIn())}
+SOURCES: dict[str, Source] = {source.id: source for source in (InfoJobs(), Indeed(), LinkedIn(), Tecnoempleo(), MichaelPage())}
 
-__all__ = ["POSTED", "SOURCES", "ApifyError", "SearchQuery", "Source", "SourceResult", "plan_search",
+__all__ = ["POSTED", "SOURCES", "ApifyError", "SearchQuery", "Source", "SourceError", "SourceResult", "plan_search",
            "run_search"]
 
 
@@ -38,11 +40,13 @@ def plan_search(query: SearchQuery, source_ids: list[str], budget_usd: float) ->
     chosen = [SOURCES[source_id] for source_id in source_ids if source_id in SOURCES]
     if not chosen:
         return []
-    share = budget_usd / len(chosen)
+    paid = [source for source in chosen if not source.local]
+    share = budget_usd / len(paid) if paid else 0.0   # las fuentes locales no gastan: el reparto es entre las de Apify
     runs = []
     for source in chosen:
-        limit = source.limit_for_budget(share, query.limit)
-        runs.append(PlannedRun(source, limit, share, source.estimate_cost(limit)))
+        cap = 0.0 if source.local else share
+        limit = query.limit if source.local else source.limit_for_budget(share, query.limit)
+        runs.append(PlannedRun(source, limit, cap, source.estimate_cost(limit)))
     return runs
 
 
@@ -57,9 +61,12 @@ def run_search(token: str, query: SearchQuery, runs: list[PlannedRun],
         outcome = SourceResult(planned.source)
         try:
             partial = SearchQuery(query.keywords, query.location, planned.limit, query.posted, query.remote)
-            items = runner(token, planned.source.actor, planned.source.build_input(partial), planned.cap_usd)
+            if planned.source.local:
+                items = planned.source.fetch(partial)
+            else:
+                items = runner(token, planned.source.actor, planned.source.build_input(partial), planned.cap_usd)
             outcome.jobs = [job for item in items if (job := planned.source.parse_item(item)) is not None]
-        except ApifyError as error:
+        except SourceError as error:
             outcome.error = str(error)
         results.append(outcome)
     return results

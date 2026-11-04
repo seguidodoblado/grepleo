@@ -1,7 +1,7 @@
 grepleo (0.1.0-1) noble; urgency=medium
 
-  * Initial release: job search on InfoJobs, Indeed and LinkedIn through
-    Apify, with profiles, criteria evaluation, overview and HTML/CSV
-    export.
+  * Initial release: job search on InfoJobs, Indeed, LinkedIn and Tecnoempleo
+    through Apify and on Michael Page directly from its website, with
+    profiles, criteria evaluation, overview and HTML/CSV export.
 
  -- Jose Antonio Seguido Doblado <jose.antonio.seguido@gmail.com>  Tue, 03 Nov 2026 16:57:36 +0100

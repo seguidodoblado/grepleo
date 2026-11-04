@@ -1,5 +1,6 @@
 """Utilidades de interfaz compartidas: modo claro u oscuro en uso, iconos del sistema y diálogos pequeños."""
 from collections.abc import Callable
+from pathlib import Path
 
 import gi
 
@@ -20,18 +21,28 @@ class Appearance:
 APPEARANCE = Appearance()
 
 CSS = b"""
-.fit-high { background: rgba(46, 160, 67, 0.35); border-radius: 9px; padding: 1px 8px; }
-.fit-medium { background: rgba(210, 153, 34, 0.35); border-radius: 9px; padding: 1px 8px; }
-.fit-low { background: rgba(218, 54, 51, 0.35); border-radius: 9px; padding: 1px 8px; }
-.fit-unknown { background: rgba(128, 128, 128, 0.25); border-radius: 9px; padding: 1px 8px; }
+.row-fit-high { background: rgba(46, 160, 67, 0.30); }
+.row-fit-medium { background: rgba(230, 126, 34, 0.32); }
+.row-fit-low { background: rgba(218, 54, 51, 0.30); }
+.row-fit-unknown { background: rgba(128, 128, 128, 0.18); }
 """
+
+
+ICONS_DIR = Path(__file__).parent / "icons"   # los iconos de las fuentes: monogramas propios, no los logotipos
+
+
+def source_icon(source_id: str) -> str:
+    """El nombre del icono de una fuente de ofertas ('' si no hay)."""
+    name = f"grepleo-source-{source_id}"
+    return name if (ICONS_DIR / f"{name}.svg").exists() else ""
 
 
 def install_css() -> None:
     provider = Gtk.CssProvider()
     provider.load_from_data(CSS)
-    Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), provider,
-                                              Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+    display = Gdk.Display.get_default()
+    Gtk.StyleContext.add_provider_for_display(display, provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+    Gtk.IconTheme.get_for_display(display).add_search_path(str(ICONS_DIR))
 
 
 def pick_icon(*names: str) -> str:
@@ -57,6 +68,17 @@ def labeled(text: str, widget: Gtk.Widget, vertical: bool = True) -> Gtk.Box:
     box.append(label)
     box.append(widget)
     return box
+
+
+def link_icon(platform_id: str) -> str:
+    """El nombre del icono de una plataforma de perfiles profesionales ('' si no hay)."""
+    name = f"grepleo-link-{platform_id}"
+    return name if (ICONS_DIR / f"{name}.svg").exists() else ""
+
+
+def vte_available() -> bool:
+    """El terminal embebible para GTK 4 (gir1.2-vte-3.91), comprobado sin cargarlo."""
+    return "3.91" in gi.Repository.get_default().enumerate_versions("Vte")
 
 
 def message(parent: Gtk.Window, text: str, detail: str = "") -> None:

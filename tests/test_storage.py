@@ -80,3 +80,62 @@ def test_a_job_shared_by_two_searches_has_one_state():
     store.store_results(two, [make_job()])
     store.set_state("indeed:1", JobState.APPLIED)
     assert store.jobs_for_search(two)[0].state is JobState.APPLIED
+
+
+def test_notes_and_reminders_survive_new_searches_and_are_listed_when_due():
+    store = Store(Path(":memory:"))
+    search = store.save_search("s", None, SearchQuery("po"), ["indeed"])
+    store.store_results(search, [make_job("indeed:1"), make_job("indeed:2", title="SM")])
+    store.set_notes("indeed:1", "Entrevista el lunes con Ana; ofrecen 45k", "2026-11-10")
+    store.set_notes("indeed:2", "", "2026-12-01")
+    store.store_results(search, [make_job("indeed:1", title="PO (actualizada)"), make_job("indeed:2")])
+    jobs = {job.key: job for job in store.jobs_for_search(search)}
+    assert jobs["indeed:1"].notes.startswith("Entrevista") and jobs["indeed:1"].remind_on == "2026-11-10"
+    assert jobs["indeed:1"].title == "PO (actualizada)"      # los datos se actualizan, las notas no se tocan
+    assert [(key, title) for key, title, _day in store.due_reminders("2026-11-10")] == [("indeed:1", "PO (actualizada)")]
+    assert store.due_reminders("2026-11-09") == [] and len(store.due_reminders("2027-01-01")) == 2
+
+
+def test_an_old_database_without_notes_columns_is_migrated(tmp_path):
+    import sqlite3
+    path = tmp_path / "old.db"
+    db = sqlite3.connect(str(path))
+    db.executescript("CREATE TABLE jobs (key TEXT PRIMARY KEY, data TEXT NOT NULL, state TEXT NOT NULL DEFAULT 'new',"
+                     " first_seen TEXT NOT NULL); INSERT INTO jobs VALUES ('x:1', '{\"title\": \"t\"}', 'new', 'hoy');")
+    db.commit()
+    db.close()
+    store = Store(path)
+    store.set_notes("x:1", "nota", "2026-11-05")
+    assert store.due_reminders("2026-11-05")[0][0] == "x:1"
+
+
+def test_tracking_stage_next_steps_and_event_history_are_stored_per_offer():
+    from grepleo.models import EventKind
+    store = Store(Path(":memory:"))
+    search = store.save_search("s", None, SearchQuery("po"), ["indeed"])
+    store.store_results(search, [make_job("indeed:1"), make_job("indeed:2")])
+    store.set_tracking("indeed:1", "final", "Esperar la llamada de RRHH el viernes", "2026-11-12")
+    first = store.add_event("indeed:1", "2026-11-02", EventKind.CONTACT, "Me escribió Ana de RRHH")
+    second = store.add_event("indeed:1", "2026-11-09", EventKind.INTERVIEW, "Entrevista técnica con Luis")
+    store.add_event("indeed:1", "2026-11-09", EventKind.TEST, "Prueba de código, 90 min")
+    store.add_event("indeed:2", "2026-11-03", EventKind.OTHER, "otra oferta")
+    events = store.list_events("indeed:1")
+    assert [event.kind for event in events] == [EventKind.TEST, EventKind.INTERVIEW, EventKind.CONTACT]   # recientes primero
+    store.update_event(second, "2026-11-10", EventKind.INTERVIEW, "Entrevista técnica (movida)")
+    store.delete_event(first)
+    newest = store.list_events("indeed:1")[0]
+    assert (newest.day, newest.text) == ("2026-11-10", "Entrevista técnica (movida)")
+    assert len(store.list_events("indeed:1")) == 2
+    jobs = {job.key: job for job in store.jobs_for_search(search)}
+    assert jobs["indeed:1"].stage == "final" and jobs["indeed:1"].event_count == 2
+    assert jobs["indeed:1"].next_steps.startswith("Esperar") and jobs["indeed:1"].has_tracking
+    assert jobs["indeed:2"].event_count == 1 and not make_job().has_tracking
+    store.store_results(search, [make_job("indeed:1")])             # otra búsqueda: nada se pierde
+    assert store.jobs_for_search(search)[0].stage == "final"
+
+
+def test_a_stored_event_with_an_unknown_kind_falls_back_to_other():
+    from grepleo.models import EventKind
+    store = Store(Path(":memory:"))
+    store._db.execute("INSERT INTO events (job_key, day, kind, text) VALUES ('x', '2026-01-01', 'raro', 't')")
+    assert store.list_events("x")[0].kind is EventKind.OTHER

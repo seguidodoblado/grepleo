@@ -13,7 +13,7 @@ Se traduce **lo que ve el usuario**: etiquetas, botones, avisos de estado y mens
 
 - Los valores de los enumerados de `models.py` (`WorkMode`, `Fit`, `Status`, `JobState`): son claves estables que
   usa el código, la base de datos y las pruebas. Lo que se muestra es su propiedad `.label`, que sí se traduce.
-- Los nombres de las fuentes (InfoJobs, Indeed, LinkedIn), los de idioma («Español», «English»), los nombres de
+- Los nombres de las fuentes (InfoJobs, Indeed, LinkedIn, Tecnoempleo, Michael Page), los de idioma («Español», «English»), los nombres de
   los Actors de Apify, las URL, y el contenido de las ofertas (título, empresa, descripción), que viene tal cual
   de la fuente.
 - Lo que escribe el usuario en su perfil (requisitos, tipos, notas).

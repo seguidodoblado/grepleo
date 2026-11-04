@@ -61,11 +61,59 @@ class JobState(Enum):
                 JobState.APPLIED: _("Postulada"), JobState.DISCARDED: _("Descartada")}[self]
 
 
+class Stage(Enum):
+    """En qué punto del proceso de selección está una oferta. Los valores son claves estables."""
+    NONE = ""
+    IN_PROGRESS = "in_progress"
+    FINAL = "final"
+    OFFER = "offer"
+    HIRED = "hired"
+    SUSPENDED = "suspended"
+    REJECTED = "rejected"
+    WITHDRAWN = "withdrawn"
+
+    @property
+    def label(self) -> str:
+        return {Stage.NONE: _("Sin proceso"), Stage.IN_PROGRESS: _("En proceso"), Stage.FINAL: _("Fase final"),
+                Stage.OFFER: _("Oferta recibida"), Stage.HIRED: _("Contratado"),
+                Stage.SUSPENDED: _("Proceso suspendido"), Stage.REJECTED: _("Rechazado por la empresa"),
+                Stage.WITHDRAWN: _("Retirado por mí")}[self]
+
+    @property
+    def is_open(self) -> bool:
+        """True mientras el proceso sigue vivo."""
+        return self in (Stage.IN_PROGRESS, Stage.FINAL, Stage.OFFER)
+
+
+class EventKind(Enum):
+    """Qué ocurrió en un momento del proceso. Los valores son claves estables."""
+    CONTACT = "contact"
+    INTERVIEW = "interview"
+    TEST = "test"
+    OFFER = "offer"
+    OTHER = "other"
+
+    @property
+    def label(self) -> str:
+        return {EventKind.CONTACT: _("Contacto"), EventKind.INTERVIEW: _("Entrevista"),
+                EventKind.TEST: _("Prueba o examen"), EventKind.OFFER: _("Oferta"),
+                EventKind.OTHER: _("Otro")}[self]
+
+
+@dataclass
+class JobEvent:
+    """Una línea del histórico de una oferta: qué pasó, cuándo y los detalles."""
+    id: int
+    day: str            # «AAAA-MM-DD»
+    kind: EventKind
+    text: str = ""
+
+
 @dataclass
 class Job:
     """Una oferta de empleo normalizada, venga de la fuente que venga."""
     key: str                      # «fuente:id», único entre fuentes
-    source: str                   # «infojobs», «indeed», «linkedin»
+    source: str                   # «infojobs», «indeed», «linkedin», «tecnoempleo», «michaelpage»
     title: str
     company: str = ""
     location: str = ""
@@ -83,6 +131,16 @@ class Job:
     posted: str = ""
     closed: bool = False              # la fuente la marca como expirada
     state: JobState = JobState.NEW
+    notes: str = ""                   # lo que apunta la persona: entrevistas, ofertas recibidas, dudas…
+    remind_on: str = ""               # «AAAA-MM-DD»: el día en que quiere que se le recuerde esta oferta
+    stage: str = ""                   # clave de Stage: la fase del proceso de selección
+    next_steps: str = ""              # lo que toca hacer o esperar a continuación
+    event_count: int = 0              # cuántas líneas tiene su histórico
+
+    @property
+    def has_tracking(self) -> bool:
+        """True si la persona ha apuntado algo de esta oferta: notas, recordatorio, fase, próximos pasos o histórico."""
+        return bool(self.notes or self.remind_on or self.stage or self.next_steps or self.event_count)
 
     @property
     def text(self) -> str:
@@ -99,6 +157,7 @@ class CriterionResult:
     detail: str = ""
     weight: int = 1
     required: bool = False   # imprescindible: si falta, el encaje no puede ser Alto
+    group: str = "conditions"   # hard (técnica), soft (blanda) o conditions (experiencia, salario, modalidad…)
 
 
 @dataclass

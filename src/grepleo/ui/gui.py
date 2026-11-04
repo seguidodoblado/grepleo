@@ -1,4 +1,6 @@
 """Ventana principal: búsqueda, resultados con su encaje, detalle de criterios, panorama y exportación."""
+from dataclasses import replace
+from datetime import datetime, timezone
 from pathlib import Path
 from threading import Thread
 
@@ -10,26 +12,55 @@ from gi.repository import Gdk, Gio, GLib, GObject, Gtk
 
 from .. import __version__, settings
 from .. import secrets as token_store
+from ..assistant import build_argv, build_prompt, prepare_workspace
+from ..ats import estimate_ats
 from ..i18n import _, ngettext
+from ..incremental import incremental_posted, prune_stale, same_search
 from ..matching import evaluate
-from ..models import Evaluation, Fit, Job, JobState
+from ..models import Evaluation, Fit, Job, JobState, Stage, WorkMode
 from ..panorama import build_panorama
 from ..profiles import Profile
+from ..radar import build_radars
 from ..report import export_csv, export_html
 from ..sources import POSTED, SOURCES, SearchQuery, plan_search, run_search
-from ..storage import SavedSearch, Store
+from ..storage import DATA_DIR, SavedSearch, Store
 from ..textutil import normalize
-from .common import APPEARANCE, ask_text, confirm, icon_button, install_css, labeled, message
+from .assistant_window import AssistantWindow
+from .common import (
+    APPEARANCE,
+    ask_text,
+    confirm,
+    icon_button,
+    install_css,
+    labeled,
+    message,
+    pick_icon,
+    source_icon,
+    vte_available,
+)
+from .date_picker import today
+from .detail_view import DetailView
+from .notes_panel import NotesPanel
 from .profile_dialog import ProfileWindow
+from .radar_panel import RadarPanel
 from .theming import is_dark_theme, theme_variant
+from .tracking_panel import TrackingPanel
 
 AUTHOR = "Jose Antonio Seguido Doblado"
 AUTHOR_EMAIL = "jose.antonio.seguido@gmail.com"
 REPO_URL = "https://github.com/seguidodoblado/grepleo"
 LAST_SEARCH = "·última·"          # nombre reservado de la búsqueda que se guarda sola
 CONFIRM_ABOVE_USD = 0.25          # por encima de este coste estimado se pide confirmación
-STATE_FILTERS = ("active", "all", "favorite", "applied", "discarded")
+STATE_ICONS = {   # nombres del tema, del preferido al de reserva
+    JobState.NEW: ("media-record", "emblem-new", "mail-unread", "dialog-information"),   # un punto, como «sin leer»
+    JobState.FAVORITE: ("starred", "emblem-favorite", "non-starred"),
+    JobState.APPLIED: ("mail-send", "emblem-default", "object-select"),
+    JobState.DISCARDED: ("user-trash", "edit-delete", "process-stop"),
+}
+STATE_FILTERS = ("active", "all", "favorite", "applied", "discarded", "process", "notes")
+NOTES_ICONS = {"due": ("alarm", "appointment-soon", "dialog-warning"), "notes": ("document-edit", "text-x-generic")}
 FIT_FILTERS = (None, Fit.HIGH, Fit.MEDIUM, Fit.LOW, Fit.UNKNOWN)
+MODE_FILTERS = (None, WorkMode.REMOTE, WorkMode.HYBRID, WorkMode.ONSITE, WorkMode.UNKNOWN)
 
 
 def posted_labels() -> list[str]:
@@ -37,7 +68,13 @@ def posted_labels() -> list[str]:
 
 
 def state_filter_labels() -> list[str]:
-    return [_("Activas (sin descartar)"), _("Todas"), _("Favoritas"), _("Postuladas"), _("Descartadas")]
+    return [_("Candidatas"), _("Todas"), _("Favoritas"), _("Postuladas"), _("Descartadas"),
+            _("Proceso abierto"), _("Con notas o seguimiento")]
+
+
+def mode_filter_labels() -> list[str]:
+    return [_("Modalidad: todas"), WorkMode.REMOTE.label, WorkMode.HYBRID.label, WorkMode.ONSITE.label,
+            _("Sin indicar")]
 
 
 def fit_filter_labels() -> list[str]:
@@ -73,6 +110,51 @@ class JobItem(GObject.Object):
         self.evaluation = evaluation
 
 
+def state_icon_of(item: JobItem) -> str:
+    """El icono del estado de una oferta ('' si es nueva)."""
+    names = STATE_ICONS.get(item.job.state)
+    return pick_icon(*names) if names else ""
+
+
+def stage_of(job: Job) -> Stage:
+    try:
+        return Stage(job.stage)
+    except ValueError:
+        return Stage.NONE
+
+
+def state_text(job: Job) -> str:
+    """El estado de la oferta y, debajo, la fase de su proceso de selección si la hay."""
+    stage = stage_of(job)
+    return job.state.label + (f"\n{stage.label}" if stage is not Stage.NONE else "")
+
+
+def notes_mark(job: Job, day: str) -> str:
+    """«due» si el recordatorio vence hoy o antes, «notes» si hay algo apuntado, '' si nada."""
+    if job.remind_on and job.remind_on <= day:
+        return "due"
+    return "notes" if job.has_tracking else ""
+
+
+def notes_icon_of(item: "JobItem") -> str:
+    mark = notes_mark(item.job, today().isoformat())
+    return pick_icon(*NOTES_ICONS[mark]) if mark else ""
+
+
+def notes_tooltip(job: Job) -> str:
+    lines = [job.notes.splitlines()[0][:120]] if job.notes else []
+    if stage_of(job) is not Stage.NONE:
+        lines.append(_("Fase: {stage}").format(stage=stage_of(job).label))
+    if job.next_steps:
+        lines.append(_("Próximos pasos: {steps}").format(steps=job.next_steps.splitlines()[0][:100]))
+    if job.event_count:
+        lines.append(ngettext("{count} anotación en el histórico", "{count} anotaciones en el histórico",
+                              job.event_count).format(count=job.event_count))
+    if job.remind_on:
+        lines.append(_("Recordatorio: {date}").format(date=job.remind_on))
+    return "\n".join(lines)
+
+
 def criteria_text(evaluation: Evaluation) -> str:
     return "  ".join(f"{item.status.symbol} {item.name}" for item in evaluation.criteria)
 
@@ -94,6 +176,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.evaluations: dict[str, Evaluation] = {}
         self.searching = False
         self._updating = False
+        self._row_signatures: dict[str, tuple[str, str]] = {}
 
         header = Gtk.HeaderBar()
         header.pack_end(self._build_menu_button())
@@ -117,6 +200,16 @@ class MainWindow(Gtk.ApplicationWindow):
         self._update_estimate()
         if not self.profiles:
             self.status.set_text(_("Crea un perfil con tus criterios para ver qué ofertas encajan contigo."))
+        self._announce_reminders()
+        self.connect("close-request", self._flush_notes)
+
+    def _flush_notes(self, *_args) -> bool:
+        self.notes_panel.flush()   # lo escrito en los últimos instantes
+        self.tracking_panel.flush()
+        for window in getattr(self, "_assistant_windows", []):   # que no quede una sesión de IA abierta sin ventana madre
+            if window.is_visible():
+                window.close()
+        return False
 
     # --- construcción ------------------------------------------------------------------------------
     def _build_menu_button(self) -> Gtk.MenuButton:
@@ -187,12 +280,21 @@ class MainWindow(Gtk.ApplicationWindow):
         query_row.append(labeled(_("Publicadas"), self.posted))
         self.remote = Gtk.CheckButton(label=_("Solo remoto"), valign=Gtk.Align.END)
         query_row.append(self.remote)
+        self.incremental = Gtk.CheckButton(label=_("Solo novedades"), active=True, valign=Gtk.Align.END)
+        self.incremental.set_tooltip_text(_("Si repites una búsqueda, pide solo lo publicado desde la última vez y "
+                                            "lo suma a lo que ya tienes: gasta menos en Apify."))
+        self.incremental.connect("toggled", lambda *_args: self._update_estimate())
+        query_row.append(self.incremental)
         area.append(query_row)
 
         action_row = Gtk.Box(spacing=12)
         self.source_checks: dict[str, Gtk.CheckButton] = {}
         for source_id, source in SOURCES.items():
-            check = Gtk.CheckButton(label=source.name, active=True)
+            check = Gtk.CheckButton(active=True)
+            content = Gtk.Box(spacing=6)
+            content.append(Gtk.Image(icon_name=source_icon(source_id)))
+            content.append(Gtk.Label(label=source.name))
+            check.set_child(content)
             check.connect("toggled", lambda *_args: self._update_estimate())
             self.source_checks[source_id] = check
             action_row.append(check)
@@ -217,6 +319,10 @@ class MainWindow(Gtk.ApplicationWindow):
         self.filter_fit = Gtk.DropDown.new_from_strings(fit_filter_labels())
         self.filter_fit.connect("notify::selected", lambda *_args: self._filters_changed())
         filters.append(self.filter_fit)
+        self.filter_mode = Gtk.DropDown.new_from_strings(mode_filter_labels())
+        self.filter_mode.set_tooltip_text(_("Filtra las ofertas ya encontradas por modalidad de trabajo"))
+        self.filter_mode.connect("notify::selected", lambda *_args: self._filters_changed())
+        filters.append(self.filter_mode)
         self.filter_category = Gtk.DropDown.new_from_strings([_("Tipo: todos")])
         self.filter_category.connect("notify::selected", lambda *_args: self._filters_changed())
         filters.append(self.filter_category)
@@ -238,59 +344,80 @@ class MainWindow(Gtk.ApplicationWindow):
         self.selection.connect("notify::selected-item", self._on_selection_changed)
         self.filter_model.connect("items-changed", lambda *_args: self._update_counter())
 
+        # la tabla se queda con lo que sirve para escanear; el resto (criterios, experiencia, tipo…) va al panel
         columns = (
             (_("Empresa · Puesto"), lambda item: f"{item.job.company or '—'}\n{item.job.title}", 240, "company"),
-            (_("Tipo"), lambda item: item.evaluation.category or "—", 90, "category"),
-            (_("Ubicación"), lambda item: f"{item.job.location or '—'}\n{item.job.work_mode.label}", 150, "location"),
-            (_("Salario"), lambda item: salary_text(item.job), 120, "salary"),
-            (_("Experiencia"), lambda item: item.job.experience_text or "—", 110, "experience"),
-            (_("Criterios"), lambda item: criteria_text(item.evaluation), 420, None),
-            (_("Encaje"), lambda item: f"{item.evaluation.fit.label}\n{item.evaluation.summary}", 90, "fit"),
-            (_("Estado"), lambda item: item.job.state.label, 90, "state"),
-            (_("Fuente"), lambda item: source_names().get(item.job.source, item.job.source), 90, "source"),
+            (_("Ubicación"), lambda item: f"{item.job.location or '—'}\n{item.job.work_mode.label}", 120, "location"),
+            (_("Salario"), lambda item: salary_text(item.job), 110, "salary"),
+            (_("Encaje"), lambda item: f"{item.evaluation.fit.label}\n{item.evaluation.summary}", 80, "fit"),
+            (_("Estado"), lambda item: state_text(item.job), 130, "state"),
+            (_("Notas"), lambda item: "", 64, "notes"),   # solo el icono; el texto sale al pasar el ratón
+            (_("Fuente"), lambda item: "", 76, "source"),   # solo el icono; el nombre sale al pasar el ratón
         )
         self.fit_column = None
         for title, getter, width, sort_key in columns:
-            column = self._text_column(title, getter, width, sort_key, is_fit=sort_key == "fit")
+            icon = {"state": state_icon_of, "source": lambda item: source_icon(item.job.source),
+                    "notes": notes_icon_of}.get(sort_key)
+            # al agrandar la ventana, el espacio extra se reparte entre empresa y ubicación
+            column = self._text_column(title, getter, width, sort_key, icon_getter=icon,
+                                       expand=sort_key in ("company", "location"))
             self.view.append_column(column)
             if sort_key == "fit":
                 self.fit_column = column
-        if self.fit_column is not None:
-            self.view.sort_by_column(self.fit_column, Gtk.SortType.DESCENDING)
+        self._sort_by_fit()
 
-        scroll = Gtk.ScrolledWindow(vexpand=True, min_content_height=280)
+        scroll = Gtk.ScrolledWindow(vexpand=True, min_content_width=560, min_content_height=280)
         scroll.set_child(self.view)
         self.detail = self._build_detail()
-        paned = Gtk.Paned(orientation=Gtk.Orientation.VERTICAL, vexpand=True)
+        paned = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL, vexpand=True, shrink_start_child=False,
+                          shrink_end_child=False)
         paned.set_start_child(scroll)
         paned.set_end_child(self.detail)
-        paned.set_position(380)
+        paned.set_position(760)
         page.append(paned)
         return page
 
-    def _text_column(self, title, getter, width, sort_key, is_fit=False) -> Gtk.ColumnViewColumn:
+    def _sort_by_fit(self) -> None:
+        """El orden predeterminado: de mejor a peor encaje."""
+        if self.fit_column is not None:
+            self.view.sort_by_column(self.fit_column, Gtk.SortType.DESCENDING)
+
+    def _text_column(self, title, getter, width, sort_key, icon_getter=None, expand=False) -> Gtk.ColumnViewColumn:
         factory = Gtk.SignalListItemFactory()
 
         def setup(_factory, row):
-            label = Gtk.Label(xalign=0, wrap=True, margin_top=4, margin_bottom=4, margin_start=6, margin_end=6,
-                              max_width_chars=70, valign=Gtk.Align.START)
-            row.set_child(label)
+            box = Gtk.Box(spacing=6, margin_top=4, margin_bottom=4, margin_start=6, margin_end=6,
+                          valign=Gtk.Align.START)
+            box.append(Gtk.Image())
+            box.append(Gtk.Label(xalign=0, wrap=True, max_width_chars=70))
+            row.set_child(box)
 
         def bind(_factory, row):
-            label = row.get_child()
+            box = row.get_child()
             item = row.get_item()
-            label.set_text(getter(item))
+            image, label = box.get_first_child(), box.get_last_child()
+            text = getter(item)
+            label.set_text(text)
+            label.set_visible(bool(text))   # una columna solo de icono no deja hueco para el texto
+            tooltip = {"source": lambda: source_names().get(item.job.source, ""),
+                       "notes": lambda: notes_tooltip(item.job)}.get(sort_key)
+            box.set_tooltip_text(tooltip() or None if tooltip else None)
+            icon = icon_getter(item) if icon_getter else ""
+            image.set_visible(bool(icon))
+            if icon:
+                image.set_from_icon_name(icon)
+            # toda la fila lleva el color del encaje: cada celda pinta su fondo
+            cell = box.get_parent() or box
             for fit in Fit:
-                label.remove_css_class(f"fit-{fit.value}")
-            if is_fit:
-                label.add_css_class(f"fit-{item.evaluation.fit.value}")
-                label.set_halign(Gtk.Align.START)
+                cell.remove_css_class(f"row-fit-{fit.value}")
+            cell.add_css_class(f"row-fit-{item.evaluation.fit.value}")
 
         factory.connect("setup", setup)
         factory.connect("bind", bind)
         column = Gtk.ColumnViewColumn.new(title, factory)
         column.set_resizable(True)
-        column.set_fixed_width(width)
+        column.set_fixed_width(width)   # ancho mínimo; con expand=True crece con la ventana
+        column.set_expand(expand)
         if sort_key:
             column.set_sorter(Gtk.CustomSorter.new(self._sorter_for(sort_key)))
         return column
@@ -305,7 +432,8 @@ class MainWindow(Gtk.ApplicationWindow):
                 return (top is not None, top or 0.0)
             mapping = {"company": item.job.company, "category": item.evaluation.category,
                        "location": item.job.location, "experience": item.job.experience_text,
-                       "state": item.job.state.value, "source": item.job.source}
+                       "state": item.job.state.value, "source": item.job.source,
+                       "notes": {"due": "2", "notes": "1"}.get(notes_mark(item.job, today().isoformat()), "0")}
             return normalize(mapping.get(key, ""))
 
         def compare(first, second, *_extra):
@@ -315,25 +443,56 @@ class MainWindow(Gtk.ApplicationWindow):
         return compare
 
     def _build_detail(self) -> Gtk.Box:
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8, margin_top=8)
-        self.detail_label = Gtk.Label(xalign=0, yalign=0, wrap=True, selectable=True, use_markup=True)
-        scroll = Gtk.ScrolledWindow(vexpand=True, min_content_height=140)
-        scroll.set_child(self.detail_label)
-        box.append(scroll)
-        buttons = Gtk.Box(spacing=8)
+        """El panel lateral: los botones siempre a la vista arriba y, debajo, los criterios y la descripción."""
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10, margin_start=10, margin_end=4)
+        box.set_size_request(380, -1)
+        buttons = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, max_children_per_line=4,
+                              column_spacing=6, row_spacing=6, homogeneous=False)
         self.open_button = icon_button(("web-browser", "applications-internet"), _("Abrir oferta"))
         self.open_button.connect("clicked", self._open_job)
         buttons.append(self.open_button)
+        self.cv_button = icon_button(("utilities-terminal", "document-edit", "text-x-generic"), _("Adaptar CV"))
+        self.cv_button.set_tooltip_text(_("Abre un terminal con tu propia IA (Claude Code, OpenCode, Codex…) para "
+                                          "adaptar tu currículum a esta oferta"))
+        self.cv_button.connect("clicked", self._adapt_cv)
+        buttons.append(self.cv_button)
         self.state_buttons: dict[JobState, Gtk.Button] = {}
         for state, text in ((JobState.FAVORITE, _("Favorita")), (JobState.APPLIED, _("Postulada")),
                             (JobState.DISCARDED, _("Descartar"))):
-            button = Gtk.Button(label=text)
+            button = icon_button(STATE_ICONS[state], text)
             button.connect("clicked", lambda _button, s=state: self._toggle_state(s))
             self.state_buttons[state] = button
             buttons.append(button)
         box.append(buttons)
+        self.radar = RadarPanel(vexpand=True)
+        self.detail_view = DetailView()
+        detail_scroll = Gtk.ScrolledWindow(vexpand=True, hscrollbar_policy=Gtk.PolicyType.NEVER)
+        detail_scroll.set_child(self.detail_view)
+        self.tracking_panel = TrackingPanel(self.store, self._tracking_changed)
+        self.notes_panel = NotesPanel(self._notes_changed)
+        # pestañas: la oferta, el radar, el seguimiento del proceso y las notas
+        self.detail_tabs = Gtk.Notebook(vexpand=True, scrollable=True)
+        self._tab_pages = {"offer": detail_scroll, "radar": self.radar, "tracking": self.tracking_panel,
+                           "notes": self.notes_panel}
+        for key in self._tab_pages:
+            self.detail_tabs.append_page(self._tab_pages[key], Gtk.Label(label=self._tab_title(key)))
+        self.detail_tabs.set_current_page(min(settings.detail_tab(), len(self._tab_pages) - 1))
+        self.detail_tabs.connect("switch-page", lambda _notebook, _page, number: settings.set_detail_tab(number))
+        box.append(self.detail_tabs)
         self._set_detail(None)
         return box
+
+    @staticmethod
+    def _tab_title(key: str, marked: bool = False) -> str:
+        titles = {"offer": _("Oferta"), "radar": _("Radar"), "tracking": _("Seguimiento"), "notes": _("Notas")}
+        return titles[key] + (" •" if marked else "")
+
+    def _mark_tabs(self, job: Job | None) -> None:
+        """Un punto en «Seguimiento» y «Notas» avisa de que esa oferta tiene algo apuntado."""
+        marks = {"tracking": bool(job and (job.stage or job.next_steps or job.remind_on or job.event_count)),
+                 "notes": bool(job and job.notes)}
+        for key, marked in marks.items():
+            self.detail_tabs.set_tab_label_text(self._tab_pages[key], self._tab_title(key, marked))
 
     def _build_panorama_page(self) -> Gtk.ScrolledWindow:
         self.panorama_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12, margin_top=12,
@@ -476,8 +635,28 @@ class MainWindow(Gtk.ApplicationWindow):
             self.estimate.set_text(_("Elige al menos una fuente."))
             return
         total = sum(run.estimate_usd for run in runs)
-        self.estimate.set_text(_("Coste estimado en Apify: ≈ {cost} $ (tope {cap} $)").format(
-            cost=f"{total:.3f}", cap=f"{settings.budget_usd():.2f}"))
+        if all(run.source.local for run in runs):
+            text = _("Sin coste: se lee directamente de su web")
+        else:
+            text = _("Coste estimado en Apify: ≈ {cost} $ (tope {cap} $)").format(
+                cost=f"{total:.3f}", cap=f"{settings.budget_usd():.2f}")
+        previous, _unused = self._incremental_base(self._collect_query(), self._selected_sources())
+        if previous is not None:   # el máximo no cambia, pero se pagará solo por lo que sea nuevo
+            text += " · " + _("solo novedades desde el {date}").format(date=previous.ran_at[:10])
+        self.estimate.set_text(text)
+
+    def _incremental_base(self, query: SearchQuery, sources: list[str]) -> tuple[SavedSearch | None, str]:
+        """La búsqueda anterior y la ventana de fechas, si esta puede pedir solo novedades; si no, (None, "")."""
+        if not self.incremental.get_active():
+            return None, ""
+        saved = self._selected_saved_search()
+        target = saved.id if saved else self.last_search_id
+        previous = next((s for s in self.store.list_searches() if s.id == target), None)
+        if (previous is None or not previous.ran_at or not same_search(previous.query, query)
+                or not set(sources) <= set(previous.sources)):
+            return None, ""
+        window = incremental_posted(query.posted, previous.ran_at, datetime.now(timezone.utc))
+        return (previous, window) if window is not None else (None, "")
 
     # --- búsqueda ---------------------------------------------------------------------------------
     def _start_search(self, *_args) -> None:
@@ -491,19 +670,24 @@ class MainWindow(Gtk.ApplicationWindow):
         if not sources:
             message(self, _("Elige al menos una fuente."))
             return
-        try:
-            token = token_store.get_token()
-        except token_store.SecretsError as error:
-            message(self, _("No hay un llavero disponible."), str(error))
-            return
-        if not token:
-            message(self, _("Falta el token de Apify."), _("Añádelo en Preferencias (menú principal)."))
-            return
-        runs = plan_search(query, sources, settings.budget_usd())
+        token = ""
+        if any(not SOURCES[source_id].local for source_id in sources):   # las fuentes locales no usan Apify
+            try:
+                token = token_store.get_token()
+            except token_store.SecretsError as error:
+                message(self, _("No hay un llavero disponible."), str(error))
+                return
+            if not token:
+                message(self, _("Falta el token de Apify."), _("Añádelo en Preferencias (menú principal)."))
+                return
+        previous, window = self._incremental_base(query, sources)
+        effective = replace(query, posted=window) if previous else query   # lo que se le pide a las fuentes
+        base = prune_stale(self.store.jobs_for_search(previous.id), datetime.now(timezone.utc)) if previous else []
+        runs = plan_search(effective, sources, settings.budget_usd())
         total = sum(run.estimate_usd for run in runs)
 
         def launch() -> None:
-            self._run(token, query, sources, runs)
+            self._run(token, effective, sources, runs, query, base)
 
         if total > CONFIRM_ABOVE_USD:
             confirm(self, _("Esta búsqueda costará aproximadamente {cost} $ en Apify.").format(cost=f"{total:.2f}"),
@@ -512,7 +696,7 @@ class MainWindow(Gtk.ApplicationWindow):
         else:
             launch()
 
-    def _run(self, token, query, sources, runs) -> None:
+    def _run(self, token, effective, sources, runs, query, base) -> None:
         self.searching = True
         self.search_button.set_sensitive(False)
         self.spinner.start()
@@ -521,16 +705,19 @@ class MainWindow(Gtk.ApplicationWindow):
             GLib.idle_add(self.status.set_text, _("Buscando en {source}…").format(source=name))
 
         def work() -> None:
-            results = run_search(token, query, runs, progress=progress)
-            GLib.idle_add(self._search_finished, results, query, sources)
+            results = run_search(token, effective, runs, progress=progress)
+            GLib.idle_add(self._search_finished, results, query, sources, base)
 
         Thread(target=work, daemon=True).start()
 
-    def _search_finished(self, results, query, sources) -> None:
+    def _search_finished(self, results, query, sources, base) -> None:
         self.searching = False
         self.search_button.set_sensitive(True)
         self.spinner.stop()
-        found = merge_jobs([job for result in results for job in result.jobs])
+        fresh = [job for result in results for job in result.jobs]
+        found = merge_jobs([*base, *fresh])
+        known = {job.key for job in base}
+        new_count = sum(1 for job in found if job.key not in known)
         errors = [f"{result.source.name}: {result.error}" for result in results if result.error]
         if found or not errors:
             saved = self._selected_saved_search()
@@ -544,6 +731,9 @@ class MainWindow(Gtk.ApplicationWindow):
             self.status.set_text(ngettext("{count} oferta de {sources} fuente(s).",
                                           "{count} ofertas de {sources} fuente(s).", len(found)).format(
                                               count=len(found), sources=sum(1 for r in results if not r.error)))
+            if base:
+                self.status.set_text(self.status.get_text() + " " + ngettext(
+                    "{new} nueva.", "{new} nuevas.", new_count).format(new=new_count))
         if errors:
             message(self, _("Alguna fuente ha fallado."), "\n".join(errors))
             if not found:
@@ -568,8 +758,12 @@ class MainWindow(Gtk.ApplicationWindow):
     def _refresh_items(self) -> None:
         profile = self._current_profile() or Profile(name="")
         self.evaluations = {job.key: evaluate(job, profile) for job in self.jobs}
+        # de mejor a peor encaje ya en los datos, para que no dependa del estado del ColumnView
+        ordered = sorted(self.jobs, key=lambda job: (self.evaluations[job.key].fit.rank,
+                                                     self.evaluations[job.key].score or 0.0), reverse=True)
         self.store_model.splice(0, self.store_model.get_n_items(),
-                                [JobItem(job, self.evaluations[job.key]) for job in self.jobs])
+                                [JobItem(job, self.evaluations[job.key]) for job in ordered])
+        self._sort_by_fit()
         self._reload_category_filter(profile)
         self._filters_changed()
         self._update_panorama(profile)
@@ -594,6 +788,9 @@ class MainWindow(Gtk.ApplicationWindow):
         wanted_fit = FIT_FILTERS[self.filter_fit.get_selected()]
         if wanted_fit is not None and evaluation.fit is not wanted_fit:
             return False
+        wanted_mode = MODE_FILTERS[self.filter_mode.get_selected()]
+        if wanted_mode is not None and job.work_mode is not wanted_mode:
+            return False
         category = self.filter_category.get_selected()
         names = getattr(self, "_category_names", [])
         if category > 0:
@@ -603,6 +800,10 @@ class MainWindow(Gtk.ApplicationWindow):
             elif evaluation.category:   # «Otros»: ninguno de los tipos del perfil
                 return False
         state = STATE_FILTERS[self.filter_state.get_selected()]
+        if state == "process":
+            return stage_of(job).is_open
+        if state == "notes":
+            return job.has_tracking
         if state == "active":
             return job.state is not JobState.DISCARDED
         return state == "all" or job.state.value == state
@@ -652,36 +853,28 @@ class MainWindow(Gtk.ApplicationWindow):
         self._set_detail(self._selected_item())
 
     def _set_detail(self, item: JobItem | None) -> None:
-        for widget in (self.open_button, *self.state_buttons.values()):
+        for widget in (self.open_button, self.cv_button, *self.state_buttons.values()):
             widget.set_sensitive(item is not None)
         if item is None:
-            self.detail_label.set_markup("<i>{}</i>".format(GLib.markup_escape_text(
-                _("Elige una oferta para ver qué criterios cumple."))))
+            self.detail_view.show_message(_("Elige una oferta para ver qué criterios cumple."))
+            self.radar.set_data([], Fit.UNKNOWN)
+            self.notes_panel.load(None)
+            self.tracking_panel.load(None)
+            self._mark_tabs(None)
             return
-        job, evaluation = item.job, item.evaluation
-        esc = GLib.markup_escape_text
-        lines = [f"<b>{esc(job.title)}</b>",
-                 esc(" · ".join(part for part in (job.company, job.location, job.work_mode.label,
-                                                  salary_text(job), job.experience_text) if part and part != "—"))]
-        notes = [_("Encaje: {fit}").format(fit=evaluation.fit.label)]
-        if not job.full_description:
-            notes.append(_("Ficha resumida"))
-        if job.closed:
-            notes.append(_("Posiblemente cerrada"))
-        if job.posted:
-            notes.append(_("Publicada el {date}").format(date=job.posted))
-        lines.append(esc(" · ".join(notes)))
-        lines.append("")
-        lines.extend(f"{item_.status.symbol}  <b>{esc(item_.name)}</b> — {esc(item_.detail)}"
-                     for item_ in evaluation.criteria)
-        if job.description:
-            excerpt = job.description if len(job.description) <= 900 else job.description[:900] + "…"
-            lines.extend(["", esc(excerpt)])
-        self.detail_label.set_markup("\n".join(lines))
+        job = item.job
+        profile = self._current_profile() or Profile(name="")
+        ats = estimate_ats(job, profile)
+        self.radar.set_data(build_radars(job, profile), item.evaluation.fit, ats)
+        if self.notes_panel.job is not job:   # al marcar un estado se repinta el panel sin tocar lo que se escribe
+            self.notes_panel.load(job)
+            self.tracking_panel.load(job)
+        self._mark_tabs(job)
+        self.detail_view.show_job(job, item.evaluation, profile, salary_text(job), ats)
         for state, button in self.state_buttons.items():
-            button.set_label({JobState.FAVORITE: _("Favorita"), JobState.APPLIED: _("Postulada"),
-                              JobState.DISCARDED: _("Descartar")}[state] if job.state is not state
-                             else _("Quitar marca"))
+            button.get_child().get_last_child().set_label(
+                {JobState.FAVORITE: _("Favorita"), JobState.APPLIED: _("Postulada"),
+                 JobState.DISCARDED: _("Descartar")}[state] if job.state is not state else _("Quitar marca"))
 
     def _toggle_state(self, state: JobState) -> None:
         item = self._selected_item()
@@ -695,6 +888,68 @@ class MainWindow(Gtk.ApplicationWindow):
         self._filters_changed()
         self._set_detail(item)
         self._update_panorama(self._current_profile() or Profile(name=""))
+
+    @staticmethod
+    def _row_signature(job: Job) -> tuple[str, str]:
+        """Lo que se ve de su seguimiento en la fila de la tabla: el icono de notas y la fase."""
+        return notes_mark(job, today().isoformat()), job.stage
+
+    def _notes_changed(self, job: Job, notes: str) -> None:
+        job.notes = notes
+        self.store.set_notes(job.key, notes)
+        self._after_tracking_change(job)
+
+    def _tracking_changed(self, job: Job) -> None:
+        """El panel de seguimiento ya ha guardado: aquí solo se repinta lo que depende de ello."""
+        self._after_tracking_change(job)
+
+    def _after_tracking_change(self, job: Job) -> None:
+        self._mark_tabs(job)
+        signature = self._row_signature(job)
+        if self._row_signatures.get(job.key) != signature:   # no se repinta la fila a cada tecla
+            self._row_signatures[job.key] = signature
+            self._repaint_row(job)
+        if STATE_FILTERS[self.filter_state.get_selected()] in ("notes", "process"):
+            self.filter.changed(Gtk.FilterChange.DIFFERENT)
+        self._announce_reminders()
+
+    def _repaint_row(self, job: Job) -> None:
+        for position in range(self.store_model.get_n_items()):
+            if self.store_model.get_item(position).job is job:
+                self.store_model.items_changed(position, 1, 1)
+                return
+
+    def _announce_reminders(self) -> None:
+        """Avisa en la barra de estado de los recordatorios que vencen hoy o antes (de cualquier búsqueda)."""
+        due = self.store.due_reminders(today().isoformat())
+        if not due or self.searching:
+            return
+        titles = ", ".join(f"«{title or key}»" for key, title, _day in due[:3])
+        self.status.set_text(ngettext("Tienes {count} recordatorio para hoy o vencido: {titles}.",
+                                      "Tienes {count} recordatorios para hoy o vencidos: {titles}.",
+                                      len(due)).format(count=len(due), titles=titles))
+
+    def _adapt_cv(self, _button) -> None:
+        item = self._selected_item()
+        profile = self._current_profile()
+        if item is None:
+            return
+        if profile is None:
+            message(self, _("Crea un perfil con tus datos para poder adaptar tu currículum."))
+            return
+        if not vte_available():
+            message(self, _("Falta el terminal embebido: instala el paquete gir1.2-vte-3.91."))
+            return
+        try:
+            work = prepare_workspace(DATA_DIR / "cv", item.job, item.evaluation, profile)
+            argv = build_argv(settings.assistant_command(),
+                              build_prompt(settings.assistant_prompt(), work.offer, work.cv, work.upload, work.output))
+        except (OSError, ValueError) as error:
+            message(self, _("No se pudo preparar el asistente."), str(error))
+            return
+        window = AssistantWindow(self, work, argv, item.job)
+        self._assistant_windows = [w for w in getattr(self, "_assistant_windows", []) if w.is_visible()] + [window]
+        window.present()
 
     def _open_job(self, _button) -> None:
         item = self._selected_item()
@@ -746,7 +1001,7 @@ class MainWindow(Gtk.ApplicationWindow):
     def _open_about(self) -> None:
         about = Gtk.AboutDialog(
             transient_for=self, modal=True, program_name="Grepleo", version=__version__,
-            comments=_("Busca empleo en InfoJobs, Indeed y LinkedIn y comprueba qué criterios cumples en cada oferta."),
+            comments=_("Busca empleo en InfoJobs, Indeed, LinkedIn, Tecnoempleo y Michael Page, y comprueba qué criterios cumples en cada oferta."),
             website=REPO_URL, website_label=REPO_URL.removeprefix("https://"),
             authors=[f"{AUTHOR} <{AUTHOR_EMAIL}>"], copyright=f"© 2026 {AUTHOR}",
             license_type=Gtk.License.GPL_3_0, translator_credits=_("translator-credits"))
@@ -759,7 +1014,9 @@ class MainWindow(Gtk.ApplicationWindow):
                 about.set_logo(Gdk.Texture.new_from_filename(str(logo)))
         about.add_credit_section(_("Servicios de terceros"), [
             "Apify https://apify.com/",
-            _("Actors de la comunidad de Apify para InfoJobs, Indeed y LinkedIn")])
+            _("Actors de la comunidad de Apify para InfoJobs, Indeed, LinkedIn y Tecnoempleo"),
+            "Michael Page https://www.michaelpage.es/",
+            _("Michael Page se lee directamente de su web pública, sin Apify")])
         about.present()
 
 

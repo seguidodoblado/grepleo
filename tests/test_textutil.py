@@ -31,6 +31,19 @@ def test_required_years_reads_ranges_minimums_and_english():
     assert required_years("Experiencia de 4 años") == 4
     assert required_years("Sin experiencia previa") == 0
     assert required_years("Se valora experiencia") is None
+
+
+def test_required_years_ignores_ages_ceilings_and_unrelated_years():
+    age = ("Las personas candidatas deben ser menores de 30 años y no tener más de un año de experiencia "
+           "profesional. Contrato temporal de 2 años.")
+    assert required_years(age, strict=True) is None
+    assert required_years("Debes tener 18 años de edad", strict=True) is None
+    assert required_years("No tener más de 1 año de experiencia") is None            # un tope, no un mínimo
+    assert required_years("Hasta 2 años de experiencia", strict=True) is None
+    assert required_years("Somos una empresa con 20 años de historia", strict=True) is None
+    assert required_years("Pedimos 3 años de trayectoria. Experiencia valorable", strict=True) is None
+    assert required_years("Experiencia mínima: 4 años en proyectos de datos", strict=True) == 4
+    assert required_years("Al menos 3 años") == 3                                        # campo corto: sin `strict`
     assert required_years("fundada hace 150 años") is None   # fuera de lo plausible
 
 
@@ -54,3 +67,13 @@ def test_detect_work_mode():
     assert detect_work_mode("Madrid, híbrido (2 días en oficina)") is WorkMode.HYBRID
     assert detect_work_mode("Puesto presencial") is WorkMode.ONSITE
     assert detect_work_mode("Madrid") is WorkMode.UNKNOWN
+
+
+def test_studies_in_description_only_reads_sentences_about_degrees():
+    from grepleo.textutil import studies_in_description
+    text = ("Buscamos un ingeniero de datos con un alto grado de autonomía. "
+            "Se requiere titulación universitaria o de técnico superior en informática. Ofrecemos formación continua.")
+    rank, sentence = studies_in_description(text)
+    assert rank == 2 and sentence.startswith("Se requiere titulación universitaria")
+    assert studies_in_description("Ingeniero de datos con alto grado de autonomía.") == (None, "")
+    assert studies_in_description("Requisitos: Máster en Data Science")[0] == 3

@@ -22,24 +22,36 @@
 </p>
 
 <p align="center">
-  Search for jobs on InfoJobs, Indeed and LinkedIn and check which criteria you meet in each offer.
+  Search for jobs on InfoJobs, Indeed, LinkedIn, Tecnoempleo and Michael Page, and check which criteria you meet in each offer.
 </p>
 
 Desktop application (GTK 4 + PyGObject, interface in Spanish and English), for personal use: no server or account
-of its own, only your [Apify](https://apify.com/) token to run the searches.
+of its own, only your [Apify](https://apify.com/) token to run the searches (Michael Page is read directly from its website and
+does not need it).
 
-- **One search, three sources:** the position or keywords, the location and the posting date are sent at once to
-  InfoJobs, Indeed and LinkedIn (through Apify Actors), and offers repeated across sources are merged.
-- **Which criteria you meet:** each offer is evaluated against your **profile** (must-have and nice-to-have
-  requirements with synonyms, experience, education, languages with level, minimum salary, work mode, location
+- **One search, five sources:** the position or keywords, the location and the posting date are sent at once to
+  InfoJobs, Indeed, LinkedIn and Tecnoempleo (through Apify Actors) and Michael Page (read directly from its website,
+  at no cost), and offers repeated across sources are merged.
+- **Which criteria you meet:** each offer is evaluated against your **profile** (technical and soft skills,
+  must-have and nice-to-have, with synonyms, experience, education, languages with level, minimum salary, work mode, location
   and what you would rather not find) and shows ✓ met, ✗ not met or ? cannot be known, plus a High, Medium or Low
   fit.
 - **Honest about what it does not know:** summary cards (like InfoJobs') do not include the full description, so
   a requirement that does not appear stays as "cannot tell" and does not count against you.
 - **Several profiles** and **saved searches**; offers are stored on your computer and you can mark them as
-  favourite, applied or discarded.
+  favourite, applied or discarded. Each offer has its own **follow-up**: process
+  stage (final stage, suspended, rejected…), next steps, a **history** of contacts, interviews and tests, a dated
+  **reminder** that warns you when the application opens and your **notes**.
+- **Skills radars:** in each offer's panel, a general one and those you define in your profile by topic (Cloud,
+  Languages, Methodologies…), whose axes are concrete things that appear in offers, with your level from 0 to 10.
+  Your polygon (more intense towards the edges) is overlaid on what the offer asks and each radar gives its **overlap
+  percentage**; at the top, the overall overlap: the more they overlap, the better the chances of fit.
+- **Estimated ATS compatibility:** a percentage per offer of whether your CV would pass the automatic filter many
+  companies use to screen CVs, with its verdict, its reliability, the keywords your CV does not cite and the
+  knock-out requirements you do not meet. It is a local, explained estimate, not an official figure: each company
+  configures its own ATS. Each radar also has a side legend that explains, axis by axis, what you are seeing.
 - **Overview:** which requirements repeat across the sample and what can be concluded by counting (most
-  requested, what nobody asks for, how many offers publish a salary, how many are remote…).
+  requested, the nice-to-haves of your profile that no offer mentions, how many offers publish a salary, how many are remote…).
 - **Export** what you see to a self-contained HTML report or a CSV table.
 - **Spending control:** before searching you see an estimate of the cost on Apify, and every search has a
   spending cap that you configure.
@@ -53,9 +65,14 @@ All the documentation —installation, usage guide, technical specifications, tr
 ## Third-party services
 
 Grepleo uses [Apify](https://apify.com/) to get the offers, specifically **community Actors** on Apify (by their
-authors, not by Apify) that access InfoJobs, Indeed and LinkedIn. Those sites offer no public search API and
+authors, not by Apify) that access InfoJobs, Indeed, LinkedIn and Tecnoempleo. Those sites offer no public search API and
 their terms of use restrict automated access: the use is personal and the responsibility of whoever runs it.
 Actors may stop working or change without notice.
+
+**Michael Page** is the exception: the application reads its public website (michaelpage.es) directly from your
+computer, only the search and offer routes its `robots.txt` allows, with pauses between requests and a cap on the
+number of offers per search. It does not go through Apify and costs nothing, but it depends on that website's
+design and may stop working if it changes.
 
 ## Privacy
 

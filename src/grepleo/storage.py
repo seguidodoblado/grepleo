@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from .models import Job, JobState, WorkMode
+from .models import EventKind, Job, JobEvent, JobState, WorkMode
 from .profiles import Profile
 from .sources.base import SearchQuery
 
@@ -27,9 +27,14 @@ CREATE TABLE IF NOT EXISTS searches (
     keywords TEXT NOT NULL, location TEXT NOT NULL, limit_n INTEGER NOT NULL, posted TEXT NOT NULL,
     remote INTEGER NOT NULL, sources TEXT NOT NULL, ran_at TEXT);
 CREATE TABLE IF NOT EXISTS jobs (
-    key TEXT PRIMARY KEY, data TEXT NOT NULL, state TEXT NOT NULL DEFAULT 'new', first_seen TEXT NOT NULL);
+    key TEXT PRIMARY KEY, data TEXT NOT NULL, state TEXT NOT NULL DEFAULT 'new', first_seen TEXT NOT NULL,
+    notes TEXT NOT NULL DEFAULT '', remind_on TEXT NOT NULL DEFAULT '', stage TEXT NOT NULL DEFAULT '',
+    next_steps TEXT NOT NULL DEFAULT '');
 CREATE TABLE IF NOT EXISTS results (
     search_id INTEGER NOT NULL, job_key TEXT NOT NULL, PRIMARY KEY (search_id, job_key));
+CREATE TABLE IF NOT EXISTS events (
+    id INTEGER PRIMARY KEY, job_key TEXT NOT NULL, day TEXT NOT NULL, kind TEXT NOT NULL, text TEXT NOT NULL);
+CREATE INDEX IF NOT EXISTS events_by_job ON events (job_key);
 """
 
 
@@ -54,7 +59,8 @@ def job_to_dict(job: Job) -> dict[str, Any]:
     }
 
 
-def job_from_dict(data: dict[str, Any], state: str = "new") -> Job:
+def job_from_dict(data: dict[str, Any], state: str = "new", notes: str = "", remind_on: str = "", stage: str = "",
+                  next_steps: str = "", event_count: int = 0) -> Job:
     try:
         mode = WorkMode(data.get("work_mode", "unknown"))
     except ValueError:
@@ -76,7 +82,8 @@ def job_from_dict(data: dict[str, Any], state: str = "new") -> Job:
         experience_text=str(data.get("experience_text", "")), studies_text=str(data.get("studies_text", "")),
         description=str(data.get("description", "")), full_description=bool(data.get("full_description")),
         url=str(data.get("url", "")), posted=str(data.get("posted", "")), closed=bool(data.get("closed")),
-        state=job_state,
+        state=job_state, notes=notes or "", remind_on=remind_on or "",
+        stage=stage or "", next_steps=next_steps or "", event_count=event_count or 0,
     )
 
 
@@ -86,6 +93,11 @@ class Store:
             path.parent.mkdir(parents=True, exist_ok=True)
         self._db = sqlite3.connect(str(path))
         self._db.executescript(_SCHEMA)
+        columns = {row[1] for row in self._db.execute("PRAGMA table_info(jobs)")}
+        for column in ("notes", "remind_on", "stage", "next_steps"):   # bases de datos creadas antes de las notas
+            if column not in columns:
+                self._db.execute(f"ALTER TABLE jobs ADD COLUMN {column} TEXT NOT NULL DEFAULT ''")
+        self._db.commit()
 
     def close(self) -> None:
         self._db.close()
@@ -169,15 +181,75 @@ class Store:
 
     def jobs_for_search(self, search_id: int) -> list[Job]:
         rows = self._db.execute(
-            "SELECT jobs.data, jobs.state FROM results JOIN jobs ON jobs.key = results.job_key"
+            "SELECT jobs.data, jobs.state, jobs.notes, jobs.remind_on, jobs.stage, jobs.next_steps,"
+            " (SELECT COUNT(*) FROM events WHERE events.job_key = jobs.key)"
+            " FROM results JOIN jobs ON jobs.key = results.job_key"
             " WHERE results.search_id = ? ORDER BY jobs.first_seen DESC, jobs.key", (search_id,)).fetchall()
         jobs = []
-        for data, state in rows:
+        for data, state, notes, remind_on, stage, next_steps, event_count in rows:
             try:
-                jobs.append(job_from_dict(json.loads(data), state))
+                jobs.append(job_from_dict(json.loads(data), state, notes, remind_on, stage, next_steps, event_count))
             except ValueError:
                 continue
         return jobs
+
+    def set_notes(self, job_key: str, notes: str, remind_on: str | None = None) -> None:
+        """Guarda las notas de una oferta (y, si se da, la fecha del recordatorio). Viven aparte de los datos de la
+        oferta: una nueva búsqueda que vuelva a traerla no las toca."""
+        with self._db:
+            if remind_on is None:
+                self._db.execute("UPDATE jobs SET notes = ? WHERE key = ?", (notes, job_key))
+            else:
+                self._db.execute("UPDATE jobs SET notes = ?, remind_on = ? WHERE key = ?",
+                                 (notes, remind_on, job_key))
+
+    def set_tracking(self, job_key: str, stage: str, next_steps: str, remind_on: str) -> None:
+        """Guarda la fase del proceso, los próximos pasos y el recordatorio de una oferta."""
+        with self._db:
+            self._db.execute("UPDATE jobs SET stage = ?, next_steps = ?, remind_on = ? WHERE key = ?",
+                             (stage, next_steps, remind_on, job_key))
+
+    # --- histórico de una oferta -------------------------------------------------------------------
+    def list_events(self, job_key: str) -> list[JobEvent]:
+        """El histórico de una oferta, de lo más reciente a lo más antiguo."""
+        rows = self._db.execute("SELECT id, day, kind, text FROM events WHERE job_key = ? ORDER BY day DESC, id DESC",
+                                (job_key,)).fetchall()
+        events = []
+        for identifier, day, kind, text in rows:
+            try:
+                events.append(JobEvent(identifier, day, EventKind(kind), text))
+            except ValueError:
+                events.append(JobEvent(identifier, day, EventKind.OTHER, text))
+        return events
+
+    def add_event(self, job_key: str, day: str, kind: EventKind, text: str) -> int:
+        with self._db:
+            cursor = self._db.execute("INSERT INTO events (job_key, day, kind, text) VALUES (?, ?, ?, ?)",
+                                      (job_key, day, kind.value, text))
+        return int(cursor.lastrowid or 0)
+
+    def update_event(self, identifier: int, day: str, kind: EventKind, text: str) -> None:
+        with self._db:
+            self._db.execute("UPDATE events SET day = ?, kind = ?, text = ? WHERE id = ?",
+                             (day, kind.value, text, identifier))
+
+    def delete_event(self, identifier: int) -> None:
+        with self._db:
+            self._db.execute("DELETE FROM events WHERE id = ?", (identifier,))
+
+    def due_reminders(self, today: str) -> list[tuple[str, str, str]]:
+        """Los recordatorios que vencen hoy o antes, de cualquier búsqueda: (clave, título, fecha), los más viejos primero."""
+        rows = self._db.execute(
+            "SELECT key, data, remind_on FROM jobs WHERE remind_on != '' AND remind_on <= ? ORDER BY remind_on, key",
+            (today,)).fetchall()
+        due = []
+        for key, data, remind_on in rows:
+            try:
+                title = str(json.loads(data).get("title", ""))
+            except ValueError:
+                title = ""
+            due.append((key, title, remind_on))
+        return due
 
     def set_state(self, job_key: str, state: JobState) -> None:
         with self._db:

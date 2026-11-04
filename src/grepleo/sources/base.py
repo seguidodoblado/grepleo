@@ -23,15 +23,26 @@ class SearchQuery:
     remote: bool = False
 
 
+class SourceError(Exception):
+    """Fallo de una fuente al buscar; el mensaje ya está en lenguaje de usuario."""
+
+
 class Source:
-    """Una fuente de ofertas: sabe pedirle la búsqueda a su Actor de Apify y convertir lo que devuelve."""
+    """Una fuente de ofertas: sabe pedirle la búsqueda a su Actor de Apify y convertir lo que devuelve.
+
+    Las fuentes `local` no usan Apify: leen la web pública directamente (`fetch`) y no cuestan nada."""
     id = ""
     name = ""
     actor = ""            # «usuario/nombre» del Actor en Apify
+    local = False         # True: se consulta desde este equipo, sin Apify ni coste
     start_cost = 0.0      # dólares por arrancar el Actor (plan gratuito de Apify)
     item_cost = 0.0       # dólares por oferta
 
     def build_input(self, query: SearchQuery) -> dict[str, Any]:
+        raise NotImplementedError
+
+    def fetch(self, query: SearchQuery) -> list[dict[str, Any]]:
+        """Solo las fuentes locales: busca en la web y devuelve los elementos que luego entiende `parse_item`."""
         raise NotImplementedError
 
     def parse_item(self, item: dict[str, Any]) -> Job | None:

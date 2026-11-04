@@ -29,3 +29,13 @@ def test_unknown_or_wrong_values_and_broken_files_are_ignored(tmp_path: Path):
     assert settings.read_settings(path) == {}
     path.write_text("[1, 2]", encoding="utf-8")
     assert settings.read_settings(path) == {}
+
+
+def test_detail_tab_defaults_to_the_first_and_remembers_the_choice(tmp_path):
+    from grepleo import settings
+    path = tmp_path / "settings.json"
+    assert settings.detail_tab(path) == 0
+    settings.set_detail_tab(2, path)
+    assert settings.detail_tab(path) == 2
+    path.write_text('{"detail_tab": "tres"}', encoding="utf-8")
+    assert settings.detail_tab(path) == 0                   # un valor raro vuelve al predeterminado

@@ -16,6 +16,46 @@ def parse_term(spec: str) -> tuple[str, list[str]]:
     return names[0], names
 
 
+MIN_AXES, MAX_AXES = 3, 8          # un radar necesita entre 3 y 8 elementos para ser legible
+DEFAULT_LEVEL = 5
+
+
+@dataclass
+class RadarAxis:
+    """Un elemento de un radar: algo que aparece en las ofertas (con sinónimos) y tu nivel de 0 a 10 en ello."""
+    spec: str                   # «AWS|amazon web services»
+    level: int = DEFAULT_LEVEL
+
+    @property
+    def name(self) -> str:
+        return parse_term(self.spec)[0]
+
+
+@dataclass
+class SkillRadar:
+    """Un radar de un tema (Cloud, Lenguajes, Metodologías…): sus elementos son los ejes."""
+    name: str
+    axes: list[RadarAxis] = field(default_factory=list)
+
+
+def parse_axes(text: str) -> list[RadarAxis]:
+    """«AWS|amazon web services = 8», uno por línea → ejes. Sin «= nivel» (o con uno que no es un entero de 0 a 10)
+    el nivel es 5."""
+    axes = []
+    for line in text.splitlines():
+        spec, _separator, level = line.rpartition("=") if "=" in line else (line, "", "")
+        spec = spec.strip()
+        if not parse_term(spec)[0]:
+            continue
+        digits = level.strip()
+        axes.append(RadarAxis(spec, int(digits) if digits.isdigit() and 0 <= int(digits) <= 10 else DEFAULT_LEVEL))
+    return axes
+
+
+def format_axes(axes: list[RadarAxis]) -> str:
+    return "\n".join(f"{axis.spec} = {axis.level}" for axis in axes)
+
+
 @dataclass
 class Category:
     """Un tipo de oferta (por ejemplo «Data PO»): se asigna si su título o texto cita alguna de sus palabras."""
@@ -30,21 +70,49 @@ class Profile:
     years: int = 0
     studies: str = ""
     languages: dict[str, str] = field(default_factory=dict)   # {«Inglés»: «C1»}
-    must: list[str] = field(default_factory=list)             # requisitos imprescindibles (con sinónimos)
-    nice: list[str] = field(default_factory=list)             # requisitos deseables
+    must: list[str] = field(default_factory=list)             # habilidades técnicas imprescindibles (con sinónimos)
+    nice: list[str] = field(default_factory=list)             # habilidades técnicas deseables
+    soft_must: list[str] = field(default_factory=list)        # habilidades blandas imprescindibles
+    soft_nice: list[str] = field(default_factory=list)        # habilidades blandas deseables
     avoid: list[str] = field(default_factory=list)            # cosas que no quieres encontrar
     salary_min: int = 0                                       # euros brutos anuales; 0: no importa
     work_modes: list[str] = field(default_factory=list)       # remote, hybrid, onsite; vacío: cualquiera
     locations: list[str] = field(default_factory=list)
     categories: list[Category] = field(default_factory=list)
     notes: str = ""                                           # texto libre (lo usará la IA en una versión futura)
+    full_name: str = ""                                       # datos para el currículum (todo se queda en tu equipo)
+    email: str = ""
+    phone: str = ""
+    networks: dict[str, str] = field(default_factory=dict)    # tus perfiles profesionales: {«github»: «github.com/ana»}
+    links: str = ""                                           # otros enlaces, uno por línea
+    experience: str = ""                                      # experiencia profesional: puestos, empresas, fechas, logros
+    education: str = ""                                       # formación detallada (centros, titulaciones, cursos)
+    cv_file: str = ""                                         # ruta de un CV propio ya hecho (PDF, Word, texto…)
+    radar: dict[str, int] = field(default_factory=dict)       # tu nivel (0 a 10) en cada eje del radar general; vacío: calculado
+    radars: list[SkillRadar] = field(default_factory=list)    # tus radares por temas, con sus propios elementos
+
+    @property
+    def all_must(self) -> list[str]:
+        """Todos los imprescindibles: técnicos y blandos."""
+        return [*self.must, *self.soft_must]
+
+    @property
+    def all_nice(self) -> list[str]:
+        """Todos los deseables: técnicos y blandos."""
+        return [*self.nice, *self.soft_nice]
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name, "headline": self.headline, "years": self.years, "studies": self.studies,
             "languages": dict(self.languages), "must": list(self.must), "nice": list(self.nice),
+            "soft_must": list(self.soft_must), "soft_nice": list(self.soft_nice),
             "avoid": list(self.avoid), "salary_min": self.salary_min, "work_modes": list(self.work_modes),
-            "locations": list(self.locations), "notes": self.notes,
+            "locations": list(self.locations), "notes": self.notes, "radar": dict(self.radar),
+            "radars": [{"name": radar.name, "axes": [{"spec": axis.spec, "level": axis.level} for axis in radar.axes]}
+                       for radar in self.radars],
+            "full_name": self.full_name, "email": self.email, "phone": self.phone, "links": self.links,
+            "networks": dict(self.networks),
+            "experience": self.experience, "education": self.education, "cv_file": self.cv_file,
             "categories": [{"name": c.name, "keywords": list(c.keywords)} for c in self.categories],
         }
 
@@ -59,6 +127,17 @@ class Profile:
             value = data.get(key)
             return value if isinstance(value, int) and not isinstance(value, bool) and value >= 0 else 0
 
+        radar = data.get("radar")
+        networks = data.get("networks")
+        radars = []
+        for item in data.get("radars") if isinstance(data.get("radars"), list) else []:
+            if not isinstance(item, dict) or not str(item.get("name") or "").strip():
+                continue
+            axes = [RadarAxis(str(axis.get("spec") or "").strip(), axis.get("level")
+                              if isinstance(axis.get("level"), int) and not isinstance(axis.get("level"), bool)
+                              and 0 <= axis.get("level") <= 10 else DEFAULT_LEVEL)
+                    for axis in item.get("axes", []) if isinstance(axis, dict) and str(axis.get("spec") or "").strip()]
+            radars.append(SkillRadar(str(item["name"]).strip(), axes[:MAX_AXES]))
         languages = data.get("languages")
         categories = data.get("categories")
         return cls(
@@ -67,7 +146,8 @@ class Profile:
             years=number("years"),
             studies=data.get("studies") if data.get("studies") in STUDIES else "",
             languages={str(k): str(v) for k, v in languages.items()} if isinstance(languages, dict) else {},
-            must=texts("must"), nice=texts("nice"), avoid=texts("avoid"),
+            must=texts("must"), nice=texts("nice"), soft_must=texts("soft_must"), soft_nice=texts("soft_nice"),
+            avoid=texts("avoid"),
             salary_min=number("salary_min"),
             work_modes=[m for m in texts("work_modes") if m in ("remote", "hybrid", "onsite")],
             locations=texts("locations"),
@@ -76,6 +156,14 @@ class Profile:
                         for c in categories if isinstance(c, dict) and str(c.get("name") or "").strip()]
             if isinstance(categories, list) else [],
             notes=str(data.get("notes") or ""),
+            full_name=str(data.get("full_name") or ""), email=str(data.get("email") or ""),
+            phone=str(data.get("phone") or ""), links=str(data.get("links") or ""),
+            networks={str(k): str(v).strip() for k, v in networks.items() if str(v).strip()}
+            if isinstance(networks, dict) else {},
+            experience=str(data.get("experience") or ""), education=str(data.get("education") or ""),
+            cv_file=str(data.get("cv_file") or ""), radars=radars,
+            radar={str(k): v for k, v in radar.items()
+                   if isinstance(v, int) and not isinstance(v, bool) and 0 <= v <= 10} if isinstance(radar, dict) else {},
         )
 
 
@@ -113,6 +201,15 @@ def parse_categories(text: str) -> list[Category]:
         if name:
             categories.append(Category(name, split_commas(words) or [name]))
     return categories
+
+
+def link_list(text: str) -> list[str]:
+    """Los enlaces de un perfil: uno por línea. Un perfil antiguo que los tenga en una sola línea, separados por comas,
+    se lee igual."""
+    items = []
+    for line in text.splitlines():
+        items.extend(part.strip() for part in line.split(",") if part.strip())
+    return items
 
 
 def format_categories(categories: list[Category]) -> str:

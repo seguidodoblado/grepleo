@@ -104,3 +104,14 @@ def test_categories_look_at_the_title_first_then_at_the_text():
     assert categorize(job(title="Product Owner Data", description="usamos CRM"), mine) == "Data PO"
     assert categorize(job(title="Product Owner", description="usamos Salesforce"), mine) == "CRM"
     assert categorize(job(title="Chef", description="cocina"), mine) == ""
+
+
+def test_experience_ignores_ages_and_studies_come_from_the_description():
+    text = ("Se requiere titulación universitaria en informática. Las personas candidatas deben ser menores de "
+            "30 años y no tener más de un año de experiencia. " * 2)
+    result = evaluate(job(description=text), profile(studies="degree"))
+    assert by_name(result, "Experiencia").status is Status.UNKNOWN                 # no es una edad mínima
+    assert by_name(result, "Estudios").status is Status.MET
+    assert by_name(evaluate(job(description=text), profile(studies="fp")), "Estudios").status is Status.MISSING
+    summary = evaluate(job(description=text, full_description=False), profile(studies="degree"))
+    assert by_name(summary, "Estudios").status is Status.UNKNOWN                   # una ficha resumida no cuenta

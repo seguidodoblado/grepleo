@@ -8,6 +8,7 @@ gi.require_version("Gtk", "4.0")
 from gi.repository import GLib, Gtk
 
 from .. import secrets, settings
+from ..assistant import PROMPT, build_argv
 from ..i18n import _
 from ..sources.apify import ApifyError, account_info
 from .common import labeled
@@ -28,12 +29,15 @@ class PreferencesWindow(Gtk.Window):
 
     def __init__(self, application: Gtk.Application, busy: bool) -> None:
         super().__init__(title=_("Preferencias"), transient_for=application.props.active_window,
-                         modal=True, resizable=False)
+                         modal=True, resizable=True)
+        self.set_default_size(640, 760)
         self._application = application
         self._busy = busy
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12, margin_top=16,
                       margin_bottom=16, margin_start=16, margin_end=16)
-        self.set_child(box)
+        scrolled = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER)
+        scrolled.set_child(box)
+        self.set_child(scrolled)
 
         self._language = Gtk.DropDown.new_from_strings(language_labels())
         self._language.set_selected(LANGUAGE_CODES.index(settings.language()))
@@ -69,6 +73,31 @@ class PreferencesWindow(Gtk.Window):
         self._budget = Gtk.SpinButton.new_with_range(0.1, 50.0, 0.1)
         self._budget.set_value(settings.budget_usd())
         box.append(labeled(_("Gasto máximo por búsqueda en Apify (dólares)"), self._budget))
+
+        box.append(Gtk.Separator())
+        intro = Gtk.Label(xalign=0, wrap=True, label=_(
+            "Asistente de IA (botón «Adaptar CV»): comando que se abre en un terminal con tu propia sesión. "
+            "{{prompt}} se sustituye por el mensaje. Ejemplos: «claude {{prompt}}», «codex {{prompt}}», "
+            "«opencode --prompt {{prompt}}».").format())
+        box.append(intro)
+        self._assistant = Gtk.Entry(text=settings.assistant_command())
+        box.append(self._assistant)
+        box.append(Gtk.Label(xalign=0, wrap=True, label=_(
+            "Mensaje que sustituye a {{prompt}}. Dentro puedes usar {{offer}} (la oferta), {{cv}} (tu CV base), "
+            "{{upload}} (tu CV subido, si lo hay) y {{output}} (el archivo que debe crear):").format()))
+        self._prompt = Gtk.TextView(wrap_mode=Gtk.WrapMode.WORD, top_margin=6, bottom_margin=6, left_margin=8,
+                                    right_margin=8)
+        self._prompt.get_buffer().set_text(settings.assistant_prompt())
+        prompt_scroll = Gtk.ScrolledWindow(min_content_height=170, has_frame=True)
+        prompt_scroll.set_child(self._prompt)
+        box.append(prompt_scroll)
+        reset = Gtk.Button(label=_("Restablecer el mensaje"), halign=Gtk.Align.START,
+                           tooltip_text=_("Vuelve al mensaje que trae la aplicación"))
+        reset.connect("clicked", lambda _button: self._prompt.get_buffer().set_text(PROMPT))
+        box.append(reset)
+        self._assistant_info = Gtk.Label(xalign=0, wrap=True)
+        self._assistant_info.add_css_class("error")
+        box.append(self._assistant_info)
 
         hint = Gtk.Label(label=_("El idioma y el tema se aplican reiniciando la aplicación."), xalign=0, wrap=True)
         hint.add_css_class("dim-label")
@@ -127,6 +156,14 @@ class PreferencesWindow(Gtk.Window):
             except secrets.SecretsError as error:
                 self._token_status.set_text(_("No se pudo guardar el token: {error}").format(error=error))
                 return
+        command = self._assistant.get_text().strip()
+        try:
+            build_argv(command, "prueba")
+        except ValueError as error:
+            self._assistant_info.set_text(_("Comando no válido: {error}").format(error=error))
+            return
+        buffer = self._prompt.get_buffer()
+        settings.set_assistant(command, buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), False))
         config = settings.read_settings()
         language = LANGUAGE_CODES[self._language.get_selected()]
         dark = THEME_VALUES[self._theme.get_selected()]

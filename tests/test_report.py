@@ -40,7 +40,8 @@ def test_the_panorama_states_only_what_counting_can_support():
     panorama = build_panorama(sample, evaluations(sample, prof), prof)
     assert (panorama.total, panorama.detailed) == (2, 1)
     text = "\n".join(panorama.insights)
-    assert "Lo más pedido" in text and "Ninguna oferta con detalle cita" in text
+    assert "Lo más pedido" in text and "Ninguna oferta con detalle cita tus deseables: «Snowflake»" in text
+    assert "«CRM»" not in text and "«Tableau»" not in text     # el catálogo genérico ya no genera conclusiones
     assert "Encaje:" in text and "1 de 2 ofertas publican salario" in text and "1 oferta es una ficha resumida" in text
     assert build_panorama([], {}, prof).insights == []
 
@@ -74,3 +75,11 @@ def test_html_report_without_profile_or_jobs(tmp_path):
     path = tmp_path / "vacio.html"
     export_html(path, None, [], {}, Panorama(0, 0, [], []), {}, "Vacío")
     assert "<tbody></tbody>" in path.read_text(encoding="utf-8")
+
+
+def test_the_catalog_covers_infrastructure_and_dotnet_terms():
+    from grepleo.models import Job
+    text = "Experiencia con Terraform, Ansible, CI/CD, C#, .NET y Node.js en entornos cloud."
+    found = {item.name for item in count_requirements([Job(key="x:1", source="x", title="t", description=text,
+                                                           full_description=True)]) if item.count}
+    assert {"Terraform", "Ansible", "CI/CD", "C#", ".NET", "Node.js", "Cloud"} <= found

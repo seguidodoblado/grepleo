@@ -21,6 +21,13 @@ DEFAULT_CATALOG: tuple[str, ...] = (
     "Gobierno/MDM|gobierno del dato|data governance|MDM|master data", "Big Data", "Excel", "Docker",
     "Kubernetes", "Git", "Java", "JavaScript", "TypeScript", "React", "Angular", "Spring", "Linux",
     "Inglés|English",
+    # infraestructura y DevOps
+    "Terraform", "Ansible", "Jenkins", "CI/CD|ci cd|integración continua", "GitHub Actions", "GitLab", "Helm",
+    "Prometheus", "Grafana", "Bash", "PowerShell", "Cloud", "Redes|networking", "Windows Server", "VMware",
+    "Serverless|lambda", "Microservicios|microservices",
+    # desarrollo y datos
+    ".NET|dotnet", "C#", "PHP", "Node.js|nodejs", "PostgreSQL", "MySQL", "MongoDB", "Oracle", "Kafka", "Spark",
+    "Airflow", "dbt",
 )
 
 
@@ -42,7 +49,7 @@ def _terms(profile: Profile | None) -> list[str]:
     specs = list(DEFAULT_CATALOG)
     known = {normalize(parse_term(spec)[0]) for spec in specs}
     if profile:
-        for spec in (*profile.must, *profile.nice):
+        for spec in (*profile.all_must, *profile.all_nice):
             name = parse_term(spec)[0]
             if name and normalize(name) not in known:
                 specs.append(spec)
@@ -86,12 +93,17 @@ def build_insights(jobs: list[Job], evaluations: dict[str, Evaluation], requirem
             "Lo más pedido: {names} (sobre {count} oferta con detalle).",
             "Lo más pedido: {names} (sobre {count} ofertas con detalle).", detailed).format(
                 names=names, count=detailed))
-    absent = [item.name for item in requirements if item.count == 0][:4]
-    if absent and detailed:
-        insights.append(_("Ninguna oferta con detalle cita: {names}.").format(
-            names=", ".join(f"«{name}»" for name in absent)))
     if profile and detailed:
-        for spec in profile.must:
+        # solo lo que depende de tu perfil: un catálogo genérico daría siempre la misma frase, sin relación contigo
+        unseen = []
+        for spec in profile.all_nice:
+            name, names = parse_term(spec)
+            if name and not any(job.full_description and mentions(normalize(job.text), names) for job in jobs):
+                unseen.append(name)
+        if unseen:
+            insights.append(_("Ninguna oferta con detalle cita tus deseables: {names}.").format(
+                names=", ".join(f"«{name}»" for name in unseen[:4])))
+        for spec in profile.all_must:
             name, names = parse_term(spec)
             hits = sum(1 for job in jobs if job.full_description and mentions(normalize(job.text), names))
             if name and hits * 5 < detailed:

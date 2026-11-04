@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "grepleo"
 version = "0.1.0"
-description = "Búsqueda de empleo con evaluación de criterios (InfoJobs, Indeed y LinkedIn)"
+description = "Búsqueda de empleo con evaluación de criterios (InfoJobs, Indeed, LinkedIn, Tecnoempleo y Michael Page)"
 readme = "README.md"
 license = "GPL-3.0-or-later"
 requires-python = ">=3.10"

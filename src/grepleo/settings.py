@@ -37,6 +37,41 @@ def language(path: Path = SETTINGS_PATH) -> str | None:
     return value if value in LANGUAGES else None
 
 
+def detail_tab(path: Path = SETTINGS_PATH) -> int:
+    """La pestaña del panel de la oferta con la que se abrió por última vez (0 si no consta)."""
+    value = read_settings(path).get("detail_tab")
+    return value if isinstance(value, int) and not isinstance(value, bool) and 0 <= value < 20 else 0
+
+
+def set_detail_tab(number: int, path: Path = SETTINGS_PATH) -> None:
+    config = read_settings(path)
+    config["detail_tab"] = number
+    write_settings(config, path)
+
+
+def assistant_command(path: Path = SETTINGS_PATH) -> str:
+    """El comando del asistente de IA («claude {prompt}»…); uno vacío o que no es texto vuelve al de serie."""
+    from .assistant import DEFAULT_COMMAND
+    value = read_settings(path).get("assistant")
+    return value.strip() if isinstance(value, str) and value.strip() else DEFAULT_COMMAND
+
+
+def assistant_prompt(path: Path = SETTINGS_PATH) -> str:
+    """El mensaje del asistente: el que has editado o, si no, el de serie."""
+    from .assistant import PROMPT
+    value = read_settings(path).get("assistant_prompt")
+    return value.strip() if isinstance(value, str) and value.strip() else PROMPT
+
+
+def set_assistant(command: str, prompt: str, path: Path = SETTINGS_PATH) -> None:
+    """Guarda el comando y el mensaje; el mensaje de serie no se congela (así mejora con las versiones)."""
+    from .assistant import PROMPT
+    config = read_settings(path)
+    config["assistant"] = command.strip()
+    config["assistant_prompt"] = "" if prompt.strip() in ("", PROMPT) else prompt.strip()
+    write_settings(config, path)
+
+
 def budget_usd(path: Path = SETTINGS_PATH) -> float:
     """Gasto máximo por búsqueda en dólares; un valor no numérico o no positivo vuelve al predeterminado."""
     value = read_settings(path).get("budget_usd")

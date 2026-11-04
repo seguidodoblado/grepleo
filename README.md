@@ -22,25 +22,35 @@
 </p>
 
 <p align="center">
-  Busca empleo en InfoJobs, Indeed y LinkedIn y comprueba qué criterios cumples en cada oferta.
+  Busca empleo en InfoJobs, Indeed, LinkedIn, Tecnoempleo y Michael Page, y comprueba qué criterios cumples en cada oferta.
 </p>
 
 Aplicación de escritorio (GTK 4 + PyGObject, interfaz en español e inglés), de uso personal: sin servidor ni cuenta
-propios, solo tu token de [Apify](https://apify.com/) para lanzar las búsquedas.
+propios, solo tu token de [Apify](https://apify.com/) para lanzar las búsquedas (Michael Page se lee directamente de
+su web y no lo necesita).
 
-- **Una búsqueda, tres fuentes:** el puesto o las palabras clave, la ubicación y la fecha de publicación se
-  lanzan a la vez en InfoJobs, Indeed y LinkedIn (a través de Actors de Apify), y las ofertas repetidas entre
-  fuentes se unifican.
-- **Qué criterios cumples:** cada oferta se evalúa frente a tu **perfil** (requisitos imprescindibles y
-  deseables con sinónimos, experiencia, estudios, idiomas con nivel, salario mínimo, modalidad, ubicación y lo que
+- **Una búsqueda, cinco fuentes:** el puesto o las palabras clave, la ubicación y la fecha de publicación se
+  lanzan a la vez en InfoJobs, Indeed, LinkedIn y Tecnoempleo (a través de Actors de Apify) y en Michael Page (leída
+  directamente de su web, sin coste), y las ofertas repetidas entre fuentes se unifican.
+- **Qué criterios cumples:** cada oferta se evalúa frente a tu **perfil** (habilidades técnicas y blandas,
+  imprescindibles y deseables con sinónimos, experiencia, estudios, idiomas con nivel, salario mínimo, modalidad, ubicación y lo que
   prefieres no encontrar) y muestra ✓ cumple, ✗ no cumple o ? no se puede saber, además de un encaje Alto, Medio
   o Bajo.
 - **Honesta con lo que no sabe:** las fichas resumidas (como las de InfoJobs) no traen la descripción completa, así
   que un requisito que no aparece queda como «no se sabe» y no cuenta en tu contra.
 - **Varios perfiles** y **búsquedas guardadas**; las ofertas se guardan en tu equipo y las marcas como
-  favoritas, postuladas o descartadas.
-- **Panorama:** qué requisitos se repiten en la muestra y qué se puede concluir contando (lo más pedido, lo que
-  nadie pide, cuántas ofertas publican salario, cuántas son remotas…).
+  favoritas, postuladas o descartadas. Cada oferta tiene su **seguimiento**: fase del
+  proceso (fase final, suspendido, rechazado…), próximos pasos, un **histórico** de contactos, entrevistas y pruebas,
+  un **recordatorio** con fecha que te avisa al abrir la aplicación y tus **notas**.
+- **Radares de competencias:** en el panel de cada oferta, uno general y los que definas en tu perfil por temas (Cloud,
+  Lenguajes, Metodologías…), cuyos ejes son cosas concretas que aparecen en las ofertas con tu nivel de 0 a 10. Tu
+  polígono (más intenso hacia los extremos) se superpone a lo que pide la oferta y cada radar da su **porcentaje de
+  solape**; arriba, el solape global: cuanto más superpuestos, más posibilidades de encaje.
+- **Compatibilidad ATS estimada:** un porcentaje por oferta de si tu CV pasaría el filtro automático con el que muchas
+  empresas criban los currículums, con su veredicto, su fiabilidad, las palabras clave que tu CV no cita y los
+  requisitos eliminatorios que no cumples. Es una estimación local y explicada, no un dato oficial: cada empresa
+  configura su ATS. Cada radar lleva además una leyenda lateral que explica eje por eje lo que se ve.
+- **Panorama:** qué requisitos se repiten en la muestra y qué se puede concluir contando (lo más pedido, los deseables de tu perfil que ninguna oferta cita, cuántas ofertas publican salario, cuántas son remotas…).
 - **Exporta** lo que ves a un informe HTML autocontenido o a una tabla CSV.
 - **Control del gasto:** antes de buscar ves una estimación del coste en Apify, y cada búsqueda lleva un tope de
   gasto que tú configuras.
@@ -54,9 +64,13 @@ la **[wiki del proyecto](https://github.com/seguidodoblado/grepleo/wiki)** (espa
 ## Servicios de terceros
 
 Grepleo usa [Apify](https://apify.com/) para obtener las ofertas, y en concreto **Actors de la comunidad** de
-Apify (de sus autores, no de Apify) que acceden a InfoJobs, Indeed y LinkedIn. Esos sitios no ofrecen una API
+Apify (de sus autores, no de Apify) que acceden a InfoJobs, Indeed, LinkedIn y Tecnoempleo. Esos sitios no ofrecen una API
 pública de búsqueda y sus condiciones de uso restringen el acceso automatizado: el uso es personal y responsabilidad
 de quien lo lanza. Los Actors pueden dejar de funcionar o cambiar sin avisar.
+
+**Michael Page** es la excepción: la aplicación lee directamente su web pública (michaelpage.es) desde tu equipo, solo
+las rutas de búsqueda y de ficha que su `robots.txt` permite, con pausas entre peticiones y un máximo de ofertas por
+búsqueda. No pasa por Apify ni cuesta nada, pero depende del diseño de esa web y puede dejar de funcionar si cambia.
 
 ## Privacidad
 

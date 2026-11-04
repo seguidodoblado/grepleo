@@ -31,16 +31,42 @@ _YEARS_PATTERNS = (
 )
 
 
-def required_years(text: str) -> int | None:
-    """Años de experiencia que pide el texto (el mínimo, si da un rango), o None si no dice nada."""
+# lo que antecede a una cifra de años cuando es un tope o una edad, no un mínimo de experiencia
+_NOT_A_MINIMUM_BEFORE = re.compile(
+    r"(?:hasta|maximo|menos de|no tener|no superar|no mas de|menor(?:es)? de|mayor(?:es)? de|edad de|edad)\s*(?:\w+\s*){0,3}$")
+_AGE_AFTER = re.compile(r"^\s*(?:de edad|cumplidos)")
+_EXPERIENCE_WORD = re.compile(r"experiencia|experience")
+_SENTENCE_END = re.compile(r"[.;!?\n]")
+
+
+def _sentence_around(text: str, start: int, end: int) -> str:
+    """La frase (hasta el punto, punto y coma o salto de línea más cercano) que contiene text[start:end]."""
+    before = [m.end() for m in _SENTENCE_END.finditer(text, 0, start)]
+    after = _SENTENCE_END.search(text, end)
+    return text[(before[-1] if before else 0):(after.start() if after else len(text))]
+
+
+def required_years(text: str, strict: bool = False) -> int | None:
+    """Años de experiencia que pide el texto (el mínimo, si da un rango), o None si no dice nada.
+
+    Con `strict` (para una descripción larga, no un campo corto como «Al menos 3 años») solo vale una cifra que
+    tenga «experiencia» en su misma frase: así no se confunden con la experiencia una edad ni la antigüedad de una empresa.
+    """
     normalized = normalize(text)
     if re.search(r"(?:sin|no se requiere|no requerid[ao]|no necesari[ao])\s*(?:\w+\s*)?experiencia", normalized):
         return 0
     for pattern in _YEARS_PATTERNS:
         for match in pattern.finditer(normalized):
             years = int(match.group(1))
-            if 1 <= years <= 30:
-                return years
+            if not 1 <= years <= 30:
+                continue
+            if _NOT_A_MINIMUM_BEFORE.search(normalized[max(0, match.start() - 30):match.start()]):
+                continue
+            if _AGE_AFTER.match(normalized[match.end():match.end() + 15]):
+                continue
+            if strict and not _EXPERIENCE_WORD.search(_sentence_around(normalized, match.start(), match.end())):
+                continue
+            return years
     return None
 
 
@@ -60,6 +86,25 @@ def studies_rank(text: str) -> int | None:
         if pattern.search(normalized):
             return rank
     return None
+
+
+_STUDIES_CONTEXT = re.compile(
+    r"titulacion|titulad|estudios|formacion (?:academica|universitaria|reglada)|licenciatura|licenciad|grado en"
+    r"|master|ciclo formativo|\bfp\b|degree|bachelor|diplomatura")
+
+
+def studies_in_description(text: str) -> tuple[int | None, str]:
+    """Nivel de estudios y la frase que lo pide, mirando solo las frases que hablan de titulación o estudios.
+
+    Una descripción cita «ingeniero» o «grado» por otros motivos (el título del puesto, «un alto grado de
+    autonomía»); por eso, a diferencia de un campo de estudios del portal, no se lee entera.
+    """
+    for sentence in re.split(r"[.;!?\n]", text):
+        if _STUDIES_CONTEXT.search(normalize(sentence)):
+            rank = studies_rank(sentence)
+            if rank is not None:
+                return rank, " ".join(sentence.split())[:120]
+    return None, ""
 
 
 _LANGUAGES = {

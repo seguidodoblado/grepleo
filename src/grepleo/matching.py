@@ -15,6 +15,7 @@ from .textutil import (
     mentions,
     normalize,
     required_years,
+    studies_in_description,
     studies_rank,
 )
 
@@ -31,19 +32,21 @@ def _money(value: float) -> str:
 
 def _skill_criteria(job: Job, text: str, profile: Profile) -> list[CriterionResult]:
     results: list[CriterionResult] = []
-    groups = ((profile.must, W_MUST, True), (profile.nice, W_NICE, False))
-    for specs, weight, required in groups:
+    groups = ((profile.must, W_MUST, True, "hard"), (profile.nice, W_NICE, False, "hard"),
+              (profile.soft_must, W_MUST, True, "soft"), (profile.soft_nice, W_NICE, False, "soft"))
+    for specs, weight, required, group in groups:
         for spec in specs:
             name, names = parse_term(spec)
             if not name:
                 continue
             if mentions(text, names):
-                results.append(CriterionResult(name, Status.MET, _("Aparece en la oferta"), weight, required))
+                results.append(CriterionResult(name, Status.MET, _("Aparece en la oferta"), weight, required, group))
             elif job.full_description:
-                results.append(CriterionResult(name, Status.MISSING, _("No aparece en la oferta"), weight, required))
+                results.append(CriterionResult(name, Status.MISSING, _("No aparece en la oferta"), weight,
+                                               required, group))
             else:
                 results.append(CriterionResult(name, Status.UNKNOWN, _("Ficha resumida: no se puede saber"),
-                                               weight, required))
+                                               weight, required, group))
     for spec in profile.avoid:
         name, names = parse_term(spec)
         if not name:
@@ -66,7 +69,7 @@ def _experience_criterion(job: Job, profile: Profile) -> CriterionResult:
     name = _("Experiencia")
     needed = required_years(job.experience_text) if job.experience_text else None
     if needed is None:
-        needed = required_years(job.text)
+        needed = required_years(job.text, strict=True)
     if needed is None:
         return CriterionResult(name, Status.UNKNOWN, _("La oferta no dice cuánta experiencia pide"), W_EXPERIENCE)
     detail = _("Pide {needed}, tienes {have}").format(needed=_years(needed), have=_years(profile.years))
@@ -107,10 +110,13 @@ def _location_criterion(job: Job, profile: Profile) -> CriterionResult:
 def _studies_criterion(job: Job, profile: Profile) -> CriterionResult:
     name = _("Estudios")
     needed = studies_rank(job.studies_text) if job.studies_text else None
+    detail = job.studies_text
+    if needed is None:   # sin campo del portal, se busca en la descripción completa
+        needed, detail = studies_in_description(job.text) if job.full_description else (None, "")
     if needed is None:
         return CriterionResult(name, Status.UNKNOWN, _("La oferta no pide estudios concretos"), W_STUDIES)
     have = STUDIES_RANK[profile.studies]
-    return CriterionResult(name, Status.MET if have >= needed else Status.MISSING, job.studies_text, W_STUDIES)
+    return CriterionResult(name, Status.MET if have >= needed else Status.MISSING, detail, W_STUDIES)
 
 
 def _language_criteria(job: Job, profile: Profile) -> list[CriterionResult]:
@@ -120,13 +126,14 @@ def _language_criteria(job: Job, profile: Profile) -> list[CriterionResult]:
         label = f"{language} {needed}".strip()
         key = normalize(language)
         if key not in mine:
-            results.append(CriterionResult(label, Status.MISSING, _("No lo tienes en tu perfil"), W_LANGUAGE))
+            results.append(CriterionResult(label, Status.MISSING, _("No lo tienes en tu perfil"), W_LANGUAGE,
+                                           group="hard"))
         elif needed and mine[key] and level_rank(mine[key]) < level_rank(needed):
             results.append(CriterionResult(label, Status.MISSING,
                                            _("Pide {needed}, tienes {have}").format(needed=needed, have=mine[key]),
-                                           W_LANGUAGE))
+                                           W_LANGUAGE, group="hard"))
         else:
-            results.append(CriterionResult(label, Status.MET, _("Cumples el nivel"), W_LANGUAGE))
+            results.append(CriterionResult(label, Status.MET, _("Cumples el nivel"), W_LANGUAGE, group="hard"))
     return results
 
 
@@ -156,6 +163,16 @@ def fit_from(criteria: list[CriterionResult]) -> tuple[Fit, float | None]:
     if score >= MEDIUM_SCORE or (score >= HIGH_SCORE and required_missing):
         return Fit.MEDIUM, score
     return Fit.LOW, score
+
+
+def knockout_criteria(job: Job, profile: Profile) -> list[CriterionResult]:
+    """Lo que un filtro automático suele usar para descartar: la experiencia que pide, los estudios (si indicas los
+    tuyos) y los idiomas. Sirve a la estimación ATS."""
+    criteria = [_experience_criterion(job, profile)]
+    if profile.studies:
+        criteria.append(_studies_criterion(job, profile))
+    criteria.extend(_language_criteria(job, profile))
+    return criteria
 
 
 def evaluate(job: Job, profile: Profile) -> Evaluation:

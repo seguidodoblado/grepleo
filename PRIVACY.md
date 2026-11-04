@@ -20,8 +20,10 @@ ningún dato de quien la usa. Solo se comunica con Apify cuando tú lanzas una b
 En tu equipo:
 
 - El token de Apify, en el **llavero del sistema** (libsecret), nunca en un archivo.
-- Los perfiles, las búsquedas guardadas, las ofertas y su estado, en `~/.local/share/grepleo/grepleo.db`.
+- Los perfiles, las búsquedas guardadas, las ofertas, su estado y **tu seguimiento (fase, próximos pasos, histórico), notas y recordatorios** (nunca salen de tu equipo ni van a los informes HTML o CSV), en `~/.local/share/grepleo/grepleo.db`.
 - Los ajustes, en `~/.config/grepleo/settings.json`.
+- Las carpetas de trabajo del asistente de CV, una por oferta, en `~/.local/share/grepleo/cv/` (la oferta, tu CV construido desde el perfil, una copia del CV que hayas subido y lo que genere la IA).
+- Un registro de errores en `~/.local/share/grepleo/grepleo.log` (excepciones y avisos de la propia aplicación; se rota al pasar de 1 MB y nunca se envía a ningún sitio).
 - Los informes HTML y CSV, donde tú elijas al exportarlos.
 
 ## Con quién se comparte
@@ -32,10 +34,16 @@ Solo con los servicios que intervienen cuando lanzas una búsqueda:
   número de ofertas** de cada búsqueda, y tu token para autorizarla. Queda sujeto a las condiciones y a la política
   de privacidad de Apify, y el uso se factura o descuenta de tu crédito de Apify.
 - **Actors de la comunidad de Apify** (desarrollados por terceros): reciben esos mismos datos de la búsqueda y
-  acceden por su cuenta a InfoJobs, Indeed y LinkedIn. Cada Actor tiene su autor y sus condiciones.
+  acceden por su cuenta a InfoJobs, Indeed, LinkedIn y Tecnoempleo. Cada Actor tiene su autor y sus condiciones.
+- **Michael Page** (`www.michaelpage.es`): si eliges esta fuente, la aplicación se conecta **directamente desde tu
+  equipo**, sin pasar por Apify. El sitio recibe tu dirección IP y las **palabras clave** de la búsqueda (no tu
+  ubicación, que se filtra en tu equipo), y la aplicación se identifica con su nombre y versión (`Grepleo/x.y.z`).
+  Queda sujeto a las condiciones y a la política de privacidad de Michael Page. No hace falta token ni cuesta nada.
 
-**Tu perfil, tus criterios, tus notas y las marcas de las ofertas nunca se envían**: la evaluación se hace en tu
-equipo. La aplicación no incluye analítica, telemetría ni publicidad.
+- **Tu propia CLI de IA** (Claude Code, OpenCode, Codex…): solo si pulsas **Adaptar CV**. Se abre un terminal con la CLI que tú hayas instalado y configurado, con tu cuenta, y se le da una carpeta con la oferta, tu CV construido desde el perfil (nombre, contacto, experiencia, formación…) y tu CV subido. Lo que llegue a su proveedor queda sujeto a las condiciones y a la política de privacidad de ese servicio. Grepleo no ve tus credenciales ni llama a ninguna API.
+
+**Tu perfil, tus criterios, tus notas y las marcas de las ofertas no se envían a ningún servicio de la aplicación**: la
+evaluación se hace en tu equipo. Lo único que puede salir es lo que tú mandes a tu propia IA con **Adaptar CV**. La aplicación no incluye analítica, telemetría ni publicidad.
 
 ## Cómo borrar tus datos
 

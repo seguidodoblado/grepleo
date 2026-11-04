@@ -13,6 +13,8 @@ def main() -> None:
     else:
         os.environ.pop("LANGUAGE", None)
     i18n.install()
+    from . import logsetup
+    logsetup.install()   # antes de cargar GTK: así también quedan sus avisos
     from .ui.gui import run_gui
     run_gui()
 

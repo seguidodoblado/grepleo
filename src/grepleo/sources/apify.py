@@ -9,12 +9,13 @@ from collections.abc import Callable
 from typing import Any
 
 from ..i18n import _
+from .base import SourceError
 
 API = "https://api.apify.com/v2"
 RUN_TIMEOUT_SECONDS = 300   # límite del endpoint síncrono de Apify
 
 
-class ApifyError(Exception):
+class ApifyError(SourceError):
     """Fallo al hablar con Apify; el mensaje ya está en lenguaje de usuario."""
 
     def __init__(self, message: str, status: int | None = None) -> None:
