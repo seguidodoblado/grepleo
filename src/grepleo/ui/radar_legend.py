@@ -1,7 +1,7 @@
 """La leyenda lateral de un radar y el cuadro de la compatibilidad ATS estimada."""
 from gi.repository import GLib, Gtk
 
-from ..ats import AtsEstimate
+from ..ats import POSSIBLE, AtsEstimate
 from ..i18n import _, ngettext
 from ..models import Fit
 from ..radar import COVERED, MISSING, NOT_ASKED, RadarData, coverage_points, legend_rows, main_gaps
@@ -89,6 +89,10 @@ def build_ats(estimate: AtsEstimate) -> Gtk.Box:
         lines.append(_("Palabras clave: tu CV cita {found} de las {total} que pide la oferta ({percent} % ponderado por lo "
                        "que las pide).").format(found=len(estimate.found), total=total,
                                                 percent=round(estimate.keyword_score * 100)))
+    elif estimate.no_keywords:
+        lines.append(_("Palabras clave: no se reconoce ninguna en esta oferta (no parece de tu campo o usa un vocabulario "
+                       "que no conozco), así que no se pueden contar y el resultado no pasa del {limit} %.").format(
+                           limit=POSSIBLE - 1))
     else:
         lines.append(_("Palabras clave: no se pueden contar, porque la oferta es una ficha resumida."))
     if estimate.title_score is not None:
@@ -97,8 +101,9 @@ def build_ats(estimate: AtsEstimate) -> Gtk.Box:
     lines.append(_("Estructura del CV: {percent} % de las secciones estándar con contenido (la experiencia pesa el "
                    "doble).").format(percent=round(estimate.format_score * 100)))
     if estimate.failed:
-        lines.append(_("Requisitos eliminatorios que no cumples: {names}. Cada uno resta un 40 %.").format(
-            names=", ".join(estimate.failed)))
+        lines.append(_("Requisitos eliminatorios que no cumples: {names}.").format(names=", ".join(
+            f"{name} (−{round((1 - factor) * 100)} %)" for name, factor in zip(estimate.failed, estimate.factors,
+                                                                            strict=True))))
     else:
         lines.append(_("Requisitos eliminatorios (experiencia, estudios, idiomas): ninguno incumplido."))
     if estimate.unknown:

@@ -13,6 +13,7 @@ from ..models import Fit
 from ..profiles import (
     STUDIES,
     Profile,
+    bare_levels,
     format_categories,
     format_languages,
     parse_categories,
@@ -107,7 +108,13 @@ class ProfileWindow(Gtk.Window):
         box.append(row)
         self._languages = Gtk.Entry(text=format_languages(profile.languages),
                                     placeholder_text=_("Por ejemplo: Inglés C1, Francés B1"))
-        box.append(labeled(_("Idiomas (con nivel A1 a C2)"), self._languages))
+        self._languages.connect("changed", self._languages_changed)
+        self._languages_warning = Gtk.Label(xalign=0, wrap=True, visible=False)
+        self._languages_warning.add_css_class("error")
+        languages_box = labeled(_("Idiomas (con nivel A1 a C2)"), self._languages)
+        languages_box.append(self._languages_warning)
+        box.append(languages_box)
+        self._languages_changed(self._languages)
 
         box.append(_section(_("Habilidades técnicas")))
         hint = Gtk.Label(label=_("Uno por línea; sinónimos con | (Power BI|powerbi)"), xalign=0)
@@ -280,6 +287,15 @@ class ProfileWindow(Gtk.Window):
         self._radar_loading = False
         self._radar_manual.clear()
         self._radar_changed()
+
+    def _languages_changed(self, entry: Gtk.Entry) -> None:
+        """Avisa si se escribe un nivel suelto («A2»): se tomaría por un idioma y las ofertas que piden inglés saldrían como
+        un requisito que no tienes."""
+        levels = bare_levels(entry.get_text())
+        self._languages_warning.set_visible(bool(levels))
+        if levels:
+            self._languages_warning.set_text(_("«{level}» es un nivel, no un idioma: escribe, por ejemplo, «Inglés {level}».")
+                                             .format(level=levels[0].strip().upper()))
 
     def _network_changed(self, entry: Gtk.Entry, platform_id: str) -> None:
         """Avisa con un icono en la casilla si lo escrito no es de esa plataforma (un LinkedIn pegado en la de GitHub)."""

@@ -51,11 +51,21 @@ def test_missing_keywords_lower_the_score_and_the_most_wanted_ones_are_listed_fi
     assert "Kubernetes" in estimate.missing
 
 
-def test_each_failed_knockout_requirement_multiplies_the_result_by_the_factor():
+def test_a_missing_requirement_multiplies_the_result_and_experience_weighs_by_the_years_that_are_missing():
+    from grepleo.ats import EXPERIENCE_FACTORS, experience_factor
+    assert experience_factor(1) == 0.85 and experience_factor(2) == 0.7 and experience_factor(3) == KNOCKOUT_FACTOR
+    assert experience_factor(10) == KNOCKOUT_FACTOR and EXPERIENCE_FACTORS == ((1, 0.85), (2, 0.7))
     ok = estimate_ats(job(), good_profile())
-    short = estimate_ats(job(), good_profile(years=1))                  # pide 2 años y tiene 1
-    assert short.failed == ["Experiencia"] and short.keyword_score == ok.keyword_score
-    assert short.percent == round(ok.percent * KNOCKOUT_FACTOR) or abs(short.percent - ok.percent * KNOCKOUT_FACTOR) < 1.5
+    short = estimate_ats(job(), good_profile(years=1))                  # pide 2 años y tiene 1: falta 1
+    assert short.failed == ["Experiencia"] and short.factors == [0.85] and short.keyword_score == ok.keyword_score
+    assert abs(short.percent - ok.percent * 0.85) < 1.5
+    far = estimate_ats(job(description=OFFER.replace("2 años", "5 años") * 2), good_profile(years=1))   # faltan 4
+    assert far.factors == [KNOCKOUT_FACTOR] and far.percent < short.percent
+    middle = estimate_ats(job(description=OFFER.replace("2 años", "3 años") * 2), good_profile(years=1))  # faltan 2
+    assert middle.factors == [0.7]
+    english = estimate_ats(job(description=OFFER * 2 + "\nSe requiere inglés C1.\n"), good_profile(languages={}))
+    assert english.failed == ["Inglés C1"] and english.factors == [KNOCKOUT_FACTOR]   # idiomas y estudios: el factor fijo
+    assert len(english.failed) == len(english.factors)
 
 
 def test_a_summary_card_has_low_reliability_and_no_keyword_score():
@@ -109,3 +119,22 @@ def test_the_estimate_is_always_a_percentage_and_has_readable_labels():
     estimate = AtsEstimate(150, "high", None, None, 1.0)
     assert estimate.reliability_label and estimate.verdict
     assert 0 <= estimate_ats(job(), Profile(name="x")).percent <= 100
+
+
+def test_an_offer_without_any_known_keyword_is_capped_and_never_tops_the_ranking():
+    outside = job(title="Técnico Electromecánico", description="Mantenimiento de motores y cuadros eléctricos. " * 8)
+    estimate = estimate_ats(outside, good_profile())
+    assert estimate.no_keywords and estimate.reliability == "low" and estimate.keyword_score is None
+    assert estimate.percent <= POSSIBLE - 1
+    assert estimate_ats(job(), good_profile()).percent > estimate.percent           # una oferta de tu campo, por delante
+    summary = job(full_description=False, description="Scrum", title="Técnico")     # una ficha resumida no es lo mismo
+    assert estimate_ats(summary, good_profile()).no_keywords is False
+
+
+def test_soft_skills_alone_do_not_bring_an_offer_into_scope():
+    soft_only = job(title="Técnico de Mantenimiento", description="Buscamos trabajo en equipo, proactividad y liderazgo. " * 8)
+    profile = good_profile(soft_must=["Trabajo en equipo"], soft_nice=["Proactividad"])
+    estimate = estimate_ats(soft_only, profile)
+    assert estimate.no_keywords and estimate.percent <= POSSIBLE - 1         # las blandas las cita cualquier oferta
+    technical = estimate_ats(job(description=OFFER * 2 + " Trabajo en equipo."), profile)
+    assert technical.no_keywords is False and technical.percent > estimate.percent

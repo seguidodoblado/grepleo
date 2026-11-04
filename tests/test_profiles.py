@@ -66,3 +66,11 @@ def test_networks_round_trip_and_old_profiles_have_none():
     odd = Profile.from_dict({"name": "x", "networks": {"github": "  github.com/a ", "web": "", "x": 5}})
     assert odd.networks == {"github": "github.com/a", "x": "5"}
     assert Profile.from_dict({"name": "y", "networks": [1]}).networks == {}
+
+
+def test_a_level_written_without_a_language_is_detected():
+    from grepleo.profiles import bare_levels, is_level, parse_languages
+    assert is_level("A2") and is_level("c1") and not is_level("Inglés") and not is_level("A3") and not is_level("A")
+    assert bare_levels("A2") == ["A2"] and bare_levels("Inglés B2, c1 , Francés") == ["c1"]
+    assert bare_levels("Inglés A2, Francés B1") == [] and bare_levels("") == []
+    assert parse_languages("A2") == {"A2": ""}            # lo que acababa guardándose: un idioma llamado «A2»

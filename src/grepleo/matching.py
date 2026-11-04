@@ -65,11 +65,15 @@ def _years(count: int) -> str:
     return _("{count} año").format(count=count) if count == 1 else _("{count} años").format(count=count)
 
 
+def experience_requirement(job: Job) -> int | None:
+    """Los años de experiencia que pide la oferta (el campo del portal o, si no, su texto), o None si no lo dice."""
+    needed = required_years(job.experience_text) if job.experience_text else None
+    return needed if needed is not None else required_years(job.text, strict=True)
+
+
 def _experience_criterion(job: Job, profile: Profile) -> CriterionResult:
     name = _("Experiencia")
-    needed = required_years(job.experience_text) if job.experience_text else None
-    if needed is None:
-        needed = required_years(job.text, strict=True)
+    needed = experience_requirement(job)
     if needed is None:
         return CriterionResult(name, Status.UNKNOWN, _("La oferta no dice cuánta experiencia pide"), W_EXPERIENCE)
     detail = _("Pide {needed}, tienes {have}").format(needed=_years(needed), have=_years(profile.years))

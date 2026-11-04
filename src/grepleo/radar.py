@@ -26,6 +26,7 @@ from .textutil import (
     required_years,
     studies_in_description,
     studies_rank,
+    term_pattern,
 )
 
 SCALE = 10.0
@@ -127,37 +128,56 @@ _REQUIRED_CUE = re.compile(r"imprescind|indispensable|obligatori|requisit|requir
                            r"se requiere|minim|excluyente|buscamos|qualification")
 
 
-def _cue(text: str) -> float | None:
-    """Lo que dice un título o una frase sobre lo que sigue: deseable (7), imprescindible (10) o nada (None)."""
-    normalized = normalize(text)
+def _cue_of(normalized: str) -> float | None:
+    """Lo que dice un título o una frase (ya normalizados) sobre lo que sigue: deseable (7), imprescindible (10) o
+    nada (None)."""
     if _NICE_CUE.search(normalized):   # «requisitos deseables» es deseable: lo suave gana a lo duro
         return DEMAND_NICE
     return DEMAND_REQUIRED if _REQUIRED_CUE.search(normalized) else None
 
 
-@lru_cache(maxsize=64)
-def _blocks(description: str):
-    """La descripción troceada en secciones y viñetas; se guarda porque se consulta una vez por cada elemento."""
-    return tuple(structure_description(description))
+@lru_cache(maxsize=512)
+def _prepared(description: str) -> tuple[tuple[bool, float | None, str, float | None], ...]:
+    """La descripción troceada y normalizada una sola vez: (es título, lo que dice el título, texto normalizado, lo que
+    dice la propia línea). Se consulta una vez por cada elemento de cada radar y de la estimación ATS."""
+    prepared = []
+    for block in structure_description(description):
+        normalized = normalize(block.text)
+        if block.kind == HEADING:
+            prepared.append((True, _cue_of(normalized), "", None))
+        else:
+            own = _cue_of(normalized) if block.kind == BULLET or len(block.text) < 200 else None
+            prepared.append((False, None, normalized, own))
+    return tuple(prepared)
+
+
+@lru_cache(maxsize=1024)
+def _patterns(spec: str) -> tuple[re.Pattern[str], ...]:
+    """Las expresiones que buscan un elemento y sus sinónimos en un texto ya normalizado."""
+    return tuple(term_pattern(name) for name in parse_term(spec)[1] if name.strip())
+
+
+@lru_cache(maxsize=2048)
+def _normalized(text: str) -> str:
+    return normalize(text)
 
 
 def term_demand(job: Job, spec: str) -> float | None:
     """Cuánto pide la oferta un elemento: 10 si lo cita como requisito o en el título, 7 como deseable, 5 si solo lo
     menciona, 0 si no aparece y None si no se puede saber (ficha resumida que no lo cita)."""
-    names = parse_term(spec)[1]
-    if not names:
+    patterns = _patterns(spec)
+    if not patterns:
         return None
-    if mentions(normalize(job.title), names):
+    title = _normalized(job.title)
+    if any(pattern.search(title) for pattern in patterns):
         return DEMAND_REQUIRED
     if not job.full_description:
         return None
     best, section = 0.0, DEMAND_MENTIONED
-    for block in _blocks(job.description):
-        if block.kind == HEADING:
-            section = _cue(block.text) or DEMAND_MENTIONED
-            continue
-        if mentions(normalize(block.text), names):
-            own = _cue(block.text) if block.kind == BULLET or len(block.text) < 200 else None
+    for is_heading, heading_cue, normalized, own in _prepared(job.description):
+        if is_heading:
+            section = heading_cue or DEMAND_MENTIONED
+        elif any(pattern.search(normalized) for pattern in patterns):
             best = max(best, own or section)
     return best
 

@@ -188,6 +188,17 @@ def parse_languages(text: str) -> dict[str, str]:
     return languages
 
 
+def is_level(text: str) -> bool:
+    """Si el texto es solo un nivel del Marco Común Europeo (A1 a C2)."""
+    return len(text) == 2 and text[0].upper() in "ABC" and text[1] in "12"
+
+
+def bare_levels(text: str) -> list[str]:
+    """Los niveles sueltos que se han escrito sin idioma («A2» en vez de «Inglés A2»): se guardarían como un idioma que
+    se llama «A2» y ninguna oferta lo pediría."""
+    return [part for part in split_commas(text) if is_level(part.strip())]
+
+
 def format_languages(languages: dict[str, str]) -> str:
     return ", ".join(f"{name} {level}".strip() for name, level in languages.items())
 

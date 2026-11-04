@@ -142,3 +142,14 @@ def test_professional_profiles_have_a_box_each_that_cleans_completes_and_warns()
                          "bluesky": "bsky.app/profile/ana.bsky.social", "web": "ana.dev", "gitlab": "github.com/otra"}
     window._networks["github"].set_text("")
     assert "github" not in window._collect().networks                        # una casilla vacía no se guarda
+
+
+def test_a_bare_level_in_languages_shows_a_warning_that_says_what_to_write():
+    window = make_window(Profile(name="I", languages={"Inglés": "B2"}))
+    assert not window._languages_warning.get_visible()
+    window._languages.set_text("A2")
+    assert window._languages_warning.get_visible()
+    assert "«A2» es un nivel, no un idioma" in window._languages_warning.get_text() and "Inglés A2" in window._languages_warning.get_text()
+    window._languages.set_text("Inglés A2, Francés B1")
+    assert not window._languages_warning.get_visible()
+    assert make_window(Profile(name="J", languages={"A2": ""}))._languages_warning.get_visible()   # un perfil ya guardado mal

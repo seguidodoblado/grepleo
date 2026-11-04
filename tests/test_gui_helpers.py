@@ -165,3 +165,55 @@ def test_the_main_window_keeps_a_small_minimum_size_so_it_can_be_maximized_on_a_
             assert minimum_height <= 1000, f"alto mínimo {minimum_height} con incremental={incremental}"
     finally:
         settings.set_property("gtk-font-name", previous)
+
+
+def test_the_ats_column_is_filled_in_the_background_and_can_be_filtered_and_sorted():
+    from pathlib import Path
+
+    from gi.repository import GLib, Gtk
+
+    from grepleo.profiles import Profile
+    from grepleo.sources.base import SearchQuery
+    from grepleo.storage import Store
+    if not Gtk.init_check():
+        pytest.skip("sin pantalla para crear widgets")
+    rich = "Requisitos:\n- AWS y Docker\n- Terraform\n" * 6
+    poor = "Requisitos:\n- Cobol y Fortran\n- Mainframe y JCL\n" * 6
+    store = Store(Path(":memory:"))
+    profile_id = store.save_profile(Profile(name="P", headline="DevOps", years=3, must=["AWS", "Docker", "Terraform"],
+                                            experience="DevOps con AWS y Docker"))
+    search = store.save_search(gui.LAST_SEARCH, profile_id, SearchQuery("devops"), ["indeed"])
+    store.store_results(search, [Job(key="x:good", source="indeed", title="DevOps AWS", description=rich,
+                                     full_description=True),
+                                 Job(key="x:bad", source="indeed", title="Programador Cobol", description=poor,
+                                     full_description=True)])
+    window = gui.MainWindow(Gtk.Application(application_id="io.github.seguidodoblado.GrepleoAts"), store)
+    items = [window.store_model.get_item(i) for i in range(window.store_model.get_n_items())]
+    pending = [item for item in items if item.ats_percent < 0]          # la oferta elegida se calcula al momento; el resto, después
+    assert pending, "la ventana no debe calcular todo antes de mostrarse"
+    assert gui.ats_text(pending[0]) == "…" and "Calculando" in gui.ats_tooltip(pending[0])
+    context = GLib.MainContext.default()
+    for _attempt in range(50):                                          # las tandas llegan cuando el bucle está libre
+        while context.iteration(False):
+            pass
+        if all(item.ats_percent >= 0 for item in items):
+            break
+    percents = {item.job.key: item.ats_percent for item in items}
+    assert all(0 <= value <= 100 for value in percents.values()) and percents["x:good"] > percents["x:bad"]
+    good = next(item for item in items if item.job.key == "x:good")
+    assert gui.ats_text(good) == f"{percents['x:good']} %" and good.ats.verdict in gui.ats_tooltip(good)
+    labels = gui.ats_filter_labels()
+    assert len(labels) == len(gui.ATS_FILTERS) and labels[0].startswith("ATS")
+    window.filter_ats.set_selected(1)                                   # probable: ≥ 70 %
+    assert window.filter_model.get_n_items() == (1 if percents["x:good"] >= 70 else 0)
+    window.filter_ats.set_selected(3)                                   # poco probable: < 45 %
+    assert {window.filter_model.get_item(i).job.key for i in range(window.filter_model.get_n_items())} >= (
+        {"x:bad"} if percents["x:bad"] < 45 else set())
+    window.filter_ats.set_selected(0)
+    assert window.filter_model.get_n_items() == 2
+    by_ats = gui.MainWindow._sorter_for("ats")
+    assert by_ats(good, next(item for item in items if item is not good)) > 0       # el mejor va por delante al ordenar
+    # al cambiar el perfil, las estimaciones guardadas dejan de valer
+    key_before = window._ats_profile_key
+    window._queue_ats(items, Profile(name="Otro", years=0))
+    assert window._ats_profile_key != key_before

@@ -1,4 +1,6 @@
 """Ventana principal: búsqueda, resultados con su encaje, detalle de criterios, panorama y exportación."""
+import hashlib
+import json
 from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
@@ -13,7 +15,7 @@ from gi.repository import Gdk, Gio, GLib, GObject, Gtk, Pango
 from .. import __version__, settings
 from .. import secrets as token_store
 from ..assistant import build_argv, build_prompt, prepare_workspace
-from ..ats import estimate_ats
+from ..ats import LIKELY, POSSIBLE, AtsEstimate, estimate_ats
 from ..i18n import _, ngettext
 from ..incremental import incremental_posted, prune_stale, same_search
 from ..matching import evaluate
@@ -61,6 +63,8 @@ STATE_FILTERS = ("active", "all", "favorite", "applied", "discarded", "process",
 NOTES_ICONS = {"due": ("alarm", "appointment-soon", "dialog-warning"), "notes": ("document-edit", "text-x-generic")}
 FIT_FILTERS = (None, Fit.HIGH, Fit.MEDIUM, Fit.LOW, Fit.UNKNOWN)
 MODE_FILTERS = (None, WorkMode.REMOTE, WorkMode.HYBRID, WorkMode.ONSITE, WorkMode.UNKNOWN)
+ATS_FILTERS = (None, (LIKELY, 101), (POSSIBLE, LIKELY), (0, POSSIBLE))   # rangos [desde, hasta) de la estimación
+ATS_CHUNK = 12                    # ofertas que se calculan por tanda, para no bloquear la ventana
 
 
 def posted_labels() -> list[str]:
@@ -70,6 +74,12 @@ def posted_labels() -> list[str]:
 def state_filter_labels() -> list[str]:
     return [_("Candidatas"), _("Todas"), _("Favoritas"), _("Postuladas"), _("Descartadas"),
             _("Proceso abierto"), _("Con notas o seguimiento")]
+
+
+def ats_filter_labels() -> list[str]:
+    return [_("ATS: todas"), _("Probable (≥ {percent} %)").format(percent=LIKELY),
+            _("Posible ({low}–{high} %)").format(low=POSSIBLE, high=LIKELY - 1),
+            _("Poco probable (< {percent} %)").format(percent=POSSIBLE)]
 
 
 def mode_filter_labels() -> list[str]:
@@ -102,12 +112,29 @@ def merge_jobs(jobs: list[Job]) -> list[Job]:
 
 
 class JobItem(GObject.Object):
-    """Una fila de la tabla: la oferta y su evaluación."""
+    """Una fila de la tabla: la oferta, su evaluación y, cuando se ha calculado, su estimación ATS."""
+
+    ats_percent = GObject.Property(type=int, default=-1)   # -1: aún sin calcular; al cambiar avisa a su celda
 
     def __init__(self, job: Job, evaluation: Evaluation) -> None:
         super().__init__()
         self.job = job
         self.evaluation = evaluation
+        self.ats: AtsEstimate | None = None
+
+    def set_ats(self, estimate: AtsEstimate) -> None:
+        self.ats = estimate
+        self.ats_percent = estimate.percent
+
+
+def ats_text(item: "JobItem") -> str:
+    return "…" if item.ats_percent < 0 else f"{item.ats_percent} %"
+
+
+def ats_tooltip(item: "JobItem") -> str:
+    if item.ats is None:
+        return _("Calculando la compatibilidad ATS…")
+    return f"{item.ats.verdict}\n" + _("fiabilidad {level}").format(level=item.ats.reliability_label)
 
 
 def state_icon_of(item: JobItem) -> str:
@@ -177,6 +204,9 @@ class MainWindow(Gtk.ApplicationWindow):
         self.searching = False
         self._updating = False
         self._row_signatures: dict[str, tuple[str, str]] = {}
+        self._ats_cache: dict[tuple[str, str], AtsEstimate] = {}
+        self._ats_profile_key = ""
+        self._ats_generation = 0
 
         header = Gtk.HeaderBar()
         header.pack_end(self._build_menu_button())
@@ -324,6 +354,11 @@ class MainWindow(Gtk.ApplicationWindow):
         self.filter_mode.set_tooltip_text(_("Filtra las ofertas ya encontradas por modalidad de trabajo"))
         self.filter_mode.connect("notify::selected", lambda *_args: self._filters_changed())
         filters.append(self.filter_mode)
+        self.filter_ats = Gtk.DropDown.new_from_strings(ats_filter_labels())
+        self.filter_ats.set_tooltip_text(_("Filtra por la compatibilidad ATS estimada: lo que tu CV tiene de pasar el filtro "
+                                           "automático de la empresa"))
+        self.filter_ats.connect("notify::selected", lambda *_args: self._filters_changed())
+        filters.append(self.filter_ats)
         self.filter_category = Gtk.DropDown.new_from_strings([_("Tipo: todos")])
         self.filter_category.connect("notify::selected", lambda *_args: self._filters_changed())
         filters.append(self.filter_category)
@@ -351,6 +386,7 @@ class MainWindow(Gtk.ApplicationWindow):
             (_("Ubicación"), lambda item: f"{item.job.location or '—'}\n{item.job.work_mode.label}", 120, "location"),
             (_("Salario"), lambda item: salary_text(item.job), 110, "salary"),
             (_("Encaje"), lambda item: f"{item.evaluation.fit.label}\n{item.evaluation.summary}", 80, "fit"),
+            (_("ATS"), ats_text, 64, "ats"),   # se rellena en segundo plano; el icono de la estimación va en el tooltip
             (_("Estado"), lambda item: state_text(item.job), 130, "state"),
             (_("Notas"), lambda item: "", 64, "notes"),   # solo el icono; el texto sale al pasar el ratón
             (_("Fuente"), lambda item: "", 76, "source"),   # solo el icono; el nombre sale al pasar el ratón
@@ -400,8 +436,12 @@ class MainWindow(Gtk.ApplicationWindow):
             text = getter(item)
             label.set_text(text)
             label.set_visible(bool(text))   # una columna solo de icono no deja hueco para el texto
+            if sort_key == "ats":   # el cálculo es en segundo plano: la celda se actualiza cuando llega
+                item.ats_handler = item.connect("notify::ats-percent", lambda *_args, i=item, lb=label: (
+                    lb.set_text(ats_text(i)), box.set_tooltip_text(ats_tooltip(i))))
             tooltip = {"source": lambda: source_names().get(item.job.source, ""),
-                       "notes": lambda: notes_tooltip(item.job)}.get(sort_key)
+                       "notes": lambda: notes_tooltip(item.job),
+                       "ats": lambda: ats_tooltip(item)}.get(sort_key)
             box.set_tooltip_text(tooltip() or None if tooltip else None)
             icon = icon_getter(item) if icon_getter else ""
             image.set_visible(bool(icon))
@@ -413,8 +453,16 @@ class MainWindow(Gtk.ApplicationWindow):
                 cell.remove_css_class(f"row-fit-{fit.value}")
             cell.add_css_class(f"row-fit-{item.evaluation.fit.value}")
 
+        def unbind(_factory, row):
+            item = row.get_item()
+            handler = getattr(item, "ats_handler", 0) if item is not None else 0
+            if handler:
+                item.disconnect(handler)
+                item.ats_handler = 0
+
         factory.connect("setup", setup)
         factory.connect("bind", bind)
+        factory.connect("unbind", unbind)
         column = Gtk.ColumnViewColumn.new(title, factory)
         column.set_resizable(True)
         column.set_fixed_width(width)   # ancho mínimo; con expand=True crece con la ventana
@@ -428,6 +476,8 @@ class MainWindow(Gtk.ApplicationWindow):
         def value(item):
             if key == "fit":
                 return (item.evaluation.fit.rank, item.evaluation.score or 0.0)
+            if key == "ats":
+                return item.ats_percent
             if key == "salary":
                 top = item.job.salary_max if item.job.salary_max is not None else item.job.salary_min
                 return (top is not None, top or 0.0)
@@ -768,12 +818,62 @@ class MainWindow(Gtk.ApplicationWindow):
         # de mejor a peor encaje ya en los datos, para que no dependa del estado del ColumnView
         ordered = sorted(self.jobs, key=lambda job: (self.evaluations[job.key].fit.rank,
                                                      self.evaluations[job.key].score or 0.0), reverse=True)
-        self.store_model.splice(0, self.store_model.get_n_items(),
-                                [JobItem(job, self.evaluations[job.key]) for job in ordered])
+        items = [JobItem(job, self.evaluations[job.key]) for job in ordered]
+        self.store_model.splice(0, self.store_model.get_n_items(), items)
+        self._queue_ats(items, profile)
         self._sort_by_fit()
         self._reload_category_filter(profile)
         self._filters_changed()
         self._update_panorama(profile)
+
+    # --- compatibilidad ATS en segundo plano ---------------------------------------------------------
+    @staticmethod
+    def _profile_key(profile: Profile) -> str:
+        """Una huella del perfil: si cambia, las estimaciones guardadas ya no valen."""
+        return hashlib.sha1(json.dumps(profile.to_dict(), sort_keys=True).encode("utf-8")).hexdigest()
+
+    def _ats_of(self, item: JobItem, profile: Profile) -> AtsEstimate:
+        """La estimación de una oferta: la guardada o, si falta, se calcula ahora."""
+        key = (item.job.key, self._ats_profile_key)
+        if key not in self._ats_cache:
+            self._ats_cache[key] = estimate_ats(item.job, profile)
+        if item.ats is None:
+            item.set_ats(self._ats_cache[key])
+        return self._ats_cache[key]
+
+    def _queue_ats(self, items: list[JobItem], profile: Profile) -> None:
+        """Pone las estimaciones ya conocidas y calcula el resto por tandas, para que la ventana no se bloquee."""
+        self._ats_generation += 1   # una tanda anterior, si la hay, se abandona
+        self._ats_profile_key = self._profile_key(profile)
+        pending = []
+        for item in items:
+            cached = self._ats_cache.get((item.job.key, self._ats_profile_key))
+            if cached is not None:
+                item.set_ats(cached)
+            else:
+                pending.append(item)
+        if pending:
+            GLib.idle_add(self._ats_step, self._ats_generation, pending, profile)
+
+    def _ats_step(self, generation: int, pending: list[JobItem], profile: Profile) -> bool:
+        if generation != self._ats_generation:
+            return False
+        for item in pending[:ATS_CHUNK]:
+            self._ats_of(item, profile)
+        del pending[:ATS_CHUNK]
+        self._ats_changed(final=not pending)
+        return bool(pending)
+
+    def _ats_changed(self, final: bool) -> None:
+        """Tras una tanda: si hay un filtro o un orden por ATS, se reaplica; al acabar, se refresca el contador."""
+        if self.filter_ats.get_selected() > 0:
+            self.filter.changed(Gtk.FilterChange.DIFFERENT)
+        sorter = self.view.get_sorter()
+        primary = sorter.get_primary_sort_column() if sorter is not None else None
+        if primary is not None and primary.get_title() == _("ATS"):
+            primary.get_sorter().changed(Gtk.SorterChange.DIFFERENT)
+        if final:
+            self._update_counter()
 
     def _reload_category_filter(self, profile: Profile) -> None:
         names = [category.name for category in profile.categories]
@@ -795,6 +895,9 @@ class MainWindow(Gtk.ApplicationWindow):
         wanted_fit = FIT_FILTERS[self.filter_fit.get_selected()]
         if wanted_fit is not None and evaluation.fit is not wanted_fit:
             return False
+        wanted_ats = ATS_FILTERS[self.filter_ats.get_selected()]
+        if wanted_ats is not None and not (item.ats_percent >= 0 and wanted_ats[0] <= item.ats_percent < wanted_ats[1]):
+            return False   # sin calcular todavía no entra en un filtro por rango
         wanted_mode = MODE_FILTERS[self.filter_mode.get_selected()]
         if wanted_mode is not None and job.work_mode is not wanted_mode:
             return False
@@ -871,7 +974,7 @@ class MainWindow(Gtk.ApplicationWindow):
             return
         job = item.job
         profile = self._current_profile() or Profile(name="")
-        ats = estimate_ats(job, profile)
+        ats = self._ats_of(item, profile)
         self.radar.set_data(build_radars(job, profile), item.evaluation.fit, ats)
         if self.notes_panel.job is not job:   # al marcar un estado se repinta el panel sin tocar lo que se escribe
             self.notes_panel.load(job)

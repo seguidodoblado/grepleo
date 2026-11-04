@@ -56,12 +56,12 @@ def test_the_legend_of_a_radar_the_offer_does_not_ask_anything_of_says_so():
 
 def test_the_ats_box_shows_the_percentage_the_verdict_and_where_it_comes_from():
     estimate = AtsEstimate(58, "medium", 0.5, 0.67, 0.83, found=["AWS"], missing=["Docker", "Terraform"],
-                           failed=["Experiencia"], unknown=1)
+                           failed=["Experiencia"], factors=[0.85], unknown=1)
     box = build_ats(estimate)
     text = "\n".join(texts(box))
     assert "Compatibilidad ATS estimada: 58 %" in text and "Puede pasar" in text and "fiabilidad media" in text
     assert "cita 1 de las 3" in text and "67 %" in text and "83 %" in text
-    assert "no cumples: Experiencia" in text and "Cada uno resta un 40 %" in text
+    assert "no cumples: Experiencia (−15 %)" in text
     assert "Palabras clave que tu CV no cita: Docker, Terraform" in text and "solo si son ciertas" in text
     assert "CV base (un PDF subido no se lee)" in text and "1 requisito no se puede saber" in text
     uploaded = AtsEstimate(90, "high", 1.0, 1.0, 1.0, found=["AWS"], from_upload=True)
@@ -99,3 +99,9 @@ def test_the_offer_tab_shows_the_ats_percentage_next_to_the_fit():
     assert "ATS ≈ 72 %" in buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), False)
     view.show_job(offer, evaluate(offer, profile), profile, "—")
     assert "ATS" not in buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), False)
+
+
+def test_the_ats_box_explains_why_an_offer_outside_the_field_is_capped():
+    estimate = AtsEstimate(44, "low", None, 0.0, 1.0, no_keywords=True)
+    text = "\n".join(texts(build_ats(estimate)))
+    assert "no se reconoce ninguna" in text and "no pasa del 44 %" in text and "ficha resumida" not in text
