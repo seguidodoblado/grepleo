@@ -36,7 +36,7 @@ class AssistantWindow(Gtk.Window):
     """Una sesión de tu CLI de IA en un terminal embebido, con la carpeta de la oferta como directorio de trabajo."""
 
     def __init__(self, parent: Gtk.Window, workspace: Workspace, argv: list[str], job: Job) -> None:
-        super().__init__(title=_("Asistente de IA · CV adaptado"), transient_for=parent, resizable=True)
+        super().__init__(title=_("Asistente de IA · CV adaptado"), resizable=True)   # independiente: maximizable
         gi.require_version("Vte", "3.91")
         from gi.repository import Vte
         self.set_default_size(960, 700)

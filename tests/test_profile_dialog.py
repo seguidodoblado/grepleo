@@ -11,6 +11,8 @@ except (ValueError, ImportError):
 
 from pathlib import Path
 
+from gi.repository import GLib
+
 from grepleo.profiles import Profile
 from grepleo.storage import Store
 from grepleo.ui.profile_dialog import ProfileWindow, _text_of
@@ -21,10 +23,20 @@ def make_window(profile=None, saved=None):
     return ProfileWindow(parent, Store(Path(":memory:")), profile, None, (saved if saved is not None else []).append)
 
 
-def test_the_editor_is_resizable_and_has_a_maximize_button():
-    window = make_window()
-    assert window.get_resizable() and window.get_titlebar() is not None
-    assert window._maximize.get_tooltip_text()
+def test_the_editor_is_an_independent_resizable_window_that_blocks_the_main_one_while_open():
+    parent = Gtk.Window()
+    window = ProfileWindow(parent, Store(Path(":memory:")), None, None, [].append)
+    # con ventana madre o modal, el gestor de ventanas la trata como un diálogo y no deja maximizarla
+    assert window.get_resizable() and window.get_transient_for() is None and not window.get_modal()
+    window.present()
+    context = GLib.MainContext.default()
+    while context.iteration(False):
+        pass
+    assert not parent.get_sensitive()
+    window.close()
+    while context.iteration(False):
+        pass
+    assert parent.get_sensitive()                    # al cerrarla, la principal vuelve a responder
 
 
 def test_technical_and_soft_skills_are_edited_and_collected_separately():

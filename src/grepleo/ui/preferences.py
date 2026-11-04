@@ -11,7 +11,7 @@ from .. import secrets, settings
 from ..assistant import PROMPT, build_argv
 from ..i18n import _
 from ..sources.apify import ApifyError, account_info
-from .common import labeled
+from .common import block_parent, labeled
 
 # Los nombres de idioma no se traducen (convención habitual en selectores de idioma):
 # «English» se ve igual con la app en español, y viceversa.
@@ -28,8 +28,8 @@ class PreferencesWindow(Gtk.Window):
     Cinnamon/Mint, cambiar gtk-theme-name en caliente no repinta la ventana."""
 
     def __init__(self, application: Gtk.Application, busy: bool) -> None:
-        super().__init__(title=_("Preferencias"), transient_for=application.props.active_window,
-                         modal=True, resizable=True)
+        super().__init__(title=_("Preferencias"), resizable=True)
+        block_parent(self, application.props.active_window)
         self.set_default_size(640, 760)
         self._application = application
         self._busy = busy

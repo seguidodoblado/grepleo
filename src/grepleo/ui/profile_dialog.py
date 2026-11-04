@@ -22,7 +22,7 @@ from ..profiles import (
 )
 from ..radar import AXES, SCALE, axis_labels, default_levels, profile_levels
 from ..storage import Store
-from .common import labeled, link_icon, pick_icon
+from .common import block_parent, labeled, link_icon, pick_icon
 from .radar_editor import RadarEditor
 from .radar_view import RadarView
 
@@ -75,20 +75,13 @@ class ProfileWindow(Gtk.Window):
 
     def __init__(self, parent: Gtk.Window, store: Store, profile: Profile | None, identifier: int | None,
                  on_saved: Callable[[int], None]) -> None:
-        super().__init__(title=_("Perfil"), transient_for=parent, modal=True, resizable=True)
+        super().__init__(title=_("Perfil"), resizable=True)
+        block_parent(self, parent)
         self.set_default_size(980, 780)
         self._store = store
         self._identifier = identifier
         self._on_saved = on_saved
         profile = profile or Profile(name="")
-
-        # barra propia con el botón de maximizar: una ventana modal hija no lo trae en todos los escritorios
-        header = Gtk.HeaderBar()
-        self._maximize = Gtk.Button(icon_name=pick_icon("window-maximize", "view-fullscreen"),
-                                    tooltip_text=_("Maximizar o restaurar la ventana"))
-        self._maximize.connect("clicked", self._toggle_maximize)
-        header.pack_start(self._maximize)
-        self.set_titlebar(header)
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10, margin_top=12, margin_bottom=12,
                       margin_start=16, margin_end=16, vexpand=True)
@@ -327,12 +320,6 @@ class ProfileWindow(Gtk.Window):
         except GLib.Error:
             return   # cancelado
         self._set_cv_file(chosen.get_path() or "")
-
-    def _toggle_maximize(self, _button: Gtk.Button) -> None:
-        if self.is_maximized():
-            self.unmaximize()
-        else:
-            self.maximize()
 
     def _collect(self, with_radar: bool = True) -> Profile:
         profile = self._collect_fields()

@@ -1,77 +1,78 @@
-"""InfoJobs (España), con el Actor `igolaizola/infojobs-scraper`.
+"""InfoJobs (España), con el Actor `unfenced-group/infojobs-net-scraper`.
 
-InfoJobs solo da los requisitos mínimos de cada oferta, no su descripción completa: son fichas resumidas.
+InfoJobs bloquea las peticiones directas con un muro anti-bot, por eso se usa un Actor. Con `fetchDetails` el Actor trae la
+**descripción completa** de cada oferta, el salario ya desglosado y la modalidad de trabajo, así que ya no son fichas
+resumidas. No tiene filtro de «solo remoto»: se aplica aquí, sobre lo que devuelve.
 """
 from __future__ import annotations
 
 from typing import Any
 
 from ..models import Job, WorkMode
-from ..textutil import detect_work_mode, normalize
-from .base import SearchQuery, Source, parse_salary, short_date, to_text
+from ..textutil import detect_work_mode
+from .base import SearchQuery, Source, annual_euros, short_date, to_text
 
-PROVINCES = (
-    "a-coruna", "alava-araba", "albacete", "alicante-alacant", "almeria", "asturias", "avila", "badajoz",
-    "barcelona", "burgos", "caceres", "cadiz", "cantabria", "castellon-castello", "ceuta", "ciudad-real",
-    "cordoba", "cuenca", "girona", "granada", "guadalajara", "guipuzcoa-gipuzkoa", "huelva", "huesca",
-    "illes-balears", "jaen", "la-rioja", "las-palmas", "leon", "lleida", "lugo", "madrid", "malaga", "melilla",
-    "murcia", "navarra", "ourense", "palencia", "pontevedra", "salamanca", "santa-cruz-de-tenerife", "segovia",
-    "sevilla", "soria", "tarragona", "teruel", "toledo", "valencia-valencia", "valladolid", "vizcaya-bizkaia",
-    "zamora", "zaragoza",
-)
-_SINCE = {"day": "last-24-hours", "week": "last-7-days", "month": "last-15-days"}
-
-
-def province_slug(location: str) -> str:
-    """El identificador de provincia de InfoJobs para un texto de ubicación, o «» si no es una provincia."""
-    slug = normalize(location).strip().replace(" ", "-")
-    if slug in PROVINCES:
-        return slug
-    matches = [province for province in PROVINCES if slug and slug in province.split("-")]
-    return matches[0] if len(matches) == 1 else ""
+FULL_DESCRIPTION_CHARS = 150   # una descripción más corta es un resumen
+_SINCE_DAYS = {"day": 1, "week": 7, "month": 30}   # los valores que acepta el Actor son 1, 7, 15 y 30
+_MODES = {"remote": WorkMode.REMOTE, "hybrid": WorkMode.HYBRID, "on-site": WorkMode.ONSITE, "onsite": WorkMode.ONSITE}
 
 
 class InfoJobs(Source):
     id = "infojobs"
     name = "InfoJobs"
-    actor = "igolaizola/infojobs-scraper"
-    start_cost = 0.001
-    item_cost = 0.001
+    actor = "unfenced-group/infojobs-net-scraper"
+    start_cost = 0.00005
+    item_cost = 0.00079
 
     def build_input(self, query: SearchQuery) -> dict[str, Any]:
-        data: dict[str, Any] = {"query": query.keywords, "maxItems": query.limit,
-                                "sortBy": "recent" if query.posted else "relevance"}
-        if query.posted in _SINCE:
-            data["sinceDate"] = _SINCE[query.posted]
+        data: dict[str, Any] = {"searchQuery": query.keywords, "maxItems": query.limit, "fetchDetails": True}
         if query.location:
-            if slug := province_slug(query.location):
-                data["province"] = slug
-            else:
-                data["city"] = query.location
-        if query.remote:
-            data["teleworking"] = ["remote-only"]
+            data["location"] = query.location
+        if query.posted in _SINCE_DAYS:
+            data["daysOld"] = _SINCE_DAYS[query.posted]
         return data
 
+    def refine(self, jobs: list[Job], query: SearchQuery) -> list[Job]:
+        """El Actor no filtra por «solo remoto»: se descartan aquí las ofertas que no lo son."""
+        return [job for job in jobs if job.work_mode is WorkMode.REMOTE] if query.remote else jobs
+
     def parse_item(self, item: dict[str, Any]) -> Job | None:
-        identifier = to_text(item.get("id")) or to_text(item.get("link"))
+        identifier = to_text(item.get("id")) or to_text(item.get("url"))
         title = to_text(item.get("title"))
         if not identifier or not title:
             return None
-        description = to_text(item.get("salaryDescription"))
-        low, high = parse_salary(description)
-        if low is None:
-            low, high = parse_salary(" ".join(part for part in (to_text(item.get("salaryMin")),
-                                                                  to_text(item.get("salaryMax")),
-                                                                  to_text(item.get("salaryPeriod"))) if part))
-        remote_text = to_text(item.get("teleworking"))
-        place = ", ".join(part for part in (to_text(item.get("city")), to_text(item.get("province"))) if part)
-        mode = detect_work_mode(remote_text) if remote_text else WorkMode.UNKNOWN
+        text = to_text(item.get("descriptionText")) or to_text(item.get("descriptionMarkdown"))
+        low, high = self._salary(item)
+        mode = _MODES.get(to_text(item.get("workMode")).lower())
+        if mode is None:
+            mode = detect_work_mode(f"{title} {text[:600]}")
+        place = to_text(item.get("city")) or to_text(item.get("location"))
         return Job(
-            key=f"{self.id}:{identifier}", source=self.id, title=title,
-            company=to_text((item.get("author") or {}).get("name") if isinstance(item.get("author"), dict) else ""),
+            key=f"{self.id}:{identifier}", source=self.id, title=title, company=to_text(item.get("company")),
             location=place, work_mode=mode, contract=to_text(item.get("contractType")),
-            salary_min=low, salary_max=high, salary_text=description,
-            experience_text=to_text(item.get("experienceMin")), studies_text=to_text(item.get("study")),
-            description=to_text(item.get("requirementMin")), full_description=False,
-            url=to_text(item.get("link")), posted=short_date(item.get("published")),
+            salary_min=low, salary_max=high, salary_text=self._salary_text(low, high), description=text,
+            full_description=len(text) >= FULL_DESCRIPTION_CHARS,
+            url=to_text(item.get("url")) or to_text(item.get("applyUrl")),
+            posted=short_date(item.get("publishDateISO") or item.get("publishDate")),
         )
+
+    @staticmethod
+    def _salary(item: dict[str, Any]) -> tuple[float | None, float | None]:
+        if to_text(item.get("salaryCurrency")).upper() not in ("", "EUR"):
+            return None, None
+        unit = to_text(item.get("salaryPeriod")) or "year"
+
+        def annual(key: str) -> float | None:
+            value = item.get(key)
+            number = isinstance(value, (int, float)) and not isinstance(value, bool) and value > 0
+            return annual_euros(value, unit) if number else None
+
+        low, high = annual("salaryMin"), annual("salaryMax")
+        return low if low is not None else high, high if high is not None else low
+
+    @staticmethod
+    def _salary_text(low: float | None, high: float | None) -> str:
+        """El salario como en las demás fuentes («28.000–36.000 €»); sin cifras, vacío."""
+        if low is None:
+            return ""
+        return f"{low:,.0f}–{(high or low):,.0f} €".replace(",", ".")

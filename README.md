@@ -36,7 +36,7 @@ su web y no lo necesita).
   imprescindibles y deseables con sinónimos, experiencia, estudios, idiomas con nivel, salario mínimo, modalidad, ubicación y lo que
   prefieres no encontrar) y muestra ✓ cumple, ✗ no cumple o ? no se puede saber, además de un encaje Alto, Medio
   o Bajo.
-- **Honesta con lo que no sabe:** las fichas resumidas (como las de InfoJobs) no traen la descripción completa, así
+- **Honesta con lo que no sabe:** las fichas resumidas (cuando una fuente no trae la descripción completa) no la tienen, así
   que un requisito que no aparece queda como «no se sabe» y no cuenta en tu contra.
 - **Varios perfiles** y **búsquedas guardadas**; las ofertas se guardan en tu equipo y las marcas como
   favoritas, postuladas o descartadas. Cada oferta tiene su **seguimiento**: fase del

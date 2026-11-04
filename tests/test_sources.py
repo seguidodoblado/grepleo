@@ -4,7 +4,7 @@ from grepleo.models import WorkMode
 from grepleo.sources import SOURCES, ApifyError, SearchQuery, plan_search, run_search
 from grepleo.sources.base import annual_euros, parse_salary, short_date
 from grepleo.sources.indeed import Indeed
-from grepleo.sources.infojobs import InfoJobs, province_slug
+from grepleo.sources.infojobs import InfoJobs
 from grepleo.sources.linkedin import LinkedIn
 
 LONG = "Descripción larga de la oferta. " * 10
@@ -26,29 +26,57 @@ def test_annual_euros_and_dates():
     assert short_date("2026-10-23T10:00:00Z") == "2026-10-23" and short_date(None) == ""
 
 
-def test_province_slug():
-    assert province_slug("Madrid") == "madrid" and province_slug("a Coruña") == "a-coruna"
-    assert province_slug("Valencia") == "valencia-valencia" and province_slug("Ciudad Real") == "ciudad-real"
-    assert province_slug("Pozuelo") == "" and province_slug("") == ""
+INFOJOBS_ITEM = {
+    "id": "c7f8f42da94975b10ff7414c2990d5", "url": "https://www.infojobs.net/madrid/administrador/of-ic7f8f42d",
+    "title": "Administrador/a Directorio activo Hibrido Madrid", "company": "CAS Training", "city": "Madrid",
+    "workMode": "Hybrid", "contractType": "Contrato indefinido", "salaryRaw": "28.000 – 36.000 € / YEAR",
+    "salaryMin": 28000, "salaryMax": 36000, "salaryCurrency": "EUR", "salaryPeriod": "YEAR",
+    "publishDateISO": "2026-11-04", "descriptionText": "Funciones\n" + "Experiencia con PowerShell y Azure AD. " * 8}
 
 
-def test_infojobs_builds_its_input_and_parses_a_summary_card():
+def test_infojobs_asks_for_full_details_and_parses_a_complete_offer():
     source = InfoJobs()
-    data = source.build_input(SearchQuery("product owner", "Madrid", 30, "week", remote=True))
-    assert data == {"query": "product owner", "maxItems": 30, "sortBy": "recent", "sinceDate": "last-7-days",
-                    "province": "madrid", "teleworking": ["remote-only"]}
-    assert source.build_input(SearchQuery("x", "Pozuelo"))["city"] == "Pozuelo"
-    job = source.parse_item({
-        "id": "abc", "title": "Product Owner", "author": {"name": "Luca TIC"}, "city": "Madrid",
-        "province": {"value": "Madrid"}, "salaryDescription": "40.000 € - 50.000 € Bruto/año",
-        "teleworking": {"value": "Solo teletrabajo"}, "contractType": {"value": "Indefinido"},
-        "experienceMin": {"value": "Al menos 3 años"}, "study": {"value": "Grado"},
-        "requirementMin": "Scrum y Power BI", "link": "https://www.infojobs.net/x", "published": "2026-10-20T08:00"})
-    assert job.key == "infojobs:abc" and job.company == "Luca TIC" and job.location == "Madrid, Madrid"
-    assert (job.salary_min, job.salary_max) == (40000.0, 50000.0) and job.work_mode is WorkMode.REMOTE
-    assert job.experience_text == "Al menos 3 años" and job.studies_text == "Grado"
-    assert job.full_description is False and "Scrum" in job.description and job.posted == "2026-10-20"
-    assert source.parse_item({"title": "sin id"}) is None
+    assert source.actor == "unfenced-group/infojobs-net-scraper"
+    assert source.build_input(SearchQuery("aws, devops", "Madrid", 30, "week")) == {
+        "searchQuery": "aws, devops", "maxItems": 30, "fetchDetails": True, "location": "Madrid", "daysOld": 7}
+    assert source.build_input(SearchQuery("x", "", 5, "month"))["daysOld"] == 30
+    assert "location" not in source.build_input(SearchQuery("x")) and "daysOld" not in source.build_input(SearchQuery("x"))
+    job = source.parse_item(INFOJOBS_ITEM)
+    assert job.key == "infojobs:c7f8f42da94975b10ff7414c2990d5" and job.company == "CAS Training"
+    assert job.location == "Madrid" and job.work_mode is WorkMode.HYBRID and job.contract == "Contrato indefinido"
+    assert (job.salary_min, job.salary_max) == (28000.0, 36000.0) and job.salary_text == "28.000–36.000 €"
+    assert job.full_description and "PowerShell" in job.description and job.posted == "2026-11-04"
+    assert job.url.endswith("of-ic7f8f42d")
+    assert source.parse_item({"title": "sin id"}) is None and source.parse_item({"id": "1"}) is None
+
+
+def test_infojobs_handles_monthly_pay_missing_pay_and_unknown_work_modes():
+    source = InfoJobs()
+    monthly = source.parse_item({**INFOJOBS_ITEM, "salaryMin": 2000, "salaryMax": None, "salaryPeriod": "MONTH"})
+    assert (monthly.salary_min, monthly.salary_max) == (24000.0, 24000.0)
+    unpaid = source.parse_item({**INFOJOBS_ITEM, "salaryMin": None, "salaryMax": None, "salaryRaw": None})
+    assert unpaid.salary_min is None and unpaid.salary_text == ""
+    dollars = source.parse_item({**INFOJOBS_ITEM, "salaryCurrency": "USD"})
+    assert dollars.salary_min is None
+    assert source.parse_item({**INFOJOBS_ITEM, "workMode": "On-site"}).work_mode is WorkMode.ONSITE
+    assert source.parse_item({**INFOJOBS_ITEM, "workMode": "Remote"}).work_mode is WorkMode.REMOTE
+    guessed = source.parse_item({**INFOJOBS_ITEM, "workMode": None, "title": "DevOps 100% remoto"})
+    assert guessed.work_mode is WorkMode.REMOTE                     # sin dato del portal, se deduce del texto
+    short = source.parse_item({**INFOJOBS_ITEM, "descriptionText": "Scrum"})
+    assert short.full_description is False
+
+
+def test_infojobs_keeps_only_remote_offers_when_asked_because_its_actor_cannot_filter():
+    source = InfoJobs()
+    jobs = [source.parse_item({**INFOJOBS_ITEM, "id": "1", "workMode": "Remote"}),
+            source.parse_item({**INFOJOBS_ITEM, "id": "2", "workMode": "Hybrid"}),
+            source.parse_item({**INFOJOBS_ITEM, "id": "3", "workMode": "On-site"})]
+    assert [job.key for job in source.refine(jobs, SearchQuery("x", remote=True))] == ["infojobs:1"]
+    assert source.refine(jobs, SearchQuery("x")) == jobs
+    runs = plan_search(SearchQuery("x", limit=5, remote=True), ["infojobs"], 1.0)
+    items = [{**INFOJOBS_ITEM, "id": str(n), "workMode": mode} for n, mode in enumerate(("Remote", "Hybrid"))]
+    results = run_search("T", SearchQuery("x", limit=5, remote=True), runs, runner=lambda *args: items)
+    assert [job.key for job in results[0].jobs] == ["infojobs:0"]
 
 
 def test_indeed_parses_salary_description_and_closed_flag():
@@ -81,7 +109,7 @@ def test_linkedin_builds_and_parses():
 
 
 def test_cost_estimate_and_limit_for_budget():
-    assert InfoJobs().estimate_cost(100) == pytest.approx(0.101)
+    assert InfoJobs().estimate_cost(100) == pytest.approx(0.00005 + 0.079)
     assert Indeed().limit_for_budget(0.0015, 100) == 5 and Indeed().limit_for_budget(0.0, 100) == 1
     assert InfoJobs().limit_for_budget(10, 20) == 20
 
@@ -90,7 +118,7 @@ def test_plan_splits_the_budget_and_trims_each_source():
     runs = plan_search(SearchQuery("po", limit=500), ["infojobs", "indeed", "nope"], 0.2)
     assert [run.source.id for run in runs] == ["infojobs", "indeed"]
     assert all(run.cap_usd == pytest.approx(0.1) for run in runs)
-    assert runs[0].limit == 99 and runs[1].limit == 500
+    assert runs[0].limit == 126 and runs[1].limit == 500
     assert all(run.estimate_usd <= run.cap_usd + 1e-9 for run in runs)
     assert plan_search(SearchQuery("po"), [], 1.0) == []
     assert set(SOURCES) == {"infojobs", "indeed", "linkedin", "tecnoempleo", "michaelpage"}
@@ -274,6 +302,9 @@ def test_local_sources_cost_nothing_and_need_no_token():
 
         def fetch(self, query):
             return [{"title": "PO", "url": "https://x/ref/1"}]
+
+        def refine(self, jobs, query):
+            return jobs
 
         def parse_item(self, item):
             return MichaelPage_job(item)

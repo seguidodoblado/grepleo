@@ -81,6 +81,28 @@ def vte_available() -> bool:
     return "3.91" in gi.Repository.get_default().enumerate_versions("Vte")
 
 
+def block_parent(window: Gtk.Window, parent: Gtk.Window | None) -> None:
+    """Hace que `window` sea una ventana independiente que bloquea a `parent` mientras esté abierta.
+
+    No se le pone `transient_for` ni `modal`: con ventana madre, GTK la declara «diálogo» y Muffin (Cinnamon) y otros
+    gestores no dejan maximizarla. Así se comporta como una ventana normal (maximizable) y la principal queda sin
+    responder hasta que se cierra."""
+    if parent is None:
+        return
+
+    def block(*_args) -> None:   # al mostrarse, no al crearse: una ventana que no llega a mostrarse no deja a la principal bloqueada
+        parent.set_sensitive(False)
+
+    window.connect("map", block)
+
+    def restore(*_args) -> bool:
+        parent.set_sensitive(True)
+        return False
+
+    window.connect("close-request", restore)
+    window.connect("unrealize", restore)   # GTK 4 ya no emite «destroy»; esto cubre también un destroy() directo
+
+
 def message(parent: Gtk.Window, text: str, detail: str = "") -> None:
     """Un aviso con un único botón."""
     Gtk.AlertDialog(message=text, detail=detail, buttons=[_("Aceptar")]).choose(parent, None, None)

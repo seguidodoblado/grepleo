@@ -107,3 +107,27 @@ def test_the_mode_filter_keeps_only_the_offers_of_that_work_mode():
     window.filter_text.set_text("Oferta 2")
     window._filters_changed()                                 # la caja de búsqueda avisa con retraso: se fuerza
     assert window.filter_model.get_n_items() == 1
+
+
+def test_block_parent_disables_the_parent_while_the_window_is_shown_and_restores_it_on_close_or_destroy():
+    from gi.repository import GLib, Gtk
+
+    from grepleo.ui.common import block_parent
+    if not Gtk.init_check():
+        pytest.skip("sin pantalla para crear widgets")
+
+    def pump():
+        context = GLib.MainContext.default()
+        while context.iteration(False):
+            pass
+    for how in ("close", "destroy"):
+        parent, window = Gtk.Window(), Gtk.Window()
+        block_parent(window, parent)
+        assert parent.get_sensitive()                       # aún no se ha mostrado: no bloquea
+        window.present()
+        pump()
+        assert not parent.get_sensitive() and window.get_transient_for() is None and not window.get_modal()
+        (window.close if how == "close" else window.destroy)()
+        pump()
+        assert parent.get_sensitive()
+    block_parent(Gtk.Window(), None)                        # sin ventana madre no hace nada

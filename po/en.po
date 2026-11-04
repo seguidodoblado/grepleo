@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: grepleo 0.1.0\n"
 "Report-Msgid-Bugs-To: jose.antonio.seguido@gmail.com\n"
-"POT-Creation-Date: 2026-11-04 20:59+0100\n"
+"POT-Creation-Date: 2026-11-04 21:19+0100\n"
 "PO-Revision-Date: 2026-11-03 17:00+0100\n"
 "Last-Translator: José Antonio Seguido Doblado <jose.antonio.seguido@gmail."
 "com>\n"
@@ -56,12 +56,12 @@ msgid "baja"
 msgstr "low"
 
 #: src/grepleo/cv.py:16 src/grepleo/ui/detail_view.py:27
-#: src/grepleo/ui/profile_dialog.py:119
+#: src/grepleo/ui/profile_dialog.py:112
 msgid "Habilidades técnicas"
 msgstr "Hard skills"
 
 #: src/grepleo/cv.py:16 src/grepleo/ui/detail_view.py:27
-#: src/grepleo/ui/profile_dialog.py:128
+#: src/grepleo/ui/profile_dialog.py:121
 msgid "Habilidades blandas"
 msgstr "Soft skills"
 
@@ -111,7 +111,9 @@ msgstr "Estimated compatibility: {percent} %"
 msgid ""
 "Palabras clave de la oferta que mi CV base no cita (úsalas solo si son "
 "ciertas en mi caso): {names}"
-msgstr "Keywords from the offer that my base CV does not cite (use them only if they are true in my case): {names}"
+msgstr ""
+"Keywords from the offer that my base CV does not cite (use them only if they "
+"are true in my case): {names}"
 
 #: src/grepleo/cv.py:111
 #, python-brace-format
@@ -203,7 +205,7 @@ msgid "La oferta no dice la ubicación"
 msgstr "The offer does not say the location"
 
 #: src/grepleo/matching.py:111 src/grepleo/radar.py:120
-#: src/grepleo/ui/profile_dialog.py:110
+#: src/grepleo/ui/profile_dialog.py:103
 msgid "Estudios"
 msgstr "Education"
 
@@ -664,12 +666,12 @@ msgstr "Could not save the CV: {error}"
 msgid "CV guardado en {path}."
 msgstr "CV saved to {path}."
 
-#: src/grepleo/ui/common.py:86 src/grepleo/ui/common.py:114
+#: src/grepleo/ui/common.py:108 src/grepleo/ui/common.py:136
 msgid "Aceptar"
 msgstr "OK"
 
-#: src/grepleo/ui/common.py:91 src/grepleo/ui/common.py:113
-#: src/grepleo/ui/profile_dialog.py:258 src/grepleo/ui/tracking_panel.py:79
+#: src/grepleo/ui/common.py:113 src/grepleo/ui/common.py:135
+#: src/grepleo/ui/profile_dialog.py:251 src/grepleo/ui/tracking_panel.py:79
 msgid "Cancelar"
 msgstr "Cancel"
 
@@ -689,7 +691,7 @@ msgstr "In a week"
 msgid "Sin fecha"
 msgstr "No date"
 
-#: src/grepleo/ui/date_picker.py:44 src/grepleo/ui/profile_dialog.py:246
+#: src/grepleo/ui/date_picker.py:44 src/grepleo/ui/profile_dialog.py:239
 msgid "Quitar"
 msgstr "Clear"
 
@@ -851,7 +853,7 @@ msgid "Búsquedas guardadas"
 msgstr "Saved searches"
 
 #: src/grepleo/ui/gui.py:261 src/grepleo/ui/preferences.py:106
-#: src/grepleo/ui/profile_dialog.py:259
+#: src/grepleo/ui/profile_dialog.py:252
 msgid "Guardar"
 msgstr "Save"
 
@@ -1299,65 +1301,61 @@ msgid "Grado"
 msgstr "Degree"
 
 #: src/grepleo/ui/profile_dialog.py:88
-msgid "Maximizar o restaurar la ventana"
-msgstr "Maximize or restore the window"
-
-#: src/grepleo/ui/profile_dialog.py:95
 msgid "Quién eres"
 msgstr "Who you are"
 
-#: src/grepleo/ui/profile_dialog.py:97
+#: src/grepleo/ui/profile_dialog.py:90
 msgid "Por ejemplo: CRM Manager con Salesforce"
 msgstr "For example: CRM Manager with Salesforce"
 
-#: src/grepleo/ui/profile_dialog.py:100
+#: src/grepleo/ui/profile_dialog.py:93
 msgid "Nombre del perfil"
 msgstr "Profile name"
 
-#: src/grepleo/ui/profile_dialog.py:101
+#: src/grepleo/ui/profile_dialog.py:94
 msgid "Quién eres (cargo actual o resumen)"
 msgstr "Who you are (current role or summary)"
 
-#: src/grepleo/ui/profile_dialog.py:107
+#: src/grepleo/ui/profile_dialog.py:100
 msgid "Años de experiencia"
 msgstr "Years of experience"
 
-#: src/grepleo/ui/profile_dialog.py:113
+#: src/grepleo/ui/profile_dialog.py:106
 msgid "Salario mínimo bruto anual (€, 0 = no importa)"
 msgstr "Minimum gross annual salary (€, 0 = does not matter)"
 
-#: src/grepleo/ui/profile_dialog.py:116
+#: src/grepleo/ui/profile_dialog.py:109
 msgid "Por ejemplo: Inglés C1, Francés B1"
 msgstr "For example: English C1, French B1"
 
-#: src/grepleo/ui/profile_dialog.py:117
+#: src/grepleo/ui/profile_dialog.py:110
 msgid "Idiomas (con nivel A1 a C2)"
 msgstr "Languages (with level A1 to C2)"
 
-#: src/grepleo/ui/profile_dialog.py:120
+#: src/grepleo/ui/profile_dialog.py:113
 msgid "Uno por línea; sinónimos con | (Power BI|powerbi)"
 msgstr "One per line; synonyms with | (Power BI|powerbi)"
 
-#: src/grepleo/ui/profile_dialog.py:125 src/grepleo/ui/profile_dialog.py:135
+#: src/grepleo/ui/profile_dialog.py:118 src/grepleo/ui/profile_dialog.py:128
 msgid "Imprescindibles"
 msgstr "Must-haves"
 
-#: src/grepleo/ui/profile_dialog.py:126 src/grepleo/ui/profile_dialog.py:136
+#: src/grepleo/ui/profile_dialog.py:119 src/grepleo/ui/profile_dialog.py:129
 msgid "Deseables"
 msgstr "Nice-to-haves"
 
-#: src/grepleo/ui/profile_dialog.py:129
+#: src/grepleo/ui/profile_dialog.py:122
 msgid ""
 "Liderazgo, trabajo en equipo, comunicación…: uno por línea, con sinónimos si "
 "quieres"
 msgstr ""
 "Leadership, teamwork, communication…: one per line, with synonyms if you like"
 
-#: src/grepleo/ui/profile_dialog.py:138
+#: src/grepleo/ui/profile_dialog.py:131
 msgid "Radar general"
 msgstr "General radar"
 
-#: src/grepleo/ui/profile_dialog.py:139
+#: src/grepleo/ui/profile_dialog.py:132
 msgid ""
 "Cómo te valoras de 0 a 10 en cada eje; se superpone al de cada oferta. Si no "
 "lo tocas, sale de los datos de arriba."
@@ -1365,15 +1363,15 @@ msgstr ""
 "How you rate yourself from 0 to 10 on each axis; it is overlaid on each "
 "offer's. If you do not touch it, it comes from the data above."
 
-#: src/grepleo/ui/profile_dialog.py:157
+#: src/grepleo/ui/profile_dialog.py:150
 msgid "Recalcular desde el perfil"
 msgstr "Recalculate from the profile"
 
-#: src/grepleo/ui/profile_dialog.py:166
+#: src/grepleo/ui/profile_dialog.py:159
 msgid "Radares por temas"
 msgstr "Radars by topic"
 
-#: src/grepleo/ui/profile_dialog.py:168
+#: src/grepleo/ui/profile_dialog.py:161
 msgid ""
 "Cada radar es de un tema (Cloud, Lenguajes, Metodologías…) y sus ejes son "
 "cosas concretas que aparecen en las ofertas, con tu nivel de 0 a 10 en cada "
@@ -1386,43 +1384,43 @@ msgstr ""
 "overlap percentage. The more precise the elements (and their synonyms), the "
 "better it measures."
 
-#: src/grepleo/ui/profile_dialog.py:176
+#: src/grepleo/ui/profile_dialog.py:169
 msgid "Qué buscas"
 msgstr "What you are looking for"
 
-#: src/grepleo/ui/profile_dialog.py:184
+#: src/grepleo/ui/profile_dialog.py:177
 msgid "Madrid, Pozuelo"
 msgstr "Madrid, Pozuelo"
 
-#: src/grepleo/ui/profile_dialog.py:186
+#: src/grepleo/ui/profile_dialog.py:179
 msgid "Modalidades que acepto (ninguna marcada = cualquiera)"
 msgstr "Work modes I accept (none ticked = any)"
 
-#: src/grepleo/ui/profile_dialog.py:187
+#: src/grepleo/ui/profile_dialog.py:180
 msgid "Ubicaciones que me valen (separadas por comas)"
 msgstr "Locations that work for me (comma separated)"
 
-#: src/grepleo/ui/profile_dialog.py:188
+#: src/grepleo/ui/profile_dialog.py:181
 msgid "Prefiero que no aparezcan: uno por línea"
 msgstr "I would rather not see: one per line"
 
-#: src/grepleo/ui/profile_dialog.py:190
+#: src/grepleo/ui/profile_dialog.py:183
 msgid "Tipos de oferta y notas"
 msgstr "Offer types and notes"
 
-#: src/grepleo/ui/profile_dialog.py:193
+#: src/grepleo/ui/profile_dialog.py:186
 msgid "Tipos de oferta: «Nombre: palabra, palabra», uno por línea"
 msgstr "Offer types: “Name: word, word”, one per line"
 
-#: src/grepleo/ui/profile_dialog.py:195
+#: src/grepleo/ui/profile_dialog.py:188
 msgid "Notas sobre tu experiencia (para uso futuro)"
 msgstr "Notes about your experience (for future use)"
 
-#: src/grepleo/ui/profile_dialog.py:197
+#: src/grepleo/ui/profile_dialog.py:190
 msgid "Currículum"
 msgstr "Curriculum vitae"
 
-#: src/grepleo/ui/profile_dialog.py:198
+#: src/grepleo/ui/profile_dialog.py:191
 msgid ""
 "Con estos datos se construye tu currículum base y se adapta a cada oferta "
 "con tu propia IA. Todo se queda en tu equipo: solo sale si lanzas el "
@@ -1431,19 +1429,19 @@ msgstr ""
 "This data builds your base CV and tailors it to each offer with your own AI. "
 "It all stays on your computer: it only leaves if you launch the assistant."
 
-#: src/grepleo/ui/profile_dialog.py:207
+#: src/grepleo/ui/profile_dialog.py:200
 msgid "Nombre completo"
 msgstr "Full name"
 
-#: src/grepleo/ui/profile_dialog.py:208
+#: src/grepleo/ui/profile_dialog.py:201
 msgid "Correo"
 msgstr "Email"
 
-#: src/grepleo/ui/profile_dialog.py:209
+#: src/grepleo/ui/profile_dialog.py:202
 msgid "Teléfono"
 msgstr "Phone"
 
-#: src/grepleo/ui/profile_dialog.py:212
+#: src/grepleo/ui/profile_dialog.py:205
 msgid ""
 "Tus perfiles profesionales: basta el nombre de usuario o pegar la dirección, "
 "que se limpia sola."
@@ -1451,23 +1449,23 @@ msgstr ""
 "Your professional profiles: just the username or paste the address, which "
 "cleans itself up."
 
-#: src/grepleo/ui/profile_dialog.py:235
+#: src/grepleo/ui/profile_dialog.py:228
 msgid "Otros enlaces: uno por línea"
 msgstr "Other links: one per line"
 
-#: src/grepleo/ui/profile_dialog.py:239
+#: src/grepleo/ui/profile_dialog.py:232
 msgid "Experiencia profesional: puestos, empresas, fechas y logros"
 msgstr "Work experience: positions, companies, dates and achievements"
 
-#: src/grepleo/ui/profile_dialog.py:240
+#: src/grepleo/ui/profile_dialog.py:233
 msgid "Formación: centros, titulaciones y cursos"
 msgstr "Education: schools, degrees and courses"
 
-#: src/grepleo/ui/profile_dialog.py:244 src/grepleo/ui/profile_dialog.py:315
+#: src/grepleo/ui/profile_dialog.py:237 src/grepleo/ui/profile_dialog.py:308
 msgid "Elegir mi CV…"
 msgstr "Choose my CV…"
 
-#: src/grepleo/ui/profile_dialog.py:250
+#: src/grepleo/ui/profile_dialog.py:243
 msgid ""
 "Un CV que ya tengas (PDF, Word o texto): se le pasa a la IA junto al "
 "construido arriba"
@@ -1475,24 +1473,24 @@ msgstr ""
 "A CV you already have (PDF, Word or text): it is given to the AI along with "
 "the one built above"
 
-#: src/grepleo/ui/profile_dialog.py:297
+#: src/grepleo/ui/profile_dialog.py:290
 #, python-brace-format
 msgid "Esta dirección no es de {platform}."
 msgstr "This address is not from {platform}."
 
-#: src/grepleo/ui/profile_dialog.py:311
+#: src/grepleo/ui/profile_dialog.py:304
 msgid "Ninguno"
 msgstr "None"
 
-#: src/grepleo/ui/profile_dialog.py:317
+#: src/grepleo/ui/profile_dialog.py:310
 msgid "Documentos (PDF, Word, texto)"
 msgstr "Documents (PDF, Word, text)"
 
-#: src/grepleo/ui/profile_dialog.py:366
+#: src/grepleo/ui/profile_dialog.py:353
 msgid "El perfil necesita un nombre."
 msgstr "The profile needs a name."
 
-#: src/grepleo/ui/profile_dialog.py:371
+#: src/grepleo/ui/profile_dialog.py:358
 msgid "Ya existe un perfil con ese nombre."
 msgstr "A profile with that name already exists."
 
@@ -1552,7 +1550,10 @@ msgstr "your level from 0 to 10 on each axis"
 msgid ""
 "0 si no lo pide, 5 si solo lo menciona, 7 si lo valora y 10 si es requisito. "
 "Donde tu zona azul llega más lejos que la línea, lo cubres."
-msgstr "0 if it does not ask for it, 5 if it only mentions it, 7 if it values it and 10 if it is a requirement. Where your blue area reaches further than the line, you cover it."
+msgstr ""
+"0 if it does not ask for it, 5 if it only mentions it, 7 if it values it and "
+"10 if it is a requirement. Where your blue area reaches further than the "
+"line, you cover it."
 
 #: src/grepleo/ui/radar_legend.py:39
 msgid "la oferta no permite saberlo"
@@ -1602,7 +1603,9 @@ msgstr "Estimated ATS compatibility: {percent} %"
 msgid ""
 "Un ATS es el programa con el que muchas empresas filtran los CV antes de que "
 "los lea una persona. Es una estimación local: cada empresa configura el suyo."
-msgstr "An ATS is the program many companies use to filter CVs before a person reads them. This is a local estimate: each company configures its own."
+msgstr ""
+"An ATS is the program many companies use to filter CVs before a person reads "
+"them. This is a local estimate: each company configures its own."
 
 #: src/grepleo/ui/radar_legend.py:85
 #, python-brace-format
@@ -1614,7 +1617,9 @@ msgstr "reliability {level}"
 msgid ""
 "Palabras clave: tu CV cita {found} de las {total} que pide la oferta "
 "({percent} % ponderado por lo que las pide)."
-msgstr "Keywords: your CV cites {found} of the {total} the offer asks for ({percent} % weighted by how much it asks for them)."
+msgstr ""
+"Keywords: your CV cites {found} of the {total} the offer asks for ({percent} "
+"% weighted by how much it asks for them)."
 
 #: src/grepleo/ui/radar_legend.py:93
 msgid ""
@@ -1625,20 +1630,24 @@ msgstr "Keywords: they cannot be counted, because the offer is a summary card."
 #, python-format, python-brace-format
 msgid ""
 "Cargo: {percent} % de las palabras del título de la oferta aparecen en tu CV."
-msgstr "Position: {percent} % of the words in the offer's title appear in your CV."
+msgstr ""
+"Position: {percent} % of the words in the offer's title appear in your CV."
 
 #: src/grepleo/ui/radar_legend.py:97
 #, python-format, python-brace-format
 msgid ""
 "Estructura del CV: {percent} % de las secciones estándar con contenido (la "
 "experiencia pesa el doble)."
-msgstr "CV structure: {percent} % of the standard sections have content (experience counts double)."
+msgstr ""
+"CV structure: {percent} % of the standard sections have content (experience "
+"counts double)."
 
 #: src/grepleo/ui/radar_legend.py:100
 #, python-brace-format
 msgid ""
 "Requisitos eliminatorios que no cumples: {names}. Cada uno resta un 40 %."
-msgstr "Knock-out requirements you do not meet: {names}. Each one takes off 40 %."
+msgstr ""
+"Knock-out requirements you do not meet: {names}. Each one takes off 40 %."
 
 #: src/grepleo/ui/radar_legend.py:103
 msgid ""
@@ -1666,7 +1675,9 @@ msgstr "Keywords your CV does not cite"
 msgid ""
 "Añádelas solo si son ciertas en tu caso: en la experiencia o en las "
 "habilidades del perfil."
-msgstr "Add them only if they are true in your case: in the experience or in the profile's skills."
+msgstr ""
+"Add them only if they are true in your case: in the experience or in the "
+"profile's skills."
 
 #: src/grepleo/ui/radar_legend.py:117
 msgid "Se ha leído tu CV base y el CV que subiste."
@@ -1755,6 +1766,9 @@ msgstr "Nothing written down yet."
 #: src/grepleo/ui/tracking_panel.py:178
 msgid "Guardar cambio"
 msgstr "Save change"
+
+#~ msgid "Maximizar o restaurar la ventana"
+#~ msgstr "Maximize or restore the window"
 
 #~ msgid "Enlaces: uno por línea (LinkedIn, GitHub, web…)"
 #~ msgstr "Links: one per line (LinkedIn, GitHub, website…)"

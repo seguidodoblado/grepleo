@@ -65,7 +65,8 @@ def run_search(token: str, query: SearchQuery, runs: list[PlannedRun],
                 items = planned.source.fetch(partial)
             else:
                 items = runner(token, planned.source.actor, planned.source.build_input(partial), planned.cap_usd)
-            outcome.jobs = [job for item in items if (job := planned.source.parse_item(item)) is not None]
+            parsed = [job for item in items if (job := planned.source.parse_item(item)) is not None]
+            outcome.jobs = planned.source.refine(parsed, partial)
         except SourceError as error:
             outcome.error = str(error)
         results.append(outcome)

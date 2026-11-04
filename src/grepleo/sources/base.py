@@ -48,6 +48,10 @@ class Source:
     def parse_item(self, item: dict[str, Any]) -> Job | None:
         raise NotImplementedError
 
+    def refine(self, jobs: list[Job], query: SearchQuery) -> list[Job]:
+        """Un último filtro local sobre lo que devuelve la fuente, para lo que su Actor no sabe filtrar."""
+        return jobs
+
     def estimate_cost(self, limit: int) -> float:
         return self.start_cost + self.item_cost * limit
 
