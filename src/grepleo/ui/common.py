@@ -25,6 +25,15 @@ CSS = b"""
 .row-fit-medium { background: rgba(230, 126, 34, 0.32); }
 .row-fit-low { background: rgba(218, 54, 51, 0.30); }
 .row-fit-unknown { background: rgba(128, 128, 128, 0.18); }
+.radar-card { border-radius: 10px; padding: 10px 14px; background: rgba(128, 128, 128, 0.07);
+              border-left: 5px solid rgba(128, 128, 128, 0.5); }
+.radar-card-high { border-left-color: rgba(46, 160, 67, 0.95);
+                   background-image: linear-gradient(90deg, rgba(46, 160, 67, 0.16), rgba(46, 160, 67, 0.02)); }
+.radar-card-medium { border-left-color: rgba(230, 126, 34, 0.95);
+                     background-image: linear-gradient(90deg, rgba(230, 126, 34, 0.18), rgba(230, 126, 34, 0.02)); }
+.radar-card-low { border-left-color: rgba(218, 54, 51, 0.95);
+                  background-image: linear-gradient(90deg, rgba(218, 54, 51, 0.16), rgba(218, 54, 51, 0.02)); }
+.radar-badge { font-weight: bold; opacity: 0.85; }
 .radar-thumb { border-radius: 8px; padding: 4px 6px; }
 .radar-thumb-high { background: rgba(46, 160, 67, 0.22); }
 .radar-thumb-medium { background: rgba(230, 126, 34, 0.24); }

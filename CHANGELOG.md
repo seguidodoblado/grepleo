@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Añadido
+- Cada **radar** de la pestaña Radar va en su propia **tarjeta**, con un borde izquierdo verde, naranja, rojo o gris según el solape (el mismo color que su miniatura del minimapa), el título más grande y el solape como etiqueta (que pasa debajo del título en un panel estrecho); hay más separación entre tarjetas y la miniatura lleva al borde superior de la tarjeta
 - **Minimapa de radares** en la pestaña Radar, entre el solape global y los radares: una miniatura por radar (el general, primero y algo mayor) con su nombre y su solape, de color verde, naranja o rojo según cuánto cubres (los mismos umbrales del encaje) y atenuada en gris si la oferta no pide nada de ese tema; al pulsar una miniatura el panel se desplaza hasta su radar completo. No sale si solo hay un radar
 - El **texto completo de la oferta** se muestra formateado también cuando la fuente lo entrega aplastado en una sola línea (LinkedIn): separa las frases pegadas («…mission.What…»), los elementos de lista pegados («…pipelinesBuild…») y los títulos («Summary», «What you'll do:»), respetando nombres como JavaScript, DevOps o PostgreSQL; además un título corto sin punto abre sección aunque no vaya tras una línea en blanco y las líneas sueltas que empiezan por mayúscula son viñetas aunque no acaben en punto (antes se unían en un párrafo)
 - En Panorama, las conclusiones pasan a un **recuadro azul informativo al final**, con la primera línea resaltada

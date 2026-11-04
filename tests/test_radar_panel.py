@@ -42,7 +42,7 @@ def test_the_minimap_has_one_thumbnail_per_radar_coloured_by_overlap_and_scrolls
               RadarData("Sin demanda", ["x", "y", "z"], [5, 5, 5], [0, None, 0])]
     panel.set_data(radars, Fit.HIGH)
     assert panel.minimap is not None and len(panel.minimap.thumbs) == 3
-    assert len(panel.heads) == 3
+    assert len(panel.cards) == 3 and panel.cards[1].has_css_class("radar-card-high")
     first, second = panel.minimap.thumbs[0], panel.minimap.thumbs[1]
     assert first.get_first_child().get_size_request()[0] > second.get_first_child().get_size_request()[0]   # el general, mayor
     assert second.has_css_class("radar-thumb-high") and panel.minimap.thumbs[2].has_css_class("radar-thumb-none")
