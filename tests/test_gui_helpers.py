@@ -259,6 +259,8 @@ def test_the_panorama_fills_in_the_gaps_section_in_the_background():
         GLib.usleep(10000)
     assert "Qué te falta más veces" in shown and "Tus puntos fuertes" in shown and "Jenkins" in shown
     assert "Docker" in shown and "Calculando" not in shown
+    assert shown.index("Tus puntos fuertes") < shown.index("Lo que se ve en esta muestra")   # el recuadro azul, al final
+    assert "<big><b>Lo más pedido" in shown                                                  # la primera línea, resaltada
 
 
 def _all_labels(widget) -> str:

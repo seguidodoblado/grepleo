@@ -52,3 +52,29 @@ def test_highlight_positions_survive_accents_and_do_not_overlap():
     assert [(text[a:b]) for a, b, _kind in spans] == ["Gestión de datos", "gestion"]
     assert highlight_spans("nada de esto", ["Scrum"], []) == []
     assert highlight_spans("Java y JavaScript", ["Java"], []) == [(0, 4, GOOD)]     # no dentro de otra palabra
+
+
+def test_a_flattened_text_is_split_into_paragraphs_headings_and_bullets():
+    flat = ("We are a global company that builds things for clients everywhere in the world and keeps growing.Join us "
+            "to grow with a caring team that values learning every day of the year in many countries around the globe "
+            "and beyond.What you'll do: Design and maintain pipelinesBuild and deploy cloud-native appsDevelop "
+            "infrastructure as code with TerraformCreate automation scripts in PythonMonitor systems and respond "
+            "to incidents in productionSummaryWe use JavaScript, DevOps practices and PostgreSQL every single day "
+            "of the week, and we love it so very much.")
+    result = kinds(structure_description(flat))
+    assert result[0][0] == PARAGRAPH and result[1][0] == PARAGRAPH        # «world…growing.Join us»: dos párrafos
+    assert (HEADING, "What you'll do") in result
+    bullets = [text for kind, text in result if kind == BULLET]
+    assert "Build and deploy cloud-native apps" in bullets and "Create automation scripts in Python" in bullets
+    assert any(text.startswith("Design and maintain pipelines") for text in bullets)
+    assert any("JavaScript, DevOps practices and PostgreSQL" in text for _kind, text in result)   # no se parte
+    assert (HEADING, "Summary") in result
+
+
+def test_short_lines_without_a_final_stop_are_list_items_and_titles_open_a_section():
+    text = "Intro de la empresa en una frase larga que acaba bien.\nFunciones principales\nAdministrar servidores Linux en producción todos los días\nAutomatizar despliegues con Ansible y Terraform\nGestionar copias de seguridad y su restauración"
+    assert kinds(structure_description(text)) == [
+        (PARAGRAPH, "Intro de la empresa en una frase larga que acaba bien."), (HEADING, "Funciones principales"),
+        (BULLET, "Administrar servidores Linux en producción todos los días"),
+        (BULLET, "Automatizar despliegues con Ansible y Terraform"),
+        (BULLET, "Gestionar copias de seguridad y su restauración")]

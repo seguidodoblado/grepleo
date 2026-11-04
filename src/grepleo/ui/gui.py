@@ -987,11 +987,20 @@ class MainWindow(Gtk.ApplicationWindow):
             grid.attach(Gtk.Label(label=str(item.count), xalign=1), 2, row, 1, 1)
         self.panorama_box.append(grid)
         self._build_gaps(active, profile)
-        heading = Gtk.Label(xalign=0, use_markup=True)
-        heading.set_markup("<b>{}</b>".format(GLib.markup_escape_text(_("Lo que se ve en esta muestra"))))
-        self.panorama_box.append(heading)
-        for text in panorama.insights:
-            self.panorama_box.append(Gtk.Label(label="• " + text, xalign=0, wrap=True, selectable=True))
+        if panorama.insights:
+            self._append_info_card(panorama.insights)
+
+    def _append_info_card(self, insights: list[str]) -> None:
+        """El recuadro azul de abajo del todo con lo que se ve en la muestra; la primera conclusión va resaltada."""
+        rows = self._skill_card("info", pick_icon("dialog-information", "help-about"),
+                                _("Lo que se ve en esta muestra"), "")
+        while (child := rows.get_first_child()) is not None:
+            rows.remove(child)
+        for number, text in enumerate(insights):
+            line = Gtk.Label(xalign=0, wrap=True, selectable=True, use_markup=True)
+            escaped = GLib.markup_escape_text(text)
+            line.set_markup(f"<big><b>{escaped}</b></big>" if number == 0 else f"• {escaped}")
+            rows.append(line)
 
     def _build_gaps(self, active: list[Job], profile: Profile) -> None:
         """Los cuadros «Qué te falta más veces» y «Tus puntos fuertes»: se calculan en segundo plano porque recorren
@@ -1028,9 +1037,10 @@ class MainWindow(Gtk.ApplicationWindow):
         label.set_markup(f"<big><b>{GLib.markup_escape_text(title)}</b></big>")
         head.append(label)
         card.append(head)
-        explanation = Gtk.Label(label=hint, xalign=0, wrap=True)
-        explanation.add_css_class("dim-label")
-        card.append(explanation)
+        if hint:
+            explanation = Gtk.Label(label=hint, xalign=0, wrap=True)
+            explanation.add_css_class("dim-label")
+            card.append(explanation)
         rows = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4, margin_top=4)
         rows.append(Gtk.Label(label=_("Calculando…"), xalign=0))
         card.append(rows)

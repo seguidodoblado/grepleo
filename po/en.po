@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: grepleo 0.1.0\n"
 "Report-Msgid-Bugs-To: jose.antonio.seguido@gmail.com\n"
-"POT-Creation-Date: 2026-11-05 00:26+0100\n"
+"POT-Creation-Date: 2026-11-05 00:35+0100\n"
 "PO-Revision-Date: 2026-11-03 17:00+0100\n"
 "Last-Translator: José Antonio Seguido Doblado <jose.antonio.seguido@gmail."
 "com>\n"
@@ -250,12 +250,12 @@ msgid "Nueva"
 msgstr "New"
 
 #: src/grepleo/models.py:60 src/grepleo/ui/gui.py:549
-#: src/grepleo/ui/gui.py:1098
+#: src/grepleo/ui/gui.py:1108
 msgid "Favorita"
 msgstr "Favourite"
 
 #: src/grepleo/models.py:61 src/grepleo/ui/gui.py:549
-#: src/grepleo/ui/gui.py:1098
+#: src/grepleo/ui/gui.py:1108
 msgid "Postulada"
 msgstr "Applied"
 
@@ -668,11 +668,11 @@ msgstr "Could not save the CV: {error}"
 msgid "CV guardado en {path}."
 msgstr "CV saved to {path}."
 
-#: src/grepleo/ui/common.py:115 src/grepleo/ui/common.py:143
+#: src/grepleo/ui/common.py:117 src/grepleo/ui/common.py:145
 msgid "Aceptar"
 msgstr "OK"
 
-#: src/grepleo/ui/common.py:120 src/grepleo/ui/common.py:142
+#: src/grepleo/ui/common.py:122 src/grepleo/ui/common.py:144
 #: src/grepleo/ui/profile_dialog.py:258 src/grepleo/ui/tracking_panel.py:79
 msgid "Cancelar"
 msgstr "Cancel"
@@ -1018,7 +1018,7 @@ msgstr ""
 "Opens a terminal with your own AI (Claude Code, OpenCode, Codex…) to tailor "
 "your CV to this offer"
 
-#: src/grepleo/ui/gui.py:550 src/grepleo/ui/gui.py:1099
+#: src/grepleo/ui/gui.py:550 src/grepleo/ui/gui.py:1109
 msgid "Descartar"
 msgstr "Discard"
 
@@ -1171,15 +1171,15 @@ msgid_plural "Qué piden: {detailed} ofertas con detalle de {total}"
 msgstr[0] "What they ask for: {detailed} offer with details out of {total}"
 msgstr[1] "What they ask for: {detailed} offers with details out of {total}"
 
-#: src/grepleo/ui/gui.py:991
+#: src/grepleo/ui/gui.py:996
 msgid "Lo que se ve en esta muestra"
 msgstr "What this sample shows"
 
-#: src/grepleo/ui/gui.py:1001
+#: src/grepleo/ui/gui.py:1010
 msgid "Qué te falta más veces"
 msgstr "What you lack most often"
 
-#: src/grepleo/ui/gui.py:1002
+#: src/grepleo/ui/gui.py:1011
 msgid ""
 "Lo que piden tus ofertas y no cubres: lo que no está en tu perfil y los "
 "elementos de tus radares con nivel bajo. Formarte en esto es lo que más "
@@ -1189,11 +1189,11 @@ msgstr ""
 "and the radar items with a low level. Training in these is what would raise "
 "your fit the most."
 
-#: src/grepleo/ui/gui.py:1006
+#: src/grepleo/ui/gui.py:1015
 msgid "Tus puntos fuertes"
 msgstr "Your strengths"
 
-#: src/grepleo/ui/gui.py:1007
+#: src/grepleo/ui/gui.py:1016
 msgid ""
 "Lo que ya tienes y más piden tus ofertas: destácalo en tu CV y en las "
 "entrevistas."
@@ -1201,78 +1201,79 @@ msgstr ""
 "What you already have and your offers ask for most: highlight it in your CV "
 "and in interviews."
 
-#: src/grepleo/ui/gui.py:1035
+#: src/grepleo/ui/gui.py:1045
 msgid "Calculando…"
 msgstr "Calculating…"
 
-#: src/grepleo/ui/gui.py:1045
+#: src/grepleo/ui/gui.py:1055
 msgid ""
 "No hay huecos que destacar con las ofertas que tienen descripción completa."
 msgstr "No gaps to highlight in the offers with a full description."
 
-#: src/grepleo/ui/gui.py:1048
+#: src/grepleo/ui/gui.py:1058
 msgid ""
 "Ninguna oferta con descripción completa cita lo que tienes en el perfil."
-msgstr "No offer with a full description mentions what you have in your profile."
+msgstr ""
+"No offer with a full description mentions what you have in your profile."
 
-#: src/grepleo/ui/gui.py:1081
+#: src/grepleo/ui/gui.py:1091
 msgid "Elige una oferta para ver qué criterios cumple."
 msgstr "Choose an offer to see which criteria it meets."
 
-#: src/grepleo/ui/gui.py:1099
+#: src/grepleo/ui/gui.py:1109
 msgid "Quitar marca"
 msgstr "Remove mark"
 
-#: src/grepleo/ui/gui.py:1150
+#: src/grepleo/ui/gui.py:1160
 #, python-brace-format
 msgid "Tienes {count} recordatorio para hoy o vencido: {titles}."
 msgid_plural "Tienes {count} recordatorios para hoy o vencidos: {titles}."
 msgstr[0] "You have {count} reminder due today or overdue: {titles}."
 msgstr[1] "You have {count} reminders due today or overdue: {titles}."
 
-#: src/grepleo/ui/gui.py:1160
+#: src/grepleo/ui/gui.py:1170
 msgid "Crea un perfil con tus datos para poder adaptar tu currículum."
 msgstr "Create a profile with your details to be able to tailor your CV."
 
-#: src/grepleo/ui/gui.py:1163
+#: src/grepleo/ui/gui.py:1173
 msgid "Falta el terminal embebido: instala el paquete gir1.2-vte-3.91."
 msgstr "The embedded terminal is missing: install the gir1.2-vte-3.91 package."
 
-#: src/grepleo/ui/gui.py:1170
+#: src/grepleo/ui/gui.py:1180
 msgid "No se pudo preparar el asistente."
 msgstr "Could not prepare the assistant."
 
-#: src/grepleo/ui/gui.py:1179
+#: src/grepleo/ui/gui.py:1189
 msgid "Esta oferta no tiene un enlace utilizable."
 msgstr "This offer has no usable link."
 
-#: src/grepleo/ui/gui.py:1190
+#: src/grepleo/ui/gui.py:1200
 msgid "No hay ofertas que exportar."
 msgstr "There are no offers to export."
 
-#: src/grepleo/ui/gui.py:1190
+#: src/grepleo/ui/gui.py:1200
 msgid "Lanza una búsqueda o cambia los filtros."
 msgstr "Run a search or change the filters."
 
-#: src/grepleo/ui/gui.py:1192
+#: src/grepleo/ui/gui.py:1202
 msgid "Exportar ofertas"
 msgstr "Export offers"
 
-#: src/grepleo/ui/gui.py:1208
+#: src/grepleo/ui/gui.py:1218
 #, python-brace-format
 msgid "Radar de ofertas: {query}"
 msgstr "Job radar: {query}"
 
-#: src/grepleo/ui/gui.py:1211
+#: src/grepleo/ui/gui.py:1221
 msgid "No se pudo guardar el archivo."
 msgstr "The file could not be saved."
 
-#: src/grepleo/ui/gui.py:1213
+#: src/grepleo/ui/gui.py:1223
 #, python-brace-format
 msgid "Exportado: {path}"
 msgstr "Exported: {path}"
 
-#: src/grepleo/ui/gui.py:1226
+#: src/grepleo/ui/gui.py:1236
 msgid ""
 "Busca empleo en InfoJobs, Indeed, LinkedIn, Tecnoempleo y Michael Page, y "
 "comprueba qué criterios cumples en cada oferta."
@@ -1280,20 +1281,20 @@ msgstr ""
 "Search for jobs on InfoJobs, Indeed, LinkedIn, Tecnoempleo and Michael Page, "
 "and check which criteria you meet in each offer."
 
-#: src/grepleo/ui/gui.py:1229
+#: src/grepleo/ui/gui.py:1239
 msgid "translator-credits"
 msgstr "José Antonio Seguido Doblado <jose.antonio.seguido@gmail.com>"
 
-#: src/grepleo/ui/gui.py:1237
+#: src/grepleo/ui/gui.py:1247
 msgid "Servicios de terceros"
 msgstr "Third-party services"
 
-#: src/grepleo/ui/gui.py:1239
+#: src/grepleo/ui/gui.py:1249
 msgid ""
 "Actors de la comunidad de Apify para InfoJobs, Indeed, LinkedIn y Tecnoempleo"
 msgstr "Community Apify Actors for InfoJobs, Indeed, LinkedIn and Tecnoempleo"
 
-#: src/grepleo/ui/gui.py:1241
+#: src/grepleo/ui/gui.py:1251
 msgid "Michael Page se lee directamente de su web pública, sin Apify"
 msgstr "Michael Page is read directly from its public website, without Apify"
 
