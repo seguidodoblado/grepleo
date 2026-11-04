@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Añadido
+- La columna **Encaje** muestra la puntuación ponderada («Medio · 62 %»), que es la que ordena la tabla, en lugar del recuento «11/23», que ahora queda en el tooltip junto con la explicación (cada criterio pesa distinto)
 - Búsqueda de empleo en **InfoJobs, Indeed, LinkedIn y Tecnoempleo** a través de Actors de Apify y en **Michael Page** leída directamente de su web (sin Apify ni coste, con pausas y un máximo de ofertas por búsqueda; su salario se muestra como «desde X €» porque el portal solo publica la banda mínima), con las ofertas repetidas entre fuentes unificadas
 - **Perfiles** (varios) con habilidades técnicas y blandas (imprescindibles y deseables, con sinónimos), experiencia, estudios, idiomas con nivel, salario mínimo, modalidad, ubicaciones, cosas que se prefiere no encontrar y tipos de oferta
 - **Evaluación de criterios** con reglas locales: cada oferta muestra qué criterios cumple (✓), cuáles no (✗) y cuáles no se pueden saber (?), con un encaje Alto, Medio o Bajo; las fichas resumidas no cuentan en contra

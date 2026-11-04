@@ -217,3 +217,14 @@ def test_the_ats_column_is_filled_in_the_background_and_can_be_filtered_and_sort
     key_before = window._ats_profile_key
     window._queue_ats(items, Profile(name="Otro", years=0))
     assert window._ats_profile_key != key_before
+
+
+def test_fit_column_shows_the_weighted_score_that_sorts_and_the_count_in_the_tooltip():
+    from grepleo.ui.gui import fit_text, fit_tooltip
+
+    class Item:
+        evaluation = Evaluation(Fit.MEDIUM, 0.624, [CriterionResult("a", Status.MET, "", 1.0),
+                                                   CriterionResult("b", Status.MISSING, "", 1.0)])
+    assert fit_text(Item).endswith("62 %") and "1/2" in fit_tooltip(Item)
+    Item.evaluation = Evaluation(Fit.UNKNOWN, None)
+    assert "%" not in fit_text(Item)

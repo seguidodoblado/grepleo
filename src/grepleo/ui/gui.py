@@ -137,6 +137,18 @@ def ats_tooltip(item: "JobItem") -> str:
     return f"{item.ats.verdict}\n" + _("fiabilidad {level}").format(level=item.ats.reliability_label)
 
 
+def fit_text(item: "JobItem") -> str:
+    """El encaje y su puntuación ponderada (la que ordena la columna)."""
+    score = item.evaluation.score
+    return f"{item.evaluation.fit.label}\n{round(score * 100)} %" if score is not None else item.evaluation.fit.label
+
+
+def fit_tooltip(item: "JobItem") -> str:
+    """Qué significa el porcentaje y cuántos criterios se cumplen."""
+    return _("Puntuación ponderada: cada criterio pesa distinto.\nCumples {count} criterios (los «no se sabe» no cuentan).").format(
+        count=item.evaluation.summary)
+
+
 def state_icon_of(item: JobItem) -> str:
     """El icono del estado de una oferta ('' si es nueva)."""
     names = STATE_ICONS.get(item.job.state)
@@ -386,7 +398,7 @@ class MainWindow(Gtk.ApplicationWindow):
             (_("Empresa · Puesto"), lambda item: f"{item.job.company or '—'}\n{item.job.title}", 240, "company"),
             (_("Ubicación"), lambda item: f"{item.job.location or '—'}\n{item.job.work_mode.label}", 120, "location"),
             (_("Salario"), lambda item: salary_text(item.job), 110, "salary"),
-            (_("Encaje"), lambda item: f"{item.evaluation.fit.label}\n{item.evaluation.summary}", 80, "fit"),
+            (_("Encaje"), fit_text, 80, "fit"),
             (_("ATS"), ats_text, 64, "ats"),   # se rellena en segundo plano; el icono de la estimación va en el tooltip
             (_("Estado"), lambda item: state_text(item.job), 130, "state"),
             (_("Notas"), lambda item: "", 64, "notes"),   # solo el icono; el texto sale al pasar el ratón
@@ -442,7 +454,8 @@ class MainWindow(Gtk.ApplicationWindow):
                     lb.set_text(ats_text(i)), box.set_tooltip_text(ats_tooltip(i))))
             tooltip = {"source": lambda: source_names().get(item.job.source, ""),
                        "notes": lambda: notes_tooltip(item.job),
-                       "ats": lambda: ats_tooltip(item)}.get(sort_key)
+                       "ats": lambda: ats_tooltip(item),
+                       "fit": lambda: fit_tooltip(item)}.get(sort_key)
             box.set_tooltip_text(tooltip() or None if tooltip else None)
             icon = icon_getter(item) if icon_getter else ""
             image.set_visible(bool(icon))
