@@ -8,7 +8,7 @@ import gi
 
 gi.require_version("Gdk", "4.0")
 gi.require_version("Gtk", "4.0")
-from gi.repository import Gdk, Gio, GLib, GObject, Gtk
+from gi.repository import Gdk, Gio, GLib, GObject, Gtk, Pango
 
 from .. import __version__, settings
 from .. import secrets as token_store
@@ -298,7 +298,8 @@ class MainWindow(Gtk.ApplicationWindow):
             check.connect("toggled", lambda *_args: self._update_estimate())
             self.source_checks[source_id] = check
             action_row.append(check)
-        self.estimate = Gtk.Label(xalign=0, hexpand=True)
+        # con puntos suspensivos si no cabe: un texto largo no debe ensanchar el mínimo de la ventana
+        self.estimate = Gtk.Label(xalign=0, hexpand=True, ellipsize=Pango.EllipsizeMode.END)
         self.estimate.add_css_class("dim-label")
         action_row.append(self.estimate)
         self.spinner = Gtk.Spinner()
@@ -446,7 +447,8 @@ class MainWindow(Gtk.ApplicationWindow):
         """El panel lateral: los botones siempre a la vista arriba y, debajo, los criterios y la descripción."""
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10, margin_start=10, margin_end=4)
         box.set_size_request(380, -1)
-        buttons = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, max_children_per_line=4,
+        # al menos dos botones por línea: con uno solo, a ancho mínimo se apilarían los cinco y el panel exigiría mucha altura
+        buttons = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, min_children_per_line=2, max_children_per_line=4,
                               column_spacing=6, row_spacing=6, homogeneous=False)
         self.open_button = icon_button(("web-browser", "applications-internet"), _("Abrir oferta"))
         self.open_button.connect("clicked", self._open_job)
@@ -472,7 +474,10 @@ class MainWindow(Gtk.ApplicationWindow):
         self.notes_panel = NotesPanel(self._notes_changed)
         # pestañas: la oferta, el radar, el seguimiento del proceso y las notas
         self.detail_tabs = Gtk.Notebook(vexpand=True, scrollable=True)
-        self._tab_pages = {"offer": detail_scroll, "radar": self.radar, "tracking": self.tracking_panel,
+        # cada pestaña con su propio scroll: así el panel puede encogerse y no fija la altura mínima de la ventana
+        tracking_scroll = Gtk.ScrolledWindow(vexpand=True, hscrollbar_policy=Gtk.PolicyType.NEVER)
+        tracking_scroll.set_child(self.tracking_panel)
+        self._tab_pages = {"offer": detail_scroll, "radar": self.radar, "tracking": tracking_scroll,
                            "notes": self.notes_panel}
         for key in self._tab_pages:
             self.detail_tabs.append_page(self._tab_pages[key], Gtk.Label(label=self._tab_title(key)))
@@ -633,6 +638,7 @@ class MainWindow(Gtk.ApplicationWindow):
         runs = plan_search(self._collect_query(), self._selected_sources(), settings.budget_usd())
         if not runs:
             self.estimate.set_text(_("Elige al menos una fuente."))
+            self.estimate.set_tooltip_text(None)
             return
         total = sum(run.estimate_usd for run in runs)
         if all(run.source.local for run in runs):
@@ -644,6 +650,7 @@ class MainWindow(Gtk.ApplicationWindow):
         if previous is not None:   # el máximo no cambia, pero se pagará solo por lo que sea nuevo
             text += " · " + _("solo novedades desde el {date}").format(date=previous.ran_at[:10])
         self.estimate.set_text(text)
+        self.estimate.set_tooltip_text(text)   # el texto entero, por si se ha acortado
 
     def _incremental_base(self, query: SearchQuery, sources: list[str]) -> tuple[SavedSearch | None, str]:
         """La búsqueda anterior y la ventana de fechas, si esta puede pedir solo novedades; si no, (None, "")."""

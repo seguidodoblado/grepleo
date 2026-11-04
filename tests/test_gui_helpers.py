@@ -131,3 +131,37 @@ def test_block_parent_disables_the_parent_while_the_window_is_shown_and_restores
         pump()
         assert parent.get_sensitive()
     block_parent(Gtk.Window(), None)                        # sin ventana madre no hace nada
+
+
+def test_the_main_window_keeps_a_small_minimum_size_so_it_can_be_maximized_on_a_1080p_screen():
+    """Con una tipografía grande, el mínimo de la ventana superó el alto útil de una pantalla de 1080 px y el gestor de
+    ventanas ya no la dejaba maximizar (al desmarcar «Solo novedades» el ancho mínimo bajaba y la altura mínima sin ancho
+    fijado subía): el panel lateral debe poder encogerse y el texto del coste, acortarse con puntos suspensivos."""
+    from pathlib import Path
+
+    from gi.repository import Gtk, Pango
+
+    from grepleo.profiles import Profile
+    from grepleo.sources.base import SearchQuery
+    from grepleo.storage import Store
+    if not Gtk.init_check():
+        pytest.skip("sin pantalla para crear widgets")
+    settings = Gtk.Settings.get_default()
+    previous = settings.get_property("gtk-font-name")
+    settings.set_property("gtk-font-name", "Sans 17")       # más grande que la de un escritorio normal
+    try:
+        store = Store(Path(":memory:"))
+        profile_id = store.save_profile(Profile(name="P", must=["AWS"]))
+        search = store.save_search(gui.LAST_SEARCH, profile_id, SearchQuery("devops"), ["indeed"])
+        store.store_results(search, [Job(key="x:1", source="indeed", title="Oferta", description="AWS " * 40,
+                                         full_description=True)])
+        window = gui.MainWindow(Gtk.Application(application_id="io.github.seguidodoblado.GrepleoMinSize"), store)
+        assert window.estimate.get_ellipsize() is Pango.EllipsizeMode.END
+        for incremental in (True, False):
+            window.incremental.set_active(incremental)
+            minimum_width = window.measure(Gtk.Orientation.HORIZONTAL, -1)[0]
+            minimum_height = window.measure(Gtk.Orientation.VERTICAL, -1)[0]
+            assert minimum_width <= 1700, f"ancho mínimo {minimum_width} con incremental={incremental}"
+            assert minimum_height <= 1000, f"alto mínimo {minimum_height} con incremental={incremental}"
+    finally:
+        settings.set_property("gtk-font-name", previous)
