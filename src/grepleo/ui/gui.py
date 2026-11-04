@@ -16,7 +16,7 @@ from .. import __version__, settings
 from .. import secrets as token_store
 from ..assistant import build_argv, build_prompt, prepare_workspace
 from ..ats import LIKELY, POSSIBLE, AtsEstimate, estimate_ats
-from ..gaps import Gap, find_gaps
+from ..gaps import Gap, Strength, find_gaps, find_strengths
 from ..i18n import _, ngettext
 from ..incremental import incremental_posted, prune_stale, same_search
 from ..matching import evaluate
@@ -150,19 +150,26 @@ def fit_tooltip(item: "JobItem") -> str:
         count=item.evaluation.summary)
 
 
+def _demand_text(offers: int, required: int, relevant: int) -> str:
+    detail = ngettext("la pide {count} oferta", "la piden {count} ofertas", offers).format(count=offers)
+    extra = []
+    if required:
+        extra.append(_("{count} como requisito").format(count=required))
+    if relevant:
+        extra.append(_("{count} de encaje alto o medio").format(count=relevant))
+    return detail + (f" ({', '.join(extra)})" if extra else "")
+
+
 def gap_text(gap: Gap) -> str:
     """Una línea por hueco: qué te falta y cuántas ofertas lo piden."""
-    if gap.missing:
-        head = _("No está en tu perfil")
-    else:
-        head = _("Tu nivel: {level} de 10").format(level=gap.level)
-    detail = ngettext("la pide {count} oferta", "la piden {count} ofertas", gap.offers).format(count=gap.offers)
-    extra = []
-    if gap.required:
-        extra.append(_("{count} como requisito").format(count=gap.required))
-    if gap.relevant:
-        extra.append(_("{count} de encaje alto o medio").format(count=gap.relevant))
-    return f"{head} · {detail}" + (f" ({', '.join(extra)})" if extra else "")
+    head = _("No está en tu perfil") if gap.missing else _("Tu nivel: {level} de 10").format(level=gap.level)
+    return f"{head} · {_demand_text(gap.offers, gap.required, gap.relevant)}"
+
+
+def strength_text(strength: Strength) -> str:
+    """Una línea por punto fuerte: lo que ya tienes y cuántas ofertas lo piden."""
+    head = _("Tu nivel: {level} de 10").format(level=strength.level) if strength.level is not None else _("En tu perfil")
+    return f"{head} · {_demand_text(strength.offers, strength.required, strength.relevant)}"
 
 
 def state_icon_of(item: JobItem) -> str:
@@ -987,42 +994,78 @@ class MainWindow(Gtk.ApplicationWindow):
             self.panorama_box.append(Gtk.Label(label="• " + text, xalign=0, wrap=True, selectable=True))
 
     def _build_gaps(self, active: list[Job], profile: Profile) -> None:
-        """La sección «Qué te falta más veces»: se calcula en segundo plano porque recorre todas las ofertas."""
+        """Los cuadros «Qué te falta más veces» y «Tus puntos fuertes»: se calculan en segundo plano porque recorren
+        todas las ofertas."""
         if not profile.name:
             return
-        title = Gtk.Label(xalign=0, use_markup=True, margin_top=6)
-        title.set_markup("<b>{}</b>".format(GLib.markup_escape_text(_("Qué te falta más veces"))))
-        self.panorama_box.append(title)
-        hint = Gtk.Label(label=_("Lo que piden tus ofertas y no cubres: lo que no está en tu perfil y los elementos "
-                                 "de tus radares con nivel bajo. Primero lo más repetido en las de encaje alto o medio."),
-                         xalign=0, wrap=True)
-        hint.add_css_class("dim-label")
-        self.panorama_box.append(hint)
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
-        box.append(Gtk.Label(label=_("Calculando…"), xalign=0))
-        self.panorama_box.append(box)
+        gaps_box = self._skill_card("gap", pick_icon("dialog-warning", "emblem-important"), _("Qué te falta más veces"),
+                                    _("Lo que piden tus ofertas y no cubres: lo que no está en tu perfil y los "
+                                      "elementos de tus radares con nivel bajo. Formarte en esto es lo que más "
+                                      "subiría tu encaje."))
+        strengths_box = self._skill_card("strength", pick_icon("emblem-ok", "starred", "emblem-default"),
+                                         _("Tus puntos fuertes"),
+                                         _("Lo que ya tienes y más piden tus ofertas: destácalo en tu CV y en las "
+                                           "entrevistas."))
         self._gaps_token = getattr(self, "_gaps_token", 0) + 1
         token, evaluations = self._gaps_token, dict(self.evaluations)
 
         def work() -> None:
             gaps = find_gaps(active, evaluations, profile)
-            GLib.idle_add(self._show_gaps, token, box, gaps)
+            strengths = find_strengths(active, evaluations, profile)
+            GLib.idle_add(self._show_skills, token, gaps_box, strengths_box, gaps, strengths)
 
         Thread(target=work, daemon=True).start()
 
-    def _show_gaps(self, token: int, box: Gtk.Box, gaps: list[Gap]) -> bool:
+    def _skill_card(self, kind: str, icon: str, title: str, hint: str) -> Gtk.Box:
+        """Un cuadro de color con título y explicación; devuelve la caja donde irán las filas."""
+        card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6, margin_top=6)
+        card.add_css_class("skill-card")
+        card.add_css_class(f"skill-card-{kind}")
+        head = Gtk.Box(spacing=8)
+        if icon:
+            head.append(Gtk.Image(icon_name=icon, pixel_size=22))
+        label = Gtk.Label(xalign=0, use_markup=True)
+        label.set_markup(f"<big><b>{GLib.markup_escape_text(title)}</b></big>")
+        head.append(label)
+        card.append(head)
+        explanation = Gtk.Label(label=hint, xalign=0, wrap=True)
+        explanation.add_css_class("dim-label")
+        card.append(explanation)
+        rows = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4, margin_top=4)
+        rows.append(Gtk.Label(label=_("Calculando…"), xalign=0))
+        card.append(rows)
+        self.panorama_box.append(card)
+        return rows
+
+    def _show_skills(self, token: int, gaps_box: Gtk.Box, strengths_box: Gtk.Box, gaps: list[Gap],
+                     strengths: list[Strength]) -> bool:
         if token != self._gaps_token:
             return False   # el panorama se ha vuelto a dibujar mientras tanto
+        self._fill_skill_rows(gaps_box, [(gap.name, gap.relevant or gap.offers, gap_text(gap)) for gap in gaps],
+                              _("No hay huecos que destacar con las ofertas que tienen descripción completa."))
+        self._fill_skill_rows(strengths_box, [(item.name, item.relevant or item.offers, strength_text(item))
+                                              for item in strengths],
+                              _("Ninguna oferta con descripción completa cita lo que tienes en el perfil."))
+        return False
+
+    @staticmethod
+    def _fill_skill_rows(box: Gtk.Box, rows: list[tuple[str, int, str]], empty: str) -> None:
         while (child := box.get_first_child()) is not None:
             box.remove(child)
-        if not gaps:
-            box.append(Gtk.Label(label=_("No hay huecos que destacar con las ofertas que tienen descripción completa."),
-                                 xalign=0, wrap=True))
-        for gap in gaps:
-            row = Gtk.Label(xalign=0, wrap=True, use_markup=True)
-            row.set_markup(f"• <b>{GLib.markup_escape_text(gap.name)}</b> — {GLib.markup_escape_text(gap_text(gap))}")
-            box.append(row)
-        return False
+        if not rows:
+            box.append(Gtk.Label(label=empty, xalign=0, wrap=True))
+            return
+        grid = Gtk.Grid(column_spacing=12, row_spacing=6)
+        maximum = max(weight for _name, weight, _text in rows) or 1
+        for number, (name, weight, text) in enumerate(rows):
+            title = Gtk.Label(xalign=0)
+            title.set_markup(f"<b>{GLib.markup_escape_text(name)}</b>")
+            grid.attach(title, 0, number, 1, 1)
+            bar = Gtk.ProgressBar(fraction=weight / maximum, valign=Gtk.Align.CENTER)
+            bar.set_size_request(120, -1)
+            grid.attach(bar, 1, number, 1, 1)
+            grid.attach(Gtk.Label(label=text, xalign=0, wrap=True, hexpand=True), 2, number, 1, 1)
+        box.append(grid)
 
     # --- detalle y estados -------------------------------------------------------------------------
     def _selected_item(self) -> JobItem | None:

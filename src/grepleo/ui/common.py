@@ -25,6 +25,13 @@ CSS = b"""
 .row-fit-medium { background: rgba(230, 126, 34, 0.32); }
 .row-fit-low { background: rgba(218, 54, 51, 0.30); }
 .row-fit-unknown { background: rgba(128, 128, 128, 0.18); }
+.skill-card { border-radius: 10px; padding: 12px 16px; }
+.skill-card-gap { background-image: linear-gradient(135deg, rgba(218, 54, 51, 0.42), rgba(218, 54, 51, 0.08));
+                  border-left: 5px solid rgba(218, 54, 51, 0.95); }
+.skill-card-strength { background-image: linear-gradient(135deg, rgba(46, 160, 67, 0.40), rgba(46, 160, 67, 0.08));
+                       border-left: 5px solid rgba(46, 160, 67, 0.95); }
+.skill-card-gap progressbar progress { background: rgba(218, 54, 51, 0.95); }
+.skill-card-strength progressbar progress { background: rgba(46, 160, 67, 0.95); }
 """
 
 

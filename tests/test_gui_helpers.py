@@ -254,10 +254,11 @@ def test_the_panorama_fills_in_the_gaps_section_in_the_background():
         while context.iteration(False):
             pass
         shown = _all_labels(window.panorama_box)
-        if "Jenkins" in shown:
+        if "Jenkins" in shown and "Docker" in shown and "Calculando" not in shown:
             break
         GLib.usleep(10000)
-    assert "Qué te falta más veces" in shown and "Jenkins" in shown and "Calculando" not in shown
+    assert "Qué te falta más veces" in shown and "Tus puntos fuertes" in shown and "Jenkins" in shown
+    assert "Docker" in shown and "Calculando" not in shown
 
 
 def _all_labels(widget) -> str:

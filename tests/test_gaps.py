@@ -52,3 +52,25 @@ def test_gap_text_says_what_it_is_and_how_many_offers_ask_for_it():
     assert gap_text(Gap("Jenkins", None, 3, 2, 1)) == (
         "No está en tu perfil · la piden 3 ofertas (2 como requisito, 1 de encaje alto o medio)")
     assert gap_text(Gap("Azure", 2, 1, 0, 0)) == "Tu nivel: 2 de 10 · la pide 1 oferta"
+
+
+def test_strengths_are_what_you_have_and_the_offers_ask_for_most():
+    from grepleo.gaps import find_strengths
+    from grepleo.ui.gui import strength_text
+    radar = SkillRadar("Cloud", [RadarAxis("AWS", 8), RadarAxis("Azure", 2)])
+    prof = profile(must=["Docker", "Terraform"], radars=[radar])
+    jobs = [job(i, "Requisitos: AWS, Docker y Azure.") for i in range(3)] + [job(9, "Docker.")]
+    strengths = {item.name: item for item in find_strengths(jobs, evaluations(jobs, prof), prof)}
+    assert set(strengths) == {"AWS", "Docker"}           # Azure es un hueco (nivel 2) y Terraform nadie lo cita
+    assert strengths["AWS"].level == 8 and strengths["AWS"].offers == 3
+    assert strengths["Docker"].level is None and strengths["Docker"].offers == 4
+    assert strength_text(strengths["Docker"]).startswith("En tu perfil · la piden 4 ofertas")
+    assert strength_text(strengths["AWS"]).startswith("Tu nivel: 8 de 10")
+    assert find_strengths([], {}, prof) == [] and find_strengths([job(1, "x", full=False)], {}, prof) == []
+
+
+def test_ci_and_cd_listed_separately_count_as_one_strength():
+    from grepleo.gaps import find_strengths
+    prof = profile(must=["CI", "CD", "Docker"])
+    jobs = [job(1, "Requisitos: CI/CD y Docker.")]
+    assert [item.name for item in find_strengths(jobs, evaluations(jobs, prof), prof)] == ["CI/CD", "Docker"]

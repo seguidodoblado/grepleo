@@ -50,7 +50,7 @@ su web y no lo necesita).
   empresas criban los currículums, con su veredicto, su fiabilidad, las palabras clave que tu CV no cita y los
   requisitos eliminatorios que no cumples. Es una estimación local y explicada, no un dato oficial: cada empresa
   configura su ATS. Cada radar lleva además una leyenda lateral que explica eje por eje lo que se ve.
-- **Panorama:** qué requisitos se repiten en la muestra y qué se puede concluir contando (lo más pedido, los deseables de tu perfil que ninguna oferta cita, **qué te falta más veces** (lo que piden tus ofertas y no cubres, por orden de importancia), cuántas ofertas publican salario, cuántas son remotas…).
+- **Panorama:** qué requisitos se repiten en la muestra y qué se puede concluir contando (lo más pedido, los deseables de tu perfil que ninguna oferta cita, **qué te falta más veces** (cuadro rojo con lo que piden tus ofertas y no cubres) y **tus puntos fuertes** (cuadro verde con lo que ya tienes y más piden), cuántas ofertas publican salario, cuántas son remotas…).
 - **Exporta** lo que ves a un informe HTML autocontenido o a una tabla CSV.
 - **Control del gasto:** antes de buscar ves una estimación del coste en Apify, y cada búsqueda lleva un tope de
   gasto que tú configuras.
