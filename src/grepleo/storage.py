@@ -35,6 +35,8 @@ CREATE TABLE IF NOT EXISTS results (
 CREATE TABLE IF NOT EXISTS events (
     id INTEGER PRIMARY KEY, job_key TEXT NOT NULL, day TEXT NOT NULL, kind TEXT NOT NULL, text TEXT NOT NULL);
 CREATE INDEX IF NOT EXISTS events_by_job ON events (job_key);
+CREATE TABLE IF NOT EXISTS geocache (
+    place TEXT PRIMARY KEY, lat REAL, lon REAL, found INTEGER NOT NULL, at TEXT NOT NULL);
 """
 
 
@@ -129,6 +131,24 @@ class Store:
 
     def close(self) -> None:
         self._db.close()
+
+    # --- lugares del mapa -------------------------------------------------------------------------
+    def cached_places(self, places: list[str]) -> dict[str, tuple[float, float] | None]:
+        """Lo que ya se sabe de estos lugares: su punto, o None si se preguntó y no existe. Los que no se han preguntado
+        nunca no salen."""
+        known: dict[str, tuple[float, float] | None] = {}
+        for place in places:
+            row = self._db.execute("SELECT lat, lon, found FROM geocache WHERE place = ?", (place.casefold(),)).fetchone()
+            if row is not None:
+                known[place] = (row[0], row[1]) if row[2] else None
+        return known
+
+    def save_place(self, place: str, coordinates: tuple[float, float] | None) -> None:
+        with self._db:
+            self._db.execute("INSERT OR REPLACE INTO geocache (place, lat, lon, found, at) VALUES (?, ?, ?, ?, ?)",
+                             (place.casefold(), coordinates[0] if coordinates else None,
+                              coordinates[1] if coordinates else None, 1 if coordinates else 0,
+                              datetime.now(timezone.utc).isoformat()))
 
     # --- perfiles ---------------------------------------------------------------------------------
     def list_profiles(self) -> list[tuple[int, Profile]]:

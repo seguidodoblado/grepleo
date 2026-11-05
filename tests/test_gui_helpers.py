@@ -327,7 +327,7 @@ def test_the_market_tab_shows_the_profile_radars_against_the_offers_in_the_backg
     store.store_results(search, [Job(key="x:1", source="indeed", title="DevOps", description=text,
                                      full_description=True)])
     window = gui.MainWindow(Gtk.Application(application_id="io.github.seguidodoblado.GrepleoMarket"), store)
-    assert window.notebook.get_n_pages() == 3
+    assert window.notebook.get_n_pages() == 4
     window.notebook.set_current_page(2)
     context = GLib.MainContext.default()
     for _attempt in range(200):

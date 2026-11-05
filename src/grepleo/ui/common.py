@@ -43,6 +43,12 @@ CSS = b"""
 .radar-thumb-medium { background: rgba(230, 126, 34, 0.24); }
 .radar-thumb-low { background: rgba(218, 54, 51, 0.22); }
 .radar-thumb-none { background: rgba(128, 128, 128, 0.12); opacity: 0.6; }
+.map-pin { min-width: 22px; min-height: 22px; border-radius: 12px; border: 2px solid rgba(255, 255, 255, 0.95);
+           color: white; font-weight: bold; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.55); }
+.map-pin-high { background: rgb(46, 160, 67); }
+.map-pin-medium { background: rgb(230, 126, 34); }
+.map-pin-low { background: rgb(218, 54, 51); }
+.map-pin-unknown { background: rgb(128, 128, 128); }
 .skill-card { border-radius: 10px; padding: 12px 16px; }
 .skill-card-gap { background-image: linear-gradient(135deg, rgba(218, 54, 51, 0.42), rgba(218, 54, 51, 0.08));
                   border-left: 5px solid rgba(218, 54, 51, 0.95); }

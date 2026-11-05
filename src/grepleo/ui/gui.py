@@ -44,6 +44,7 @@ from .common import (
 )
 from .date_picker import today
 from .detail_view import DetailView
+from .map_page import MapPage
 from .market_page import MarketPage
 from .notes_panel import NotesPanel
 from .profile_dialog import ProfileWindow
@@ -262,6 +263,8 @@ class MainWindow(Gtk.ApplicationWindow):
         self.notebook.append_page(self._build_panorama_page(), Gtk.Label(label=_("Panorama")))
         self.market = MarketPage(self._market_data)
         self.notebook.append_page(self.market, Gtk.Label(label=_("Mercado")))
+        self.map_page = MapPage(self._market_data, self.store, self._pick_job, dark=APPEARANCE.dark)
+        self.notebook.append_page(self.map_page, Gtk.Label(label=_("Mapa")))
         self.notebook.connect("switch-page", self._on_main_tab)
         root.append(self.notebook)
         self.status = Gtk.Label(xalign=0, wrap=True)
@@ -603,6 +606,18 @@ class MainWindow(Gtk.ApplicationWindow):
     def _on_main_tab(self, _notebook, page, _number) -> None:
         if page is self.market:
             GLib.idle_add(self.market.refresh)   # cuando la pestaña ya se ve, sin retrasar el cambio
+        elif page is self.map_page:
+            GLib.idle_add(self.map_page.refresh)
+
+    def _pick_job(self, job: Job) -> None:
+        """Desde el mapa: vuelve a la lista y elige esa oferta."""
+        self.notebook.set_current_page(0)
+        for position in range(self.selection.get_n_items()):
+            item = self.selection.get_item(position)
+            if item is not None and item.job is job:
+                self.selection.set_selected(position)
+                self.view.scroll_to(position, None, Gtk.ListScrollFlags.FOCUS, None)
+                break
 
     def _build_panorama_page(self) -> Gtk.ScrolledWindow:
         self.panorama_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12, margin_top=12,
@@ -979,6 +994,9 @@ class MainWindow(Gtk.ApplicationWindow):
 
     def _update_panorama(self, profile: Profile) -> None:
         self.market.invalidate()
+        self.map_page.invalidate()
+        if self.map_page.get_mapped():
+            GLib.idle_add(self.map_page.refresh)
         if self.market.get_mapped():   # abierta la pestaña mientras llegan datos: se recalcula
             GLib.idle_add(self.market.refresh)
         child = self.panorama_box.get_first_child()

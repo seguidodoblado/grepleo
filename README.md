@@ -50,6 +50,7 @@ su web y no lo necesita).
   empresas criban los currículums, con su veredicto, su fiabilidad, las palabras clave que tu CV no cita y los
   requisitos eliminatorios que no cumples. Es una estimación local y explicada, no un dato oficial: cada empresa
   configura su ATS. Cada radar lleva además una leyenda lateral que explica eje por eje lo que se ve.
+- **Mapa:** las ofertas que ves como puntos sobre un mapa claro u oscuro, con el color de su encaje (necesita `gir1.2-shumate-1.0`; las imágenes son de CARTO y las ubicaciones se buscan en Nominatim, ver la política de privacidad).
 - **Mercado:** tus radares frente a lo que piden, de media, las ofertas que estás viendo (con las de encaje alto o medio, si quieres), para ver de un vistazo en qué temas te quedas corto.
 - **Panorama:** qué requisitos se repiten en la muestra y qué se puede concluir contando (lo más pedido, lo que conoces y ninguna oferta cita, lo que dominas y pocas ofertas piden, **qué te falta más veces** (cuadro rojo con lo que piden tus ofertas y no cubres) y **tus puntos fuertes** (cuadro verde con lo que ya tienes y más piden), cuántas ofertas publican salario, cuántas son remotas…).
 - **Exporta** lo que ves a un informe HTML autocontenido o a una tabla CSV.
