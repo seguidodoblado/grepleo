@@ -46,7 +46,7 @@ def _weight(demand: float) -> int:
     return W_REQUIRED if demand >= DEMAND_REQUIRED else W_NICE_ASK if demand >= DEMAND_NICE else W_MENTIONED
 
 
-def _my_skills(profile: Profile) -> list[tuple[frozenset[str], float, str]]:
+def my_skills(profile: Profile) -> list[tuple[frozenset[str], float, str]]:
     """Lo que tienes y con qué nivel (0 a 10): los ejes de tus radares y tus habilidades principales, con tu nivel
     técnico general del radar general (10 si no lo has tocado), y las secundarias, con el 70 % de él. Va por orden de
     precisión: si algo está en un radar con tema, manda el nivel de ese eje."""
@@ -58,7 +58,7 @@ def _my_skills(profile: Profile) -> list[tuple[frozenset[str], float, str]]:
     return [skill for skill in skills if skill[0]]
 
 
-def _asked_specs(profile: Profile) -> list[str]:
+def asked_specs(profile: Profile) -> list[str]:
     """Lo que se busca en una oferta: el catálogo de requisitos habituales más lo que aparece en tu perfil y tus
     radares (cada elemento una vez)."""
     specs, seen = [], set()
@@ -72,7 +72,7 @@ def _asked_specs(profile: Profile) -> list[str]:
     return specs
 
 
-def _skill_credit(spec: str, demand: float, skills: list[tuple[frozenset[str], float, str]]) -> tuple[float, str]:
+def skill_credit(spec: str, demand: float, skills: list[tuple[frozenset[str], float, str]]) -> tuple[float, str]:
     """(crédito de 0 a 1, cómo lo cubres dicho con palabras) de una habilidad pedida."""
     names = aliases(spec)
     mine = next((level for have, level, _name in skills if have & names), None)
@@ -109,9 +109,9 @@ def _skill_credit(spec: str, demand: float, skills: list[tuple[frozenset[str], f
 def _skill_criteria(job: Job, text: str, profile: Profile) -> list[CriterionResult]:
     """Lo que la oferta pide y cómo lo cubres. Lo que tienes y la oferta no cita no cuenta ni a favor ni en contra:
     cada empresa pide un perfil ideal y luego cede, así que un hueco resta según lo que pese, nunca descarta."""
-    skills = _my_skills(profile)
+    skills = my_skills(profile)
     asked: list[tuple[float, CriterionResult]] = []
-    for spec in _asked_specs(profile):
+    for spec in asked_specs(profile):
         name, names = parse_term(spec)
         if not mentions(text, names):
             continue
@@ -120,7 +120,7 @@ def _skill_criteria(job: Job, text: str, profile: Profile) -> list[CriterionResu
             demand = DEMAND_REQUIRED
         if not demand:
             continue
-        credit, how = _skill_credit(spec, demand, skills)
+        credit, how = skill_credit(spec, demand, skills)
         status = Status.MET if credit >= 1 else Status.PARTIAL if credit > 0 else Status.MISSING
         asked.append((demand, CriterionResult(
             name, status, f"{demand_note(demand)} · {how}", _weight(demand), demand >= DEMAND_REQUIRED, "hard",

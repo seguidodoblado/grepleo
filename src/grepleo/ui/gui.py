@@ -168,7 +168,7 @@ def _demand_text(offers: int, required: int, relevant: int) -> str:
 
 def gap_text(gap: Gap) -> str:
     """Una línea por hueco: qué te falta y cuántas ofertas lo piden."""
-    head = _("No está en tu perfil") if gap.missing else _("Tu nivel: {level} de 10").format(level=gap.level)
+    head = gap.how[:1].upper() + gap.how[1:]   # «no la tienes», «tienes algo parecido: AWS», «tu nivel: 2 de 10»…
     return f"{head} · {_demand_text(gap.offers, gap.required, gap.relevant)}"
 
 

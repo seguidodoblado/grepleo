@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: grepleo 0.1.0\n"
 "Report-Msgid-Bugs-To: jose.antonio.seguido@gmail.com\n"
-"POT-Creation-Date: 2026-11-05 02:13+0100\n"
+"POT-Creation-Date: 2026-11-05 02:18+0100\n"
 "PO-Revision-Date: 2026-11-03 17:00+0100\n"
 "Last-Translator: José Antonio Seguido Doblado <jose.antonio.seguido@gmail."
 "com>\n"
@@ -886,11 +886,7 @@ msgstr "{count} as a requirement"
 msgid "{count} de encaje alto o medio"
 msgstr "{count} with high or medium fit"
 
-#: src/grepleo/ui/gui.py:171
-msgid "No está en tu perfil"
-msgstr "It is not in your profile"
-
-#: src/grepleo/ui/gui.py:171 src/grepleo/ui/gui.py:177
+#: src/grepleo/ui/gui.py:177
 #, python-brace-format
 msgid "Tu nivel: {level} de 10"
 msgstr "Your level: {level} out of 10"
@@ -2050,6 +2046,9 @@ msgstr "Nothing written down yet."
 #: src/grepleo/ui/tracking_panel.py:178
 msgid "Guardar cambio"
 msgstr "Save change"
+
+#~ msgid "No está en tu perfil"
+#~ msgstr "It is not in your profile"
 
 #, python-brace-format
 #~ msgid ""
