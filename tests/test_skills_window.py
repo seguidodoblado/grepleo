@@ -120,3 +120,21 @@ def test_duplicates_between_groups_are_warned():
     window = SkillsWindow(Gtk.Window(), state, [].append)
     assert "Azure" in window.status.get_text() and "más de un grupo" in window.status.get_text()
     assert SOFT == "soft"
+
+
+def test_the_window_keeps_a_small_minimum_size_so_it_can_be_maximized_even_with_a_large_font():
+    """Con la leyenda y la vista previa sin scroll, el alto mínimo superaba el alto útil de una pantalla de 1080 px y el
+    gestor de ventanas no dejaba maximizar la ventana."""
+    settings = Gtk.Settings.get_default()
+    previous = settings.get_property("gtk-font-name")
+    try:
+        for font in ("Sans 17", "Sans 22"):
+            settings.set_property("gtk-font-name", font)
+            window = make()
+            height = window.measure(Gtk.Orientation.VERTICAL, -1)[0]
+            width = window.measure(Gtk.Orientation.HORIZONTAL, -1)[0]
+            assert height <= 700, f"alto mínimo {height} con {font}"
+            assert width <= 1500, f"ancho mínimo {width} con {font}"
+            assert height <= window.measure(Gtk.Orientation.VERTICAL, 1100)[0] + 1   # ni con el ancho por defecto
+    finally:
+        settings.set_property("gtk-font-name", previous)

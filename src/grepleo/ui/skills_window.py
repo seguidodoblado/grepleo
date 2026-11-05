@@ -179,7 +179,7 @@ class SkillsWindow(Gtk.Window):
         center.append(adders)
         body.append(center)
         # leyenda y vista previa
-        right = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8, width_request=340)
+        right = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8, margin_end=6)
         question = Gtk.Label(label=_("¿Me presentaría a una oferta que lo pide como requisito y lo defendería en la "
                                       "entrevista?"), xalign=0, wrap=True)
         question.add_css_class("title-4")
@@ -200,7 +200,12 @@ class SkillsWindow(Gtk.Window):
         self.preview = RadarView()
         self.preview.set_content_height(250)
         right.append(self.preview)
-        body.append(right)
+        # con scroll: la leyenda y la vista previa no pueden fijar el alto mínimo de la ventana (con una tipografía grande
+        # superaba el alto útil de la pantalla y el gestor de ventanas no dejaba maximizarla)
+        right_scroll = wide_scrollbars(Gtk.ScrolledWindow(vexpand=True, hscrollbar_policy=Gtk.PolicyType.NEVER,
+                                                          width_request=360))
+        right_scroll.set_child(right)
+        body.append(right_scroll)
         return body
 
     def _build_buttons(self) -> Gtk.Widget:
