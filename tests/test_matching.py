@@ -169,3 +169,14 @@ def test_the_title_sets_the_level_when_the_offer_gives_no_years():
                                                                        profile(years=1)).criteria)
     stated = evaluate(job(title="Senior DevOps", description="Pedimos 3 años de experiencia."), profile(years=1))
     assert all(item.name != "Nivel del puesto" for item in stated.criteria)     # ya dice los años: manda la experiencia
+
+
+def test_having_the_platform_covers_its_services_and_a_generic_term_is_covered_by_a_specific_one():
+    asked = job(description="Requisitos:\n- Experiencia con EC2, S3 e IaC en producción real\n" * 3)
+    result = evaluate(asked, profile(must=["AWS", "Terraform"], nice=[], languages={}))
+    assert by_name(result, "EC2").status is Status.MET and "base: AWS" in by_name(result, "EC2").detail
+    assert by_name(result, "S3").status is Status.MET
+    assert by_name(result, "IaC").status is Status.MET                 # lo cubre Terraform
+    other = evaluate(asked, profile(must=["Azure"], nice=[], languages={}))
+    assert by_name(other, "EC2").status is Status.PARTIAL and "Azure" in by_name(other, "EC2").detail   # otra nube
+    assert by_name(evaluate(asked, profile(must=["Excel"], nice=[], languages={})), "EC2").status is Status.MISSING

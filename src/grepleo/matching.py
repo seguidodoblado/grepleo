@@ -13,7 +13,7 @@ from .models import CriterionResult, Evaluation, Fit, Job, Status, WorkMode
 from .panorama import DEFAULT_CATALOG
 from .profiles import STUDIES_RANK, Profile, parse_term
 from .radar import DEMAND_NICE, DEMAND_REQUIRED, SOFT_VOCABULARY, demand_note, term_demand
-from .similar import SIMILAR_FACTOR, aliases, similar_to, umbrella_members
+from .similar import PARENT_FACTOR, SIMILAR_FACTOR, aliases, parents_of, similar_to, umbrella_members
 from .textutil import (
     language_requirements,
     level_rank,
@@ -88,6 +88,12 @@ def _skill_credit(spec: str, demand: float, skills: list[tuple[frozenset[str], f
         if credit >= FULL_CREDIT:
             return 1.0, _("la tienes")
         return credit, _("tu nivel: {level} de 10").format(level=f"{mine:.0f}")
+    base = max(((level, name) for have, level, name in skills if any(have & parent for parent in parents_of(names))),
+               key=lambda item: item[0], default=None)
+    if base is not None:   # tienes la plataforma o la base de lo que se pide (AWS para EC2)
+        credit = PARENT_FACTOR * min(base[0], demand) / demand
+        text = _("tienes la base: {name}").format(name=base[1])
+        return (1.0 if credit >= FULL_CREDIT else credit), text
     related = similar_to(names)
     best = max(((level, name) for have, level, name in skills if any(have & other for other in related)),
                key=lambda item: item[0], default=None)

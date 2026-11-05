@@ -26,6 +26,10 @@ DEFAULT_CATALOG: tuple[str, ...] = (
     "Prometheus", "Grafana", "Bash", "PowerShell", "Cloud", "Redes|networking", "Windows Server", "VMware",
     "Serverless|lambda", "Microservicios|microservices", "OpenShift", "ArgoCD|argo cd", "Azure DevOps",
     "CloudFormation", "Datadog", "Splunk", "Vault|hashicorp vault", "SonarQube", "ELK|elasticsearch",
+    # servicios de nube, redes y plataformas
+    "IaC|infrastructure as code|infraestructura como código", "EC2", "S3", "EKS", "AKS", "GKE", "VPC", "RDS",
+    "CloudWatch", "DNS", "VPN", "Active Directory|directorio activo", "ECS|fargate",
+    "GitOps", "SRE|site reliability", "ITIL", "FinOps", "RabbitMQ", "Redis", "Nginx", "Vue|vue.js", "Kotlin",
     # desarrollo y datos
     ".NET|dotnet", "C#", "PHP", "Node.js|nodejs", "PostgreSQL", "MySQL", "MongoDB", "Oracle", "Kafka", "Spark",
     "Airflow", "dbt",

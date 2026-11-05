@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: grepleo 0.1.0\n"
 "Report-Msgid-Bugs-To: jose.antonio.seguido@gmail.com\n"
-"POT-Creation-Date: 2026-11-05 01:11+0100\n"
+"POT-Creation-Date: 2026-11-05 01:19+0100\n"
 "PO-Revision-Date: 2026-11-03 17:00+0100\n"
 "Last-Translator: José Antonio Seguido Doblado <jose.antonio.seguido@gmail."
 "com>\n"
@@ -129,131 +129,136 @@ msgstr "you have it"
 msgid "tu nivel: {level} de 10"
 msgstr "your level: {level} out of 10"
 
-#: src/grepleo/matching.py:96
+#: src/grepleo/matching.py:95
+#, python-brace-format
+msgid "tienes la base: {name}"
+msgstr "you have the base: {name}"
+
+#: src/grepleo/matching.py:102
 #, python-brace-format
 msgid "tienes algo parecido: {name}"
 msgstr "you have something similar: {name}"
 
-#: src/grepleo/matching.py:97
+#: src/grepleo/matching.py:103
 msgid "no la tienes"
 msgstr "you do not have it"
 
-#: src/grepleo/matching.py:131
+#: src/grepleo/matching.py:137
 msgid "la pide la oferta · la tienes"
 msgstr "the offer asks for it · you have it"
 
-#: src/grepleo/matching.py:132
+#: src/grepleo/matching.py:138
 msgid "la pide la oferta · no la tienes"
 msgstr "the offer asks for it · you do not have it"
 
-#: src/grepleo/matching.py:137
+#: src/grepleo/matching.py:143
 #, python-brace-format
 msgid "Sin «{term}»"
 msgstr "No “{term}”"
 
-#: src/grepleo/matching.py:139
+#: src/grepleo/matching.py:145
 msgid "La oferta lo menciona"
 msgstr "The offer mentions it"
 
-#: src/grepleo/matching.py:141
+#: src/grepleo/matching.py:147
 msgid "No aparece en la oferta"
 msgstr "Does not appear in the offer"
 
-#: src/grepleo/matching.py:143
+#: src/grepleo/matching.py:149
 msgid "Ficha resumida: no se puede saber"
 msgstr "Summary card: cannot tell"
 
-#: src/grepleo/matching.py:148
+#: src/grepleo/matching.py:154
 #, python-brace-format
 msgid "{count} año"
 msgstr "{count} year"
 
-#: src/grepleo/matching.py:148
+#: src/grepleo/matching.py:154
 #, python-brace-format
 msgid "{count} años"
 msgstr "{count} years"
 
-#: src/grepleo/matching.py:158 src/grepleo/radar.py:120
+#: src/grepleo/matching.py:164 src/grepleo/radar.py:120
 #: src/grepleo/report.py:26
 msgid "Experiencia"
 msgstr "Experience"
 
-#: src/grepleo/matching.py:161
+#: src/grepleo/matching.py:167
 msgid "La oferta no dice cuánta experiencia pide"
 msgstr "The offer does not say how much experience it asks for"
 
-#: src/grepleo/matching.py:162 src/grepleo/matching.py:263
+#: src/grepleo/matching.py:168 src/grepleo/matching.py:269
 #, python-brace-format
 msgid "Pide {needed}, tienes {have}"
 msgstr "Asks for {needed}, you have {have}"
 
-#: src/grepleo/matching.py:195
+#: src/grepleo/matching.py:201
 msgid "Nivel del puesto"
 msgstr "Role level"
 
-#: src/grepleo/matching.py:198
+#: src/grepleo/matching.py:204
 #, python-brace-format
 msgid "El título pide un perfil sénior y tienes {have}"
 msgstr "The title asks for a senior profile and you have {have}"
 
-#: src/grepleo/matching.py:206
+#: src/grepleo/matching.py:212
 msgid "El título es de nivel junior o de entrada"
 msgstr "The title is junior or entry level"
 
-#: src/grepleo/matching.py:211 src/grepleo/report.py:25
+#: src/grepleo/matching.py:217 src/grepleo/report.py:25
 #: src/grepleo/ui/gui.py:427
 msgid "Salario"
 msgstr "Salary"
 
-#: src/grepleo/matching.py:214
+#: src/grepleo/matching.py:220
 msgid "La oferta no publica salario"
 msgstr "The offer does not publish a salary"
 
-#: src/grepleo/matching.py:215
+#: src/grepleo/matching.py:221
 msgid " (estimado por el portal)"
 msgstr " (estimated by the portal)"
 
-#: src/grepleo/matching.py:216
+#: src/grepleo/matching.py:222
 #, python-brace-format
 msgid "Hasta {top} frente a tu mínimo de {wanted}"
 msgstr "Up to {top} against your minimum of {wanted}"
 
-#: src/grepleo/matching.py:222 src/grepleo/report.py:25
+#: src/grepleo/matching.py:228 src/grepleo/report.py:25
 msgid "Modalidad"
 msgstr "Work mode"
 
-#: src/grepleo/matching.py:224
+#: src/grepleo/matching.py:230
 msgid "La oferta no dice la modalidad"
 msgstr "The offer does not say the work mode"
 
-#: src/grepleo/matching.py:230 src/grepleo/report.py:25
+#: src/grepleo/matching.py:236 src/grepleo/report.py:25
 #: src/grepleo/ui/gui.py:344 src/grepleo/ui/gui.py:426
 msgid "Ubicación"
 msgstr "Location"
 
-#: src/grepleo/matching.py:232 src/grepleo/models.py:19
+#: src/grepleo/matching.py:238 src/grepleo/models.py:19
 #: src/grepleo/ui/profile_dialog.py:38
 msgid "Remoto"
 msgstr "Remote"
 
-#: src/grepleo/matching.py:234
+#: src/grepleo/matching.py:240
 msgid "La oferta no dice la ubicación"
 msgstr "The offer does not say the location"
 
-#: src/grepleo/matching.py:241 src/grepleo/radar.py:121
+#: src/grepleo/matching.py:247 src/grepleo/radar.py:121
 #: src/grepleo/ui/profile_dialog.py:104
 msgid "Estudios"
 msgstr "Education"
 
-#: src/grepleo/matching.py:247
+#: src/grepleo/matching.py:253
 msgid "La oferta no pide estudios concretos"
 msgstr "The offer does not ask for specific education"
 
-#: src/grepleo/matching.py:259
+#: src/grepleo/matching.py:265
 msgid "No lo tienes en tu perfil"
 msgstr "It is not in your profile"
 
-#: src/grepleo/matching.py:266
+#: src/grepleo/matching.py:272
 msgid "Cumples el nivel"
 msgstr "You meet the level"
 
@@ -351,19 +356,19 @@ msgstr "Offer"
 msgid "Otro"
 msgstr "Other"
 
-#: src/grepleo/panorama.py:94
+#: src/grepleo/panorama.py:98
 #, python-brace-format
 msgid "Lo más pedido: {names} (sobre {count} oferta con detalle)."
 msgid_plural "Lo más pedido: {names} (sobre {count} ofertas con detalle)."
 msgstr[0] "Most requested: {names} (out of {count} offer with details)."
 msgstr[1] "Most requested: {names} (out of {count} offers with details)."
 
-#: src/grepleo/panorama.py:105
+#: src/grepleo/panorama.py:109
 #, python-brace-format
 msgid "Ninguna oferta con detalle cita tus deseables: {names}."
 msgstr "No offer with details mentions your nice-to-haves: {names}."
 
-#: src/grepleo/panorama.py:111
+#: src/grepleo/panorama.py:115
 #, python-brace-format
 msgid ""
 "Tu requisito «{name}» solo aparece en {hits} de {detailed} ofertas con "
@@ -372,12 +377,12 @@ msgstr ""
 "Your requirement “{name}” only appears in {hits} of {detailed} offers with "
 "details."
 
-#: src/grepleo/panorama.py:115
+#: src/grepleo/panorama.py:119
 #, python-brace-format
 msgid "Encaje: {high} alto, {medium} medio y {low} bajo."
 msgstr "Fit: {high} high, {medium} medium and {low} low."
 
-#: src/grepleo/panorama.py:119
+#: src/grepleo/panorama.py:123
 #, python-brace-format
 msgid ""
 "{count} de {total} ofertas publican salario; la mediana es de {median} € al "
@@ -385,14 +390,14 @@ msgid ""
 msgstr ""
 "{count} of {total} offers publish a salary; the median is {median} € a year."
 
-#: src/grepleo/panorama.py:123
+#: src/grepleo/panorama.py:127
 #, python-brace-format
 msgid "{count} oferta es en remoto."
 msgid_plural "{count} ofertas son en remoto."
 msgstr[0] "{count} offer is remote."
 msgstr[1] "{count} offers are remote."
 
-#: src/grepleo/panorama.py:128
+#: src/grepleo/panorama.py:132
 #, python-brace-format
 msgid ""
 "{count} oferta es una ficha resumida: no se puede saber qué requisitos no "
@@ -1501,9 +1506,9 @@ msgid ""
 "compara con lo que pide cada oferta; si algo está en un radar, manda el "
 "nivel del radar."
 msgstr ""
-"What you can do, one per line; synonyms with | (Power BI|powerbi). It is compared "
-"with what each offer asks for; if something is in a radar, the radar level "
-"rules."
+"What you can do, one per line; synonyms with | (Power BI|powerbi). It is "
+"compared with what each offer asks for; if something is in a radar, the "
+"radar level rules."
 
 #: src/grepleo/ui/profile_dialog.py:127 src/grepleo/ui/profile_dialog.py:137
 msgid "Lo que dominas"
