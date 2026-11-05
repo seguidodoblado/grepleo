@@ -52,7 +52,7 @@ does not need it).
   configures its own ATS. Each radar also has a side legend that explains, axis by axis, what you are seeing.
 - **Market:** your radars against what the offers you are looking at ask for on average (or only the high or medium fit ones), to see at a glance on which topics you fall short.
 - **Overview:** which requirements repeat across the sample and what can be concluded by counting (most
-  requested, the nice-to-haves of your profile that no offer mentions, **what you lack most often** (a red card with what your offers ask for and you do not cover) and **your strengths** (a green card with what you already have and they ask for most), how many offers publish a salary, how many are remote…).
+  requested, what you know that no offer mentions, what you master that few offers ask for, **what you lack most often** (a red card with what your offers ask for and you do not cover) and **your strengths** (a green card with what you already have and they ask for most), how many offers publish a salary, how many are remote…).
 - **Export** what you see to a self-contained HTML report or a CSV table.
 - **Spending control:** before searching you see an estimate of the cost on Apify, and every search has a
   spending cap that you configure.

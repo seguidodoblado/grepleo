@@ -11,6 +11,7 @@
 - La evaluación es más rápida: el catálogo de traducciones se busca una vez por idioma (antes se consultaba el disco en cada texto) y `normalize` no recorre el texto letra a letra
 
 ### Corregido
+- Las conclusiones del Panorama se adaptan al nuevo criterio: «Ninguna oferta con detalle cita lo que conoces: …» y, en lugar de una frase por cada «requisito tuyo» poco citado (que eran lo que antes se exigía de la oferta), una sola, «Lo que dominas y pocas ofertas citan (menos del 20 % de las N con detalle): «Script» (3), «GCP» (19)…», con las seis menos citadas y cuántas más hay
 - El recuadro azul de conclusiones del Panorama ya no sale con la primera línea marcada en naranja: era la selección de texto que GTK hace al enfocar la ventana, así que esas líneas dejan de ser seleccionables
 
 ### Añadido

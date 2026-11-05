@@ -51,7 +51,7 @@ su web y no lo necesita).
   requisitos eliminatorios que no cumples. Es una estimación local y explicada, no un dato oficial: cada empresa
   configura su ATS. Cada radar lleva además una leyenda lateral que explica eje por eje lo que se ve.
 - **Mercado:** tus radares frente a lo que piden, de media, las ofertas que estás viendo (con las de encaje alto o medio, si quieres), para ver de un vistazo en qué temas te quedas corto.
-- **Panorama:** qué requisitos se repiten en la muestra y qué se puede concluir contando (lo más pedido, los deseables de tu perfil que ninguna oferta cita, **qué te falta más veces** (cuadro rojo con lo que piden tus ofertas y no cubres) y **tus puntos fuertes** (cuadro verde con lo que ya tienes y más piden), cuántas ofertas publican salario, cuántas son remotas…).
+- **Panorama:** qué requisitos se repiten en la muestra y qué se puede concluir contando (lo más pedido, lo que conoces y ninguna oferta cita, lo que dominas y pocas ofertas piden, **qué te falta más veces** (cuadro rojo con lo que piden tus ofertas y no cubres) y **tus puntos fuertes** (cuadro verde con lo que ya tienes y más piden), cuántas ofertas publican salario, cuántas son remotas…).
 - **Exporta** lo que ves a un informe HTML autocontenido o a una tabla CSV.
 - **Control del gasto:** antes de buscar ves una estimación del coste en Apify, y cada búsqueda lleva un tope de
   gasto que tú configuras.
