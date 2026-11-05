@@ -79,6 +79,12 @@ def source_labels() -> list[str]:
     return [_("Las que veo ahora"), _("Solo encaje alto o medio"), _("Solo encaje bajo (plan de estudio)")]
 
 
+def urgency_class(relative: float) -> str:
+    """El color de una fila del plan según el porcentaje de ofertas que la piden respecto al mayor: rojo desde 2/3,
+    naranja desde 1/3 y verde por debajo."""
+    return "low" if relative >= 2 / 3 else "medium" if relative >= 1 / 3 else "high"
+
+
 class MarketPage(Gtk.Box):
     """Un selector de qué ofertas cuentan (las que ves, solo las de encaje alto o medio, o solo las de encaje bajo: lo que
     te falta, como plan de estudio) y, debajo, los radares del perfil con la demanda media del mercado.
@@ -186,27 +192,31 @@ class MarketPage(Gtk.Box):
             self._plan_holder.set_child(Gtk.Label(label=_("Con estas ofertas no hay nada que reforzar: tu nivel llega a "
                                                           "lo que piden."), xalign=0, margin_top=6, wrap=True))
             return
-        grid = Gtk.Grid(column_spacing=12, row_spacing=4, margin_start=4, margin_end=8, margin_top=4)
+        grid = Gtk.Grid(column_spacing=0, row_spacing=2, margin_start=4, margin_end=8, margin_top=4)
         for column, text in enumerate((_("Habilidad"), _("Radar"), _("Tu nivel → lo que piden"), _("Ofertas"), "")):
             head = Gtk.Label(label=text, xalign=0)
             head.add_css_class("heading")
             grid.attach(head, column, 0, 1, 1)
+        top = max(item.share for item in items) or 1.0
         for number, item in enumerate(items, start=1):
-            self._attach_plan_row(grid, number, item)
+            self._attach_plan_row(grid, number, item, urgency_class(item.share / top))
         self._plan_holder.set_child(grid)
 
     @staticmethod
-    def _attach_plan_row(grid: Gtk.Grid, number: int, item: StudyItem) -> None:
+    def _attach_plan_row(grid: Gtk.Grid, number: int, item: StudyItem, tier: str) -> None:
+        """Una fila entera coloreada: cuantas más ofertas la piden, más roja."""
         name = Gtk.Label(xalign=0)
         name.set_markup(f"<b>{GLib.markup_escape_text(item.name)}</b>")
-        grid.attach(name, 0, number, 1, 1)
-        grid.attach(Gtk.Label(label=item.radar, xalign=0), 1, number, 1, 1)
-        coverage = Gtk.Label(label=f"{item.level:.0f} → {item.demand:.0f}", xalign=0.5, halign=Gtk.Align.START)
-        coverage.add_css_class("plan-level")
-        coverage.add_css_class(f"row-fit-{overlap_class(item.level / item.demand if item.demand else None)}")
-        grid.attach(coverage, 2, number, 1, 1)
-        grid.attach(Gtk.Label(label=_("el {share} %").format(share=round(100 * item.share)), xalign=0), 3, number, 1, 1)
-        grid.attach(study_button(item.name), 4, number, 1, 1)
+        cells = [name, Gtk.Label(label=item.radar, xalign=0),
+                 Gtk.Label(label=f"{item.level:.0f} → {item.demand:.0f}", xalign=0),
+                 Gtk.Label(label=_("el {share} %").format(share=round(100 * item.share)), xalign=0)]
+        button = Gtk.Box(halign=Gtk.Align.FILL)
+        button.append(study_button(item.name))
+        cells.append(button)
+        for column, cell in enumerate(cells):
+            cell.add_css_class("plan-cell")
+            cell.add_css_class(f"row-fit-{tier}")
+            grid.attach(cell, column, number, 1, 1)
 
     @staticmethod
     def _toggle_expand(expander: Gtk.Expander, _param) -> None:

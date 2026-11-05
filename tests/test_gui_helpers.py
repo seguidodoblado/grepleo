@@ -428,6 +428,8 @@ def test_the_gap_card_and_the_market_plan_offer_study_links():
     plan = _all_labels(window.market._plan_holder)
     assert "Habilidad" in plan and "Azure" in plan and "2 → " in plan
     assert find_all(window.market._plan_holder, Gtk.MenuButton)
-    tinted = [label for label in find_all(window.market._plan_holder, Gtk.Label) if label.has_css_class("plan-level")]
+    from grepleo.ui.market_page import urgency_class
+    tinted = [label for label in find_all(window.market._plan_holder, Gtk.Label) if label.has_css_class("plan-cell")]
     assert tinted and all(any(c in label.get_css_classes() for c in ("row-fit-high", "row-fit-medium", "row-fit-low"))
-                          for label in tinted)                                  # el nivel va en verde, naranja o rojo
+                          for label in tinted)                                  # la fila va en verde, naranja o rojo
+    assert [urgency_class(x) for x in (1.0, 0.5, 0.1)] == ["low", "medium", "high"]   # más prioridad, más rojo
