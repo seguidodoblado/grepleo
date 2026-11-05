@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: grepleo 0.1.0\n"
 "Report-Msgid-Bugs-To: jose.antonio.seguido@gmail.com\n"
-"POT-Creation-Date: 2026-11-05 03:20+0100\n"
+"POT-Creation-Date: 2026-11-05 03:24+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -581,78 +581,150 @@ msgstr ""
 msgid "Radar"
 msgstr ""
 
-#: src/grepleo/skills_edit.py:118
+#: src/grepleo/skills_edit.py:120
+msgid "No lo he practicado"
+msgstr ""
+
+#: src/grepleo/skills_edit.py:120
+msgid "No lo he practicado ni sé qué se espera de mí en esto."
+msgstr ""
+
+#: src/grepleo/skills_edit.py:121
+msgid "Lo conozco en teoría"
+msgstr ""
+
+#: src/grepleo/skills_edit.py:121
+msgid "Sé en qué consiste, pero apenas lo practico."
+msgstr ""
+
+#: src/grepleo/skills_edit.py:122
+msgid "Lo practico a veces"
+msgstr ""
+
+#: src/grepleo/skills_edit.py:122
+msgid "Me sale con esfuerzo o cuando alguien me guía; todavía no es un hábito."
+msgstr ""
+
+#: src/grepleo/skills_edit.py:123
+msgid "Lo practico con regularidad"
+msgstr ""
+
+#: src/grepleo/skills_edit.py:123
+msgid "Lo hago de forma habitual, aunque no siempre me sale bien."
+msgstr ""
+
+#: src/grepleo/skills_edit.py:124
+msgid "Lo practico con naturalidad"
+msgstr ""
+
+#: src/grepleo/skills_edit.py:124
+msgid ""
+"Lo hago bien en mi trabajo y puedo contar ejemplos concretos. Cubre del todo "
+"lo que una oferta pide de una habilidad blanda."
+msgstr ""
+
+#: src/grepleo/skills_edit.py:126
+msgid "Es una fortaleza reconocida"
+msgstr ""
+
+#: src/grepleo/skills_edit.py:126
+msgid ""
+"Compañeros o responsables me lo reconocen y lo aplico incluso en situaciones "
+"difíciles."
+msgstr ""
+
+#: src/grepleo/skills_edit.py:128
+msgid "Soy un referente"
+msgstr ""
+
+#: src/grepleo/skills_edit.py:128
+msgid "Otras personas acuden a mí para aprenderlo o para resolverlo."
+msgstr ""
+
+#: src/grepleo/skills_edit.py:131
 msgid "No lo conozco"
 msgstr ""
 
-#: src/grepleo/skills_edit.py:118
+#: src/grepleo/skills_edit.py:131
 msgid "No lo he usado ni sé qué es."
 msgstr ""
 
-#: src/grepleo/skills_edit.py:119
+#: src/grepleo/skills_edit.py:132
 msgid "Lo conozco de oídas"
 msgstr ""
 
-#: src/grepleo/skills_edit.py:119
+#: src/grepleo/skills_edit.py:132
 msgid ""
 "Sé qué es y para qué sirve, o lo he visto en una demostración; no lo he "
 "usado."
 msgstr ""
 
-#: src/grepleo/skills_edit.py:120
+#: src/grepleo/skills_edit.py:133
 msgid "Lo he probado"
 msgstr ""
 
-#: src/grepleo/skills_edit.py:120
+#: src/grepleo/skills_edit.py:133
 msgid ""
 "Lo he usado en laboratorios o tutoriales, siguiendo guías; con un caso real "
 "necesitaría ayuda."
 msgstr ""
 
-#: src/grepleo/skills_edit.py:122
+#: src/grepleo/skills_edit.py:135
 msgid "Lo he usado en trabajo real"
 msgstr ""
 
-#: src/grepleo/skills_edit.py:122
+#: src/grepleo/skills_edit.py:135
 msgid ""
 "Con la documentación al lado resuelvo lo habitual; todavía no lo diseño de "
 "cero."
 msgstr ""
 
-#: src/grepleo/skills_edit.py:124
+#: src/grepleo/skills_edit.py:137
 msgid "Lo uso con soltura"
 msgstr ""
 
-#: src/grepleo/skills_edit.py:124
+#: src/grepleo/skills_edit.py:137
 msgid ""
 "En producción, con autonomía. Cubre del todo lo que una oferta pide como «se "
 "valora»."
 msgstr ""
 
-#: src/grepleo/skills_edit.py:126
+#: src/grepleo/skills_edit.py:139
 msgid "Lo diseño y lo mantengo"
 msgstr ""
 
-#: src/grepleo/skills_edit.py:126
+#: src/grepleo/skills_edit.py:139
 msgid ""
 "Lo diseño, configuro y mantengo solo y resuelvo incidencias. Cubre un "
 "requisito: me presentaría y lo defendería con casos reales."
 msgstr ""
 
-#: src/grepleo/skills_edit.py:128
+#: src/grepleo/skills_edit.py:141
 msgid "Dominio profundo"
 msgstr ""
 
-#: src/grepleo/skills_edit.py:128
+#: src/grepleo/skills_edit.py:141
 msgid "Arquitectura, optimización y casos complejos; puedo enseñarlo a otros."
 msgstr ""
 
-#: src/grepleo/skills_edit.py:129
+#: src/grepleo/skills_edit.py:142
 msgid "Referente"
 msgstr ""
 
-#: src/grepleo/skills_edit.py:129
+#: src/grepleo/skills_edit.py:142
 msgid "Reconocido en el tema: contribuciones o años de especialización."
+msgstr ""
+
+#: src/grepleo/skills_edit.py:149
+msgid ""
+"¿Puedo contar un ejemplo concreto y reciente en el que lo demostré, y lo "
+"contaría en la entrevista?"
+msgstr ""
+
+#: src/grepleo/skills_edit.py:150
+msgid ""
+"¿Me presentaría a una oferta que lo pide como requisito y lo defendería en "
+"la entrevista?"
 msgstr ""
 
 #: src/grepleo/skills.py:92 src/grepleo/skills.py:117
@@ -796,7 +868,7 @@ msgid "Aceptar"
 msgstr ""
 
 #: src/grepleo/ui/common.py:168 src/grepleo/ui/common.py:190
-#: src/grepleo/ui/profile_dialog.py:216 src/grepleo/ui/skills_window.py:213
+#: src/grepleo/ui/profile_dialog.py:216 src/grepleo/ui/skills_window.py:203
 #: src/grepleo/ui/tracking_panel.py:79
 msgid "Cancelar"
 msgstr ""
@@ -1656,7 +1728,7 @@ msgstr ""
 msgid "Idiomas (con nivel A1 a C2)"
 msgstr ""
 
-#: src/grepleo/ui/profile_dialog.py:117 src/grepleo/ui/skills_window.py:109
+#: src/grepleo/ui/profile_dialog.py:117 src/grepleo/ui/skills_window.py:111
 msgid "Habilidades y niveles"
 msgstr ""
 
@@ -2004,97 +2076,91 @@ msgstr ""
 msgid "Lo que pide la oferta"
 msgstr ""
 
-#: src/grepleo/ui/skills_window.py:57
+#: src/grepleo/ui/skills_window.py:59
 msgid "Habilidad (AWS, Python, Scrum…)"
 msgstr ""
 
-#: src/grepleo/ui/skills_window.py:58
+#: src/grepleo/ui/skills_window.py:60
 msgid "Sinónimos, separados por comas"
 msgstr ""
 
-#: src/grepleo/ui/skills_window.py:59
+#: src/grepleo/ui/skills_window.py:61
 msgid "Quitar esta habilidad"
 msgstr ""
 
-#: src/grepleo/ui/skills_window.py:131
+#: src/grepleo/ui/skills_window.py:133
 msgid "Grupos"
 msgstr ""
 
-#: src/grepleo/ui/skills_window.py:140
+#: src/grepleo/ui/skills_window.py:142
 msgid "Añadir radar"
 msgstr ""
 
-#: src/grepleo/ui/skills_window.py:142
+#: src/grepleo/ui/skills_window.py:144
 msgid "Proponer radares"
 msgstr ""
 
-#: src/grepleo/ui/skills_window.py:143
+#: src/grepleo/ui/skills_window.py:145
 msgid "Agrupa por temas las habilidades que ya tienes; luego los puedes editar"
 msgstr ""
 
-#: src/grepleo/ui/skills_window.py:145
+#: src/grepleo/ui/skills_window.py:147
 msgid "Quitar este radar"
 msgstr ""
 
-#: src/grepleo/ui/skills_window.py:156
+#: src/grepleo/ui/skills_window.py:158
 msgid "Nombre del radar (Cloud, Lenguajes…)"
 msgstr ""
 
-#: src/grepleo/ui/skills_window.py:159
+#: src/grepleo/ui/skills_window.py:161
 msgid "−1 a todas"
 msgstr ""
 
-#: src/grepleo/ui/skills_window.py:159
+#: src/grepleo/ui/skills_window.py:161
 msgid "Baja un punto el nivel de todas las habilidades del grupo"
 msgstr ""
 
-#: src/grepleo/ui/skills_window.py:161
+#: src/grepleo/ui/skills_window.py:163
 msgid "+1 a todas"
 msgstr ""
 
-#: src/grepleo/ui/skills_window.py:161
+#: src/grepleo/ui/skills_window.py:163
 msgid "Sube un punto el nivel de todas las habilidades del grupo"
 msgstr ""
 
-#: src/grepleo/ui/skills_window.py:174
+#: src/grepleo/ui/skills_window.py:176
 msgid "Añadir habilidad"
 msgstr ""
 
-#: src/grepleo/ui/skills_window.py:177
+#: src/grepleo/ui/skills_window.py:179
 msgid "Añadir del catálogo…"
 msgstr ""
 
-#: src/grepleo/ui/skills_window.py:183
-msgid ""
-"¿Me presentaría a una oferta que lo pide como requisito y lo defendería en "
-"la entrevista?"
-msgstr ""
-
-#: src/grepleo/ui/skills_window.py:215
+#: src/grepleo/ui/skills_window.py:205
 msgid "Aplicar"
 msgstr ""
 
-#: src/grepleo/ui/skills_window.py:226
+#: src/grepleo/ui/skills_window.py:216
 msgid "Buscar…"
 msgstr ""
 
-#: src/grepleo/ui/skills_window.py:360
+#: src/grepleo/ui/skills_window.py:351
 #, python-brace-format
 msgid "Radares propuestos: {names}. Revisa los elementos y los niveles."
 msgstr ""
 
-#: src/grepleo/ui/skills_window.py:363
+#: src/grepleo/ui/skills_window.py:354
 msgid ""
 "No hay nada que proponer: añade habilidades (al menos tres de un mismo tema) "
 "o ya tienes radares con esos nombres."
 msgstr ""
 
-#: src/grepleo/ui/skills_window.py:417
+#: src/grepleo/ui/skills_window.py:433
 #, python-brace-format
 msgid "Un radar necesita entre {low} y {high} habilidades (ahora hay {count})."
 msgstr ""
 
-#: src/grepleo/ui/skills_window.py:421
+#: src/grepleo/ui/skills_window.py:437
 #, python-brace-format
 msgid "Está en más de un grupo: {names}. Se usa la primera vez que aparece."
 msgstr ""

@@ -110,10 +110,23 @@ def apply_state(state: SkillsState, profile: Profile) -> None:
             profile.skill_levels[key] = item.level
 
 
-# --- la escala de niveles --------------------------------------------------------------------------------
-# (desde, hasta, título, qué significa): la misma tabla que se usa para valorarse; la pregunta de fondo es «¿me presentaría a
-# una oferta que lo pide como requisito y lo defendería en la entrevista?»
-def level_scale() -> list[tuple[int, int, str, str]]:
+# --- las escalas de niveles -------------------------------------------------------------------------------
+# (desde, hasta, título, qué significa). Hay dos: la de las habilidades técnicas (con la pregunta clave «¿me presentaría a una
+# oferta que lo pide como requisito y lo defendería en la entrevista?») y la de las blandas, que no se aprenden con
+# documentación ni se «diseñan»: se practican, y lo que cuenta es poder poner un ejemplo concreto.
+def level_scale(soft: bool = False) -> list[tuple[int, int, str, str]]:
+    if soft:
+        return [
+            (0, 0, _("No lo he practicado"), _("No lo he practicado ni sé qué se espera de mí en esto.")),
+            (1, 2, _("Lo conozco en teoría"), _("Sé en qué consiste, pero apenas lo practico.")),
+            (3, 4, _("Lo practico a veces"), _("Me sale con esfuerzo o cuando alguien me guía; todavía no es un hábito.")),
+            (5, 5, _("Lo practico con regularidad"), _("Lo hago de forma habitual, aunque no siempre me sale bien.")),
+            (6, 7, _("Lo practico con naturalidad"), _("Lo hago bien en mi trabajo y puedo contar ejemplos concretos. "
+                                                       "Cubre del todo lo que una oferta pide de una habilidad blanda.")),
+            (8, 9, _("Es una fortaleza reconocida"), _("Compañeros o responsables me lo reconocen y lo aplico incluso en "
+                                                       "situaciones difíciles.")),
+            (10, 10, _("Soy un referente"), _("Otras personas acuden a mí para aprenderlo o para resolverlo.")),
+        ]
     return [
         (0, 0, _("No lo conozco"), _("No lo he usado ni sé qué es.")),
         (1, 2, _("Lo conozco de oídas"), _("Sé qué es y para qué sirve, o lo he visto en una demostración; no lo he usado.")),
@@ -130,16 +143,23 @@ def level_scale() -> list[tuple[int, int, str, str]]:
     ]
 
 
-def level_title(level: int) -> str:
+def key_question(soft: bool = False) -> str:
+    """La pregunta que ayuda a elegir el nivel."""
+    if soft:
+        return _("¿Puedo contar un ejemplo concreto y reciente en el que lo demostré, y lo contaría en la entrevista?")
+    return _("¿Me presentaría a una oferta que lo pide como requisito y lo defendería en la entrevista?")
+
+
+def level_title(level: int, soft: bool = False) -> str:
     """«Lo he usado en trabajo real» para un 5 o un 6: el título de la franja de ese nivel."""
-    for low, high, title, _meaning in level_scale():
+    for low, high, title, _meaning in level_scale(soft):
         if low <= level <= high:
             return title
     return ""
 
 
-def level_meaning(level: int) -> str:
-    for low, high, _title, meaning in level_scale():
+def level_meaning(level: int, soft: bool = False) -> str:
+    for low, high, _title, meaning in level_scale(soft):
         if low <= level <= high:
             return meaning
     return ""

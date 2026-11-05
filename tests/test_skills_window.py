@@ -138,3 +138,20 @@ def test_the_window_keeps_a_small_minimum_size_so_it_can_be_maximized_even_with_
             assert height <= window.measure(Gtk.Orientation.VERTICAL, 1100)[0] + 1   # ni con el ancho por defecto
     finally:
         settings.set_property("gtk-font-name", previous)
+
+
+def test_the_legend_changes_to_the_soft_scale_when_a_soft_group_is_chosen():
+    window = make()
+    technical = [(low, high) for low, high, _row in window.level_rows]
+    assert (7, 7) in technical and window.legend_box.get_first_child().get_text().startswith("¿Me presentaría")
+    window._select(window.state.groups[2])                                    # las habilidades blandas
+    soft = [(low, high) for low, high, _row in window.level_rows]
+    assert soft != technical and (6, 7) in soft
+    assert window.legend_box.get_first_child().get_text().startswith("¿Puedo contar un ejemplo")
+    row = window._rows[0]                                                     # Liderazgo, nivel 8
+    assert row.soft and row.meaning.get_text() == "8 · Es una fortaleza reconocida"
+    row.scale.set_value(6)
+    assert [(low, high) for low, high, box in window.level_rows if box.has_css_class("level-active")] == [(6, 7)]
+    window._select(window.state.groups[0])                                    # vuelta a las técnicas
+    assert [(low, high) for low, high, _row in window.level_rows] == technical
+    assert window._rows[0].meaning.get_text() == "8 · Lo diseño y lo mantengo"

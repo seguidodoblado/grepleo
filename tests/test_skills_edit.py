@@ -7,6 +7,7 @@ from grepleo.skills_edit import (
     SkillItem,
     SkillsState,
     apply_state,
+    key_question,
     level_meaning,
     level_scale,
     level_title,
@@ -71,3 +72,16 @@ def test_the_scale_covers_every_level_once_and_says_what_each_one_means():
     assert level_title(6) == "Lo he usado en trabajo real" and level_title(5) == level_title(6)
     assert "requisito" in level_meaning(8) and "«se valora»" in level_meaning(7)
     assert level_title(99) == "" and level_meaning(-1) == ""
+
+
+def test_soft_skills_have_their_own_scale_that_talks_about_practice_not_about_tools():
+    technical, soft = level_scale(), level_scale(soft=True)
+    covered = [level for low, high, _title, _meaning in soft for level in range(low, high + 1)]
+    assert covered == list(range(11)) and len(soft) != len(technical)
+    assert level_title(6, soft=True) == "Lo practico con naturalidad" == level_title(7, soft=True)
+    assert level_title(6) == "Lo he usado en trabajo real"
+    text = " ".join(title + meaning for _low, _high, title, meaning in soft).lower()
+    for tool_word in ("documentación", "producción", "diseño", "laboratorio", "tutorial", "requisito"):
+        assert tool_word not in text                                          # nada de lo que se aplica a las herramientas
+    assert "ejemplo" in key_question(soft=True) and "requisito" in key_question()
+    assert "Cubre del todo" in level_meaning(6, soft=True)                      # coincide con SOFT_DEMAND: desde 6, cubierta

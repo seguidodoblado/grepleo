@@ -21,6 +21,7 @@ from ..skills_edit import (
     SkillItem,
     SkillsState,
     apply_state,
+    key_question,
     level_meaning,
     level_scale,
     level_title,
@@ -46,10 +47,11 @@ class SkillRow(Gtk.Box):
     """Una habilidad: su nombre, sus sinónimos, un deslizador de 0 a 10 con su valor y lo que significa ese nivel."""
 
     def __init__(self, item: SkillItem, on_change: Callable[["SkillRow"], None],
-                 on_remove: Callable[["SkillRow"], None]) -> None:
+                 on_remove: Callable[["SkillRow"], None], soft: bool = False) -> None:
         super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=4, margin_top=4, margin_bottom=4)
         self.add_css_class("card")
         self.item = item
+        self.soft = soft
         self._on_change = on_change
         self._loading = True
         name, synonyms = split_spec(item.spec)
@@ -85,8 +87,8 @@ class SkillRow(Gtk.Box):
 
     def _refresh_meaning(self) -> None:
         level = round(self.scale.get_value())
-        self.meaning.set_text(f"{level} · {level_title(level)}")
-        self.meaning.set_tooltip_text(level_meaning(level))
+        self.meaning.set_text(f"{level} · {level_title(level, self.soft)}")
+        self.meaning.set_tooltip_text(level_meaning(level, self.soft))
 
     def _changed(self, *_args) -> None:
         if self._loading:
@@ -180,23 +182,11 @@ class SkillsWindow(Gtk.Window):
         body.append(center)
         # leyenda y vista previa
         right = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8, margin_end=6)
-        question = Gtk.Label(label=_("¿Me presentaría a una oferta que lo pide como requisito y lo defendería en la "
-                                      "entrevista?"), xalign=0, wrap=True)
-        question.add_css_class("title-4")
-        right.append(question)
+        self.legend_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        right.append(self.legend_box)
         self.level_rows: list[tuple[int, int, Gtk.Box]] = []
-        for low, high, title_text, meaning in level_scale():
-            row = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=1)
-            row.add_css_class("level-row")
-            label = Gtk.Label(xalign=0, use_markup=True)
-            span = f"{low}" if low == high else f"{low}–{high}"
-            label.set_markup(f"<b>{span}</b>  {_escape(title_text)}")
-            detail = Gtk.Label(label=meaning, xalign=0, wrap=True, max_width_chars=44)
-            detail.add_css_class("dim-label")
-            row.append(label)
-            row.append(detail)
-            self.level_rows.append((low, high, row))
-            right.append(row)
+        self._legend_soft: bool | None = None
+        self._set_legend(False)
         self.preview = RadarView()
         self.preview.set_content_height(250)
         right.append(self.preview)
@@ -308,6 +298,7 @@ class SkillsWindow(Gtk.Window):
         self.group_name.set_visible(radar)
         self.remove_group.set_sensitive(radar)
         self.group_name.set_text(group.name if radar else "")
+        self._set_legend(group is not None and group.kind == SOFT)
         if group is not None:
             for item in group.skills:
                 self._build_row(item)
@@ -364,8 +355,33 @@ class SkillsWindow(Gtk.Window):
                                     "tienes radares con esos nombres."))
 
     # --- habilidades -----------------------------------------------------------------------------
+    def _set_legend(self, soft: bool) -> None:
+        """La leyenda de niveles: la de las habilidades técnicas o la de las blandas, según el grupo que se edita."""
+        if soft == self._legend_soft:
+            return
+        self._legend_soft = soft
+        while (child := self.legend_box.get_first_child()) is not None:
+            self.legend_box.remove(child)
+        question = Gtk.Label(label=key_question(soft), xalign=0, wrap=True)
+        question.add_css_class("title-4")
+        self.legend_box.append(question)
+        self.level_rows = []
+        for low, high, title_text, meaning in level_scale(soft):
+            row = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=1)
+            row.add_css_class("level-row")
+            label = Gtk.Label(xalign=0, use_markup=True)
+            span = f"{low}" if low == high else f"{low}–{high}"
+            label.set_markup(f"<b>{span}</b>  {_escape(title_text)}")
+            detail = Gtk.Label(label=meaning, xalign=0, wrap=True, max_width_chars=44)
+            detail.add_css_class("dim-label")
+            row.append(label)
+            row.append(detail)
+            self.level_rows.append((low, high, row))
+            self.legend_box.append(row)
+
     def _build_row(self, item: SkillItem) -> SkillRow:
-        row = SkillRow(item, self._skill_changed, self._remove_skill)
+        row = SkillRow(item, self._skill_changed, self._remove_skill,
+                       soft=self._current is not None and self._current.kind == SOFT)
         self._rows.append(row)
         self.rows_box.append(row)
         return row

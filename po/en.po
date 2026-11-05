@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: grepleo 0.1.0\n"
 "Report-Msgid-Bugs-To: jose.antonio.seguido@gmail.com\n"
-"POT-Creation-Date: 2026-11-05 03:20+0100\n"
+"POT-Creation-Date: 2026-11-05 03:24+0100\n"
 "PO-Revision-Date: 2026-11-03 17:00+0100\n"
 "Last-Translator: José Antonio Seguido Doblado <jose.antonio.seguido@gmail."
 "com>\n"
@@ -595,19 +595,79 @@ msgstr ""
 msgid "Radar"
 msgstr "Radar"
 
-#: src/grepleo/skills_edit.py:118
+#: src/grepleo/skills_edit.py:120
+msgid "No lo he practicado"
+msgstr "I have not practised it"
+
+#: src/grepleo/skills_edit.py:120
+msgid "No lo he practicado ni sé qué se espera de mí en esto."
+msgstr "I have not practised it and I do not know what is expected of me here."
+
+#: src/grepleo/skills_edit.py:121
+msgid "Lo conozco en teoría"
+msgstr "I know it in theory"
+
+#: src/grepleo/skills_edit.py:121
+msgid "Sé en qué consiste, pero apenas lo practico."
+msgstr "I know what it consists of, but I hardly practise it."
+
+#: src/grepleo/skills_edit.py:122
+msgid "Lo practico a veces"
+msgstr "I practise it sometimes"
+
+#: src/grepleo/skills_edit.py:122
+msgid "Me sale con esfuerzo o cuando alguien me guía; todavía no es un hábito."
+msgstr "It comes with effort or when someone guides me; it is not a habit yet."
+
+#: src/grepleo/skills_edit.py:123
+msgid "Lo practico con regularidad"
+msgstr "I practise it regularly"
+
+#: src/grepleo/skills_edit.py:123
+msgid "Lo hago de forma habitual, aunque no siempre me sale bien."
+msgstr "I do it habitually, although it does not always go well."
+
+#: src/grepleo/skills_edit.py:124
+msgid "Lo practico con naturalidad"
+msgstr "I practise it naturally"
+
+#: src/grepleo/skills_edit.py:124
+msgid ""
+"Lo hago bien en mi trabajo y puedo contar ejemplos concretos. Cubre del todo "
+"lo que una oferta pide de una habilidad blanda."
+msgstr "I do it well in my work and can tell concrete examples. It fully covers what an offer asks of a soft skill."
+
+#: src/grepleo/skills_edit.py:126
+msgid "Es una fortaleza reconocida"
+msgstr "It is a recognised strength"
+
+#: src/grepleo/skills_edit.py:126
+msgid ""
+"Compañeros o responsables me lo reconocen y lo aplico incluso en situaciones "
+"difíciles."
+msgstr "Colleagues or managers recognise it in me and I apply it even in difficult situations."
+
+#: src/grepleo/skills_edit.py:128
+msgid "Soy un referente"
+msgstr "I am a reference"
+
+#: src/grepleo/skills_edit.py:128
+msgid "Otras personas acuden a mí para aprenderlo o para resolverlo."
+msgstr "Other people come to me to learn it or to solve it."
+
+#: src/grepleo/skills_edit.py:131
 msgid "No lo conozco"
 msgstr "I do not know it"
 
-#: src/grepleo/skills_edit.py:118
+#: src/grepleo/skills_edit.py:131
 msgid "No lo he usado ni sé qué es."
 msgstr "I have not used it and I do not know what it is."
 
-#: src/grepleo/skills_edit.py:119
+#: src/grepleo/skills_edit.py:132
 msgid "Lo conozco de oídas"
 msgstr "I know it by hearsay"
 
-#: src/grepleo/skills_edit.py:119
+#: src/grepleo/skills_edit.py:132
 msgid ""
 "Sé qué es y para qué sirve, o lo he visto en una demostración; no lo he "
 "usado."
@@ -615,11 +675,11 @@ msgstr ""
 "I know what it is and what it is for, or I have seen a demo; I have not used "
 "it."
 
-#: src/grepleo/skills_edit.py:120
+#: src/grepleo/skills_edit.py:133
 msgid "Lo he probado"
 msgstr "I have tried it"
 
-#: src/grepleo/skills_edit.py:120
+#: src/grepleo/skills_edit.py:133
 msgid ""
 "Lo he usado en laboratorios o tutoriales, siguiendo guías; con un caso real "
 "necesitaría ayuda."
@@ -627,11 +687,11 @@ msgstr ""
 "I have used it in labs or tutorials, following guides; with a real case I "
 "would need help."
 
-#: src/grepleo/skills_edit.py:122
+#: src/grepleo/skills_edit.py:135
 msgid "Lo he usado en trabajo real"
 msgstr "I have used it in real work"
 
-#: src/grepleo/skills_edit.py:122
+#: src/grepleo/skills_edit.py:135
 msgid ""
 "Con la documentación al lado resuelvo lo habitual; todavía no lo diseño de "
 "cero."
@@ -639,11 +699,11 @@ msgstr ""
 "With the documentation at hand I solve the usual; I do not design it from "
 "scratch yet."
 
-#: src/grepleo/skills_edit.py:124
+#: src/grepleo/skills_edit.py:137
 msgid "Lo uso con soltura"
 msgstr "I use it fluently"
 
-#: src/grepleo/skills_edit.py:124
+#: src/grepleo/skills_edit.py:137
 msgid ""
 "En producción, con autonomía. Cubre del todo lo que una oferta pide como «se "
 "valora»."
@@ -651,11 +711,11 @@ msgstr ""
 "In production, with autonomy. It fully covers what an offer asks for as "
 "“nice to have”."
 
-#: src/grepleo/skills_edit.py:126
+#: src/grepleo/skills_edit.py:139
 msgid "Lo diseño y lo mantengo"
 msgstr "I design and maintain it"
 
-#: src/grepleo/skills_edit.py:126
+#: src/grepleo/skills_edit.py:139
 msgid ""
 "Lo diseño, configuro y mantengo solo y resuelvo incidencias. Cubre un "
 "requisito: me presentaría y lo defendería con casos reales."
@@ -663,22 +723,36 @@ msgstr ""
 "I design, configure and maintain it on my own and solve incidents. It covers "
 "a requirement: I would apply and defend it with real cases."
 
-#: src/grepleo/skills_edit.py:128
+#: src/grepleo/skills_edit.py:141
 msgid "Dominio profundo"
 msgstr "Deep mastery"
 
-#: src/grepleo/skills_edit.py:128
+#: src/grepleo/skills_edit.py:141
 msgid "Arquitectura, optimización y casos complejos; puedo enseñarlo a otros."
 msgstr ""
 "Architecture, optimisation and complex cases; I can teach it to others."
 
-#: src/grepleo/skills_edit.py:129
+#: src/grepleo/skills_edit.py:142
 msgid "Referente"
 msgstr "Reference"
 
-#: src/grepleo/skills_edit.py:129
+#: src/grepleo/skills_edit.py:142
 msgid "Reconocido en el tema: contribuciones o años de especialización."
 msgstr "Recognised in the field: contributions or years of specialisation."
+
+#: src/grepleo/skills_edit.py:149
+msgid ""
+"¿Puedo contar un ejemplo concreto y reciente en el que lo demostré, y lo "
+"contaría en la entrevista?"
+msgstr "Can I tell a concrete, recent example in which I showed it, and would I tell it in the interview?"
+
+#: src/grepleo/skills_edit.py:150
+msgid ""
+"¿Me presentaría a una oferta que lo pide como requisito y lo defendería en "
+"la entrevista?"
+msgstr ""
+"Would I apply to an offer that asks for it as a requirement and defend it in "
+"the interview?"
 
 #: src/grepleo/skills.py:92 src/grepleo/skills.py:117
 msgid "la tienes"
@@ -824,7 +898,7 @@ msgid "Aceptar"
 msgstr "OK"
 
 #: src/grepleo/ui/common.py:168 src/grepleo/ui/common.py:190
-#: src/grepleo/ui/profile_dialog.py:216 src/grepleo/ui/skills_window.py:213
+#: src/grepleo/ui/profile_dialog.py:216 src/grepleo/ui/skills_window.py:203
 #: src/grepleo/ui/tracking_panel.py:79
 msgid "Cancelar"
 msgstr "Cancel"
@@ -1533,7 +1607,9 @@ msgstr "{count} of {seen} offers with a full description"
 #: src/grepleo/ui/market_page.py:128
 msgid ""
 "Con estas ofertas no hay nada que reforzar: tu nivel llega a lo que piden."
-msgstr "With these offers there is nothing to strengthen: your level reaches what they ask for."
+msgstr ""
+"With these offers there is nothing to strengthen: your level reaches what "
+"they ask for."
 
 #: src/grepleo/ui/market_page.py:132
 msgid "Habilidad"
@@ -1713,7 +1789,7 @@ msgstr "For example: English C1, French B1"
 msgid "Idiomas (con nivel A1 a C2)"
 msgstr "Languages (with level A1 to C2)"
 
-#: src/grepleo/ui/profile_dialog.py:117 src/grepleo/ui/skills_window.py:109
+#: src/grepleo/ui/profile_dialog.py:117 src/grepleo/ui/skills_window.py:111
 msgid "Habilidades y niveles"
 msgstr "Skills and levels"
 
@@ -2095,89 +2171,81 @@ msgstr "You"
 msgid "Lo que pide la oferta"
 msgstr "What the offer asks"
 
-#: src/grepleo/ui/skills_window.py:57
+#: src/grepleo/ui/skills_window.py:59
 msgid "Habilidad (AWS, Python, Scrum…)"
 msgstr "Skill (AWS, Python, Scrum…)"
 
-#: src/grepleo/ui/skills_window.py:58
+#: src/grepleo/ui/skills_window.py:60
 msgid "Sinónimos, separados por comas"
 msgstr "Synonyms, separated by commas"
 
-#: src/grepleo/ui/skills_window.py:59
+#: src/grepleo/ui/skills_window.py:61
 msgid "Quitar esta habilidad"
 msgstr "Remove this skill"
 
-#: src/grepleo/ui/skills_window.py:131
+#: src/grepleo/ui/skills_window.py:133
 msgid "Grupos"
 msgstr "Groups"
 
-#: src/grepleo/ui/skills_window.py:140
+#: src/grepleo/ui/skills_window.py:142
 msgid "Añadir radar"
 msgstr "Add radar"
 
-#: src/grepleo/ui/skills_window.py:142
+#: src/grepleo/ui/skills_window.py:144
 msgid "Proponer radares"
 msgstr "Propose radars"
 
-#: src/grepleo/ui/skills_window.py:143
+#: src/grepleo/ui/skills_window.py:145
 msgid "Agrupa por temas las habilidades que ya tienes; luego los puedes editar"
 msgstr ""
 "Groups the skills you already have by topic; you can edit them afterwards"
 
-#: src/grepleo/ui/skills_window.py:145
+#: src/grepleo/ui/skills_window.py:147
 msgid "Quitar este radar"
 msgstr "Remove this radar"
 
-#: src/grepleo/ui/skills_window.py:156
+#: src/grepleo/ui/skills_window.py:158
 msgid "Nombre del radar (Cloud, Lenguajes…)"
 msgstr "Radar name (Cloud, Languages…)"
 
-#: src/grepleo/ui/skills_window.py:159
+#: src/grepleo/ui/skills_window.py:161
 msgid "−1 a todas"
 msgstr "−1 to all"
 
-#: src/grepleo/ui/skills_window.py:159
+#: src/grepleo/ui/skills_window.py:161
 msgid "Baja un punto el nivel de todas las habilidades del grupo"
 msgstr "Lowers the level of all the group's skills by one point"
 
-#: src/grepleo/ui/skills_window.py:161
+#: src/grepleo/ui/skills_window.py:163
 msgid "+1 a todas"
 msgstr "+1 to all"
 
-#: src/grepleo/ui/skills_window.py:161
+#: src/grepleo/ui/skills_window.py:163
 msgid "Sube un punto el nivel de todas las habilidades del grupo"
 msgstr "Raises the level of all the group's skills by one point"
 
-#: src/grepleo/ui/skills_window.py:174
+#: src/grepleo/ui/skills_window.py:176
 msgid "Añadir habilidad"
 msgstr "Add skill"
 
-#: src/grepleo/ui/skills_window.py:177
+#: src/grepleo/ui/skills_window.py:179
 msgid "Añadir del catálogo…"
 msgstr "Add from the catalogue…"
 
-#: src/grepleo/ui/skills_window.py:183
-msgid ""
-"¿Me presentaría a una oferta que lo pide como requisito y lo defendería en "
-"la entrevista?"
-msgstr ""
-"Would I apply to an offer that asks for it as a requirement and defend it in "
-"the interview?"
-
-#: src/grepleo/ui/skills_window.py:215
+#: src/grepleo/ui/skills_window.py:205
 msgid "Aplicar"
 msgstr "Apply"
 
-#: src/grepleo/ui/skills_window.py:226
+#: src/grepleo/ui/skills_window.py:216
 msgid "Buscar…"
 msgstr "Search…"
 
-#: src/grepleo/ui/skills_window.py:360
+#: src/grepleo/ui/skills_window.py:351
 #, python-brace-format
 msgid "Radares propuestos: {names}. Revisa los elementos y los niveles."
 msgstr "Proposed radars: {names}. Review the elements and the levels."
 
-#: src/grepleo/ui/skills_window.py:363
+#: src/grepleo/ui/skills_window.py:354
 msgid ""
 "No hay nada que proponer: añade habilidades (al menos tres de un mismo tema) "
 "o ya tienes radares con esos nombres."
@@ -2185,12 +2253,12 @@ msgstr ""
 "Nothing to propose: add skills (at least three of the same topic) or you "
 "already have radars with those names."
 
-#: src/grepleo/ui/skills_window.py:417
+#: src/grepleo/ui/skills_window.py:433
 #, python-brace-format
 msgid "Un radar necesita entre {low} y {high} habilidades (ahora hay {count})."
 msgstr "A radar needs between {low} and {high} skills (there are {count})."
 
-#: src/grepleo/ui/skills_window.py:421
+#: src/grepleo/ui/skills_window.py:437
 #, python-brace-format
 msgid "Está en más de un grupo: {names}. Se usa la primera vez que aparece."
 msgstr "It is in more than one group: {names}. The first occurrence is used."
@@ -2210,7 +2278,10 @@ msgid ""
 "Se abren en tu navegador; no se recomiendan cursos concretos. Las "
 "certificaciones se revisaron en {date}: comprueba en el enlace oficial que "
 "siguen vigentes."
-msgstr "They open in your browser; no specific courses are recommended. The certifications were reviewed in {date}: check on the official link that they are still current."
+msgstr ""
+"They open in your browser; no specific courses are recommended. The "
+"certifications were reviewed in {date}: check on the official link that they "
+"are still current."
 
 #: src/grepleo/ui/study_links.py:42
 msgid "Estudiar"
