@@ -18,11 +18,13 @@ from .radar import (
     RadarData,
     _general_notes,
     axis_labels,
+    build_radars,
     data_levels,
     demand_note,
     general_levels,
     offer_demand,
     term_demand,
+    total_overlap,
 )
 from .textutil import mentions, normalize
 
@@ -39,6 +41,30 @@ def _share_note(asking: int, total: int, how: str) -> str:
     if not asking:
         return _("ninguna oferta lo pide")
     return _("en el {share} % de las ofertas · {how}").format(share=share, how=how)
+
+
+@dataclass
+class OfferRow:
+    """Una oferta del mercado con sus valores: su encaje y lo que cubres de ella en cada radar y en conjunto."""
+    job: Job
+    fit: Fit
+    score: float | None
+    overall: float | None                 # el solape global de esta oferta (todos los radares juntos)
+    overlaps: list[float | None]          # el solape de cada radar, en el orden de `Market.radars`
+
+
+def build_rows(jobs: list[Job], evaluations: dict[str, Evaluation], profile: Profile) -> list[OfferRow]:
+    """El desglose por oferta de lo que cuenta el mapa del mercado (las de descripción completa), de más a menos cubierta."""
+    rows = []
+    for job in jobs:
+        if not job.full_description:
+            continue
+        radars = build_radars(job, profile)
+        evaluation = evaluations.get(job.key)
+        rows.append(OfferRow(job, evaluation.fit if evaluation else Fit.UNKNOWN, evaluation.score if evaluation else None,
+                             total_overlap(radars), [radar.overlap for radar in radars]))
+    rows.sort(key=lambda row: (-(row.overall if row.overall is not None else -1), row.job.company.casefold()))
+    return rows
 
 
 def relevant_jobs(jobs: list[Job], evaluations: dict[str, Evaluation]) -> list[Job]:

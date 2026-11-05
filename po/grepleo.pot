@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: grepleo 0.1.0\n"
 "Report-Msgid-Bugs-To: jose.antonio.seguido@gmail.com\n"
-"POT-Creation-Date: 2026-11-05 03:02+0100\n"
+"POT-Creation-Date: 2026-11-05 03:13+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -115,16 +115,16 @@ msgstr ""
 msgid "Requisitos eliminatorios que no cumplo: {names}"
 msgstr ""
 
-#: src/grepleo/market.py:40
+#: src/grepleo/market.py:42
 msgid "ninguna oferta lo pide"
 msgstr ""
 
-#: src/grepleo/market.py:41
+#: src/grepleo/market.py:43
 #, python-format, python-brace-format
 msgid "en el {share} % de las ofertas · {how}"
 msgstr ""
 
-#: src/grepleo/market.py:86 src/grepleo/radar.py:329
+#: src/grepleo/market.py:112 src/grepleo/radar.py:329
 msgid "General"
 msgstr ""
 
@@ -214,7 +214,7 @@ msgid "Ubicación"
 msgstr ""
 
 #: src/grepleo/matching.py:180 src/grepleo/models.py:19
-#: src/grepleo/ui/profile_dialog.py:36
+#: src/grepleo/ui/map_page.py:136 src/grepleo/ui/profile_dialog.py:36
 msgid "Remoto"
 msgstr ""
 
@@ -239,11 +239,13 @@ msgstr ""
 msgid "Cumples el nivel"
 msgstr ""
 
-#: src/grepleo/models.py:19 src/grepleo/ui/profile_dialog.py:36
+#: src/grepleo/models.py:19 src/grepleo/ui/map_page.py:135
+#: src/grepleo/ui/profile_dialog.py:36
 msgid "Híbrido"
 msgstr ""
 
-#: src/grepleo/models.py:20 src/grepleo/ui/profile_dialog.py:36
+#: src/grepleo/models.py:20 src/grepleo/ui/map_page.py:135
+#: src/grepleo/ui/profile_dialog.py:36
 msgid "Presencial"
 msgstr ""
 
@@ -326,6 +328,7 @@ msgid "Prueba o examen"
 msgstr ""
 
 #: src/grepleo/models.py:100 src/grepleo/ui/gui.py:591
+#: src/grepleo/ui/market_page.py:139
 msgid "Oferta"
 msgstr ""
 
@@ -345,7 +348,7 @@ msgstr[1] ""
 msgid "Ninguna oferta con detalle cita lo que conoces: {names}."
 msgstr ""
 
-#: src/grepleo/panorama.py:139 src/grepleo/ui/map_page.py:223
+#: src/grepleo/panorama.py:139 src/grepleo/ui/map_page.py:270
 #: src/grepleo/ui/radar_legend.py:128
 #, python-brace-format
 msgid "y {count} más"
@@ -522,7 +525,7 @@ msgid "Tipo"
 msgstr ""
 
 #: src/grepleo/report.py:26 src/grepleo/ui/gui.py:436
-#: src/grepleo/ui/gui.py:1051
+#: src/grepleo/ui/gui.py:1051 src/grepleo/ui/market_page.py:139
 msgid "Encaje"
 msgstr ""
 
@@ -787,11 +790,11 @@ msgstr ""
 msgid "CV guardado en {path}."
 msgstr ""
 
-#: src/grepleo/ui/common.py:154 src/grepleo/ui/common.py:182
+#: src/grepleo/ui/common.py:163 src/grepleo/ui/common.py:191
 msgid "Aceptar"
 msgstr ""
 
-#: src/grepleo/ui/common.py:159 src/grepleo/ui/common.py:181
+#: src/grepleo/ui/common.py:168 src/grepleo/ui/common.py:190
 #: src/grepleo/ui/profile_dialog.py:216 src/grepleo/ui/skills_window.py:213
 #: src/grepleo/ui/tracking_panel.py:79
 msgid "Cancelar"
@@ -978,7 +981,7 @@ msgstr ""
 msgid "(est.)"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:262 src/grepleo/ui/market_page.py:36
+#: src/grepleo/ui/gui.py:262 src/grepleo/ui/market_page.py:46
 msgid "Ofertas"
 msgstr ""
 
@@ -1320,7 +1323,8 @@ msgid ""
 "entrevistas."
 msgstr ""
 
-#: src/grepleo/ui/gui.py:1126 src/grepleo/ui/market_page.py:73
+#: src/grepleo/ui/gui.py:1126 src/grepleo/ui/market_page.py:95
+#: src/grepleo/ui/market_page.py:124
 msgid "Calculando…"
 msgstr ""
 
@@ -1414,57 +1418,70 @@ msgstr ""
 msgid "Michael Page se lee directamente de su web pública, sin Apify"
 msgstr ""
 
-#: src/grepleo/ui/map_page.py:77
+#: src/grepleo/ui/map_page.py:91
 msgid ""
 "Para ver el mapa instala el paquete gir1.2-shumate-1.0 (sudo apt install "
 "gir1.2-shumate-1.0) y reinicia Grepleo."
 msgstr ""
 
-#: src/grepleo/ui/map_page.py:92
+#: src/grepleo/ui/map_page.py:109
 msgid ""
 "Las imágenes del mapa y la búsqueda de cada ubicación (una sola vez) son de "
 "OpenStreetMap; no se envía nada más de tus ofertas ni de tu perfil."
 msgstr ""
 
-#: src/grepleo/ui/map_page.py:157
+#: src/grepleo/ui/map_page.py:201
 #, python-brace-format
 msgid "{placed} de {total} ofertas en el mapa"
 msgstr ""
 
-#: src/grepleo/ui/map_page.py:160
+#: src/grepleo/ui/map_page.py:204
 #, python-brace-format
 msgid "{count} sin ubicación (remoto o sin dato)"
 msgstr ""
 
-#: src/grepleo/ui/map_page.py:162
+#: src/grepleo/ui/map_page.py:206
 #, python-brace-format
 msgid "buscando ubicaciones: {done} de {total}"
 msgstr ""
 
-#: src/grepleo/ui/map_page.py:164
+#: src/grepleo/ui/map_page.py:208
 #, python-brace-format
 msgid "no se pudo seguir buscando: {error}"
 msgstr ""
 
-#: src/grepleo/ui/market_page.py:20
+#: src/grepleo/ui/market_page.py:23
 msgid "Las que veo ahora"
 msgstr ""
 
-#: src/grepleo/ui/market_page.py:20
+#: src/grepleo/ui/market_page.py:23
 msgid "Solo encaje alto o medio"
 msgstr ""
 
-#: src/grepleo/ui/market_page.py:20
+#: src/grepleo/ui/market_page.py:23
 msgid "Solo encaje bajo (plan de estudio)"
 msgstr ""
 
-#: src/grepleo/ui/market_page.py:44
+#: src/grepleo/ui/market_page.py:54
 msgid "Elige un perfil para ver su mapa del mercado."
 msgstr ""
 
-#: src/grepleo/ui/market_page.py:85
+#: src/grepleo/ui/market_page.py:58
+msgid "Desglose por oferta"
+msgstr ""
+
+#: src/grepleo/ui/market_page.py:109
 #, python-brace-format
 msgid "{count} de {seen} ofertas con descripción completa"
+msgstr ""
+
+#: src/grepleo/ui/market_page.py:137
+#, python-brace-format
+msgid "{count} ofertas, de la que más cubres a la que menos"
+msgstr ""
+
+#: src/grepleo/ui/market_page.py:139
+msgid "Solape global"
 msgstr ""
 
 #: src/grepleo/ui/preferences.py:23 src/grepleo/ui/preferences.py:46

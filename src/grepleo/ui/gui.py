@@ -261,7 +261,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.notebook = Gtk.Notebook(vexpand=True)
         self.notebook.append_page(self._build_results_page(), Gtk.Label(label=_("Ofertas")))
         self.notebook.append_page(self._build_panorama_page(), Gtk.Label(label=_("Panorama")))
-        self.market = MarketPage(self._market_data)
+        self.market = MarketPage(self._market_data, self._pick_job)
         self.notebook.append_page(self.market, Gtk.Label(label=_("Mercado")))
         self.map_page = MapPage(self._market_data, self.store, self._pick_job, dark=APPEARANCE.dark)
         self.notebook.append_page(self.map_page, Gtk.Label(label=_("Mapa")))

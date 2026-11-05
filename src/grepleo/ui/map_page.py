@@ -21,7 +21,7 @@ except (ValueError, ImportError):
 
 from ..geocode import Coordinates, Geocoder, clean_place, geocode_places
 from ..i18n import _
-from ..models import Evaluation, Fit, Job
+from ..models import Evaluation, Fit, Job, WorkMode
 from ..profiles import Profile
 from ..storage import Store
 
@@ -30,6 +30,20 @@ LICENSE = "© OpenStreetMap contributors"
 LICENSE_URI = "https://www.openstreetmap.org/copyright"
 ORDER = (Fit.HIGH, Fit.MEDIUM, Fit.LOW, Fit.UNKNOWN)   # de mejor a peor: un punto con varias ofertas toma el de la mejor
 LISTED = 12                                            # ofertas que se listan al pulsar un punto
+
+
+def dominant_mode(jobs: list[Job]) -> WorkMode:
+    """La modalidad de la mayoría de las ofertas de un punto (si empatan, la presencial antes que la híbrida y esta antes
+    que la remota); sin dato en todas, «sin dato»."""
+    counts = {mode: sum(1 for job in jobs if job.work_mode is mode)
+              for mode in (WorkMode.ONSITE, WorkMode.HYBRID, WorkMode.REMOTE)}
+    best = max(counts.values())
+    return next((mode for mode, count in counts.items() if count == best), WorkMode.UNKNOWN) if best else WorkMode.UNKNOWN
+
+
+def shape_class(mode: WorkMode) -> str:
+    """La forma del punto: círculo (presencial o sin dato), cuadrado redondeado (híbrido) o anillo (remoto)."""
+    return {WorkMode.HYBRID: "map-pin-hybrid", WorkMode.REMOTE: "map-pin-remote"}.get(mode, "")
 
 
 def map_available() -> bool:
@@ -81,18 +95,48 @@ class MapPage(Gtk.Box):
         source = Shumate.RasterRenderer.new_full_from_url(identifier, name, LICENSE, LICENSE_URI, 0, 19, 256,
                                                           Shumate.MapProjection.MERCATOR, url)
         self.map = Shumate.SimpleMap(vexpand=True, hexpand=True)
+        overlay = Gtk.Overlay(vexpand=True, hexpand=True)
         self.map.set_map_source(source)
         self.dark = dark
         if dark:   # las imágenes de OpenStreetMap solo son claras: en el tema oscuro se invierten
             self.map.get_map().add_css_class("map-dark")
         self._layer = Shumate.MarkerLayer.new(self.map.get_viewport())
         self.map.add_overlay_layer(self._layer)
-        self.append(self.map)
+        overlay.set_child(self.map)
+        overlay.add_overlay(self._build_legend(dark))
+        self.append(overlay)
         note = Gtk.Label(xalign=0, wrap=True, label=_(
             "Las imágenes del mapa y la búsqueda de cada ubicación (una sola vez) son de OpenStreetMap; no se envía nada "
             "más de tus ofertas ni de tu perfil."))
         note.add_css_class("dim-label")
         self.append(note)
+
+    @staticmethod
+    def _build_legend(dark: bool = False) -> Gtk.Widget:
+        """Qué significan la forma y el color de los puntos, en una esquina del mapa."""
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4, halign=Gtk.Align.START, valign=Gtk.Align.START,
+                      margin_start=10, margin_top=10)
+        box.add_css_class("map-legend")
+        if dark:
+            box.add_css_class("map-legend-dark")
+
+        def row(items: list[tuple[str, list[str]]]) -> Gtk.Box:
+            line = Gtk.Box(spacing=10)
+            for text, classes in items:
+                item = Gtk.Box(spacing=5)
+                swatch = Gtk.Label(valign=Gtk.Align.CENTER)
+                for css in ("map-pin", "map-legend-swatch", *classes):
+                    swatch.add_css_class(css)
+                item.append(swatch)
+                item.append(Gtk.Label(label=text))
+                line.append(item)
+            return line
+
+        box.append(row([(_("Presencial"), ["map-pin-unknown"]), (_("Híbrido"), ["map-pin-unknown", "map-pin-hybrid"]),
+                        (_("Remoto"), ["map-pin-unknown", "map-pin-remote"])]))
+        box.append(row([(Fit.HIGH.label, ["map-pin-high"]), (Fit.MEDIUM.label, ["map-pin-medium"]),
+                        (Fit.LOW.label, ["map-pin-low"]), (Fit.UNKNOWN.label, ["map-pin-unknown"])]))
+        return box
 
     # --- datos -----------------------------------------------------------------------------------
     def invalidate(self) -> None:
@@ -184,6 +228,8 @@ class MapPage(Gtk.Box):
             if self.dark:
                 pin.add_css_class("map-pin-undo")   # el mapa está invertido: el punto se invierte otra vez y recupera su color
             pin.add_css_class(f"map-pin-{fit.value}")
+            if shape := shape_class(dominant_mode(jobs)):
+                pin.add_css_class(shape)
             popover = self._popover(place, jobs, pin)
             click = Gtk.GestureClick()
             click.connect("released", lambda *_args, p=popover: p.popup())
@@ -214,7 +260,8 @@ class MapPage(Gtk.Box):
             fit = evaluation.fit.label if evaluation else Fit.UNKNOWN.label
             score = f" {round((evaluation.score or 0) * 100)} %" if evaluation and evaluation.score is not None else ""
             button = Gtk.Button(css_classes=["flat"], halign=Gtk.Align.FILL)
-            label = Gtk.Label(label=f"{job.company} · {job.title}  ({fit}{score})", xalign=0, wrap=True,
+            mode = f" · {job.work_mode.label}" if job.work_mode is not WorkMode.UNKNOWN else ""
+            label = Gtk.Label(label=f"{job.company} · {job.title}  ({fit}{score}{mode})", xalign=0, wrap=True,
                               max_width_chars=48)
             button.set_child(label)
             button.connect("clicked", lambda _button, j=job, p=popover: (p.popdown(), self._on_pick(j)))

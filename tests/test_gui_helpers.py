@@ -339,6 +339,21 @@ def test_the_market_tab_shows_the_profile_radars_against_the_offers_in_the_backg
     assert [view for view in window.market.panel.views] and len(window.market.panel.cards) == 2     # General y Cloud
     assert "1 de 1 ofertas" in window.market.status.get_text()
     assert "Cubres un" in window.market.panel.summary.get_text()
+    window.market.breakdown.set_expanded(True)                                 # el desglose por oferta, al abrirlo
+    for _attempt in range(200):
+        while context.iteration(False):
+            pass
+        if window.market._rows_key is not None:
+            break
+        GLib.usleep(10000)
+    assert "1 ofertas" in window.market._rows_status.get_text()
+    texts = _all_labels(window.market._grid_holder)
+    assert all(word in texts for word in ("Oferta", "Encaje", "Solape global", "General", "%"))
+    window.notebook.set_current_page(2)
+    first = window.market._grid_holder.get_child().get_child().get_child_at(0, 1)           # el botón de la primera oferta
+    first.emit("clicked")
+    assert window.notebook.get_current_page() == 0 and window.selection.get_selected_item().job.key == "x:1"
+    window.notebook.set_current_page(2)
     window.market.source.set_selected(1)                                       # solo encaje alto o medio
     for _attempt in range(100):
         while context.iteration(False):

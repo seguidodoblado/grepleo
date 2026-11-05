@@ -13,16 +13,16 @@ from pathlib import Path
 
 from gi.repository import GLib
 
-from grepleo.models import Evaluation, Fit, Job
+from grepleo.models import Evaluation, Fit, Job, WorkMode
 from grepleo.storage import Store
 from grepleo.ui import map_page
-from grepleo.ui.map_page import MapPage, best_fit, map_available, start_view
+from grepleo.ui.map_page import MapPage, best_fit, dominant_mode, map_available, shape_class, start_view
 
 needs_map = pytest.mark.skipif(not map_available(), reason="libshumate (gir1.2-shumate-1.0) no está instalado")
 
 
-def job(key, location, title="DevOps"):
-    return Job(key=f"x:{key}", source="x", title=title, company=f"Empresa {key}", location=location)
+def job(key, location, title="DevOps", mode=WorkMode.UNKNOWN):
+    return Job(key=f"x:{key}", source="x", title=title, company=f"Empresa {key}", location=location, work_mode=mode)
 
 
 def evaluation(fit):
@@ -145,3 +145,50 @@ def test_the_tiles_need_no_key_and_the_dark_theme_inverts_them_while_the_pins_ke
     dark.refresh()
     light.refresh()
     assert dark._pins[0][0].has_css_class("map-pin-undo") and not light._pins[0][0].has_css_class("map-pin-undo")
+
+
+def test_the_shape_of_a_point_says_the_work_mode_of_most_of_its_offers():
+    onsite, hybrid, remote = WorkMode.ONSITE, WorkMode.HYBRID, WorkMode.REMOTE
+    assert dominant_mode([job(1, "M", mode=hybrid), job(2, "M", mode=hybrid), job(3, "M", mode=remote)]) == hybrid
+    assert dominant_mode([job(1, "M", mode=remote), job(2, "M", mode=onsite)]) == onsite          # empate: presencial primero
+    assert dominant_mode([job(1, "M", mode=remote), job(2, "M", mode=hybrid)]) == hybrid
+    assert dominant_mode([job(1, "M")]) == WorkMode.UNKNOWN and dominant_mode([]) == WorkMode.UNKNOWN
+    assert shape_class(onsite) == "" == shape_class(WorkMode.UNKNOWN)
+    assert shape_class(hybrid) == "map-pin-hybrid" and shape_class(remote) == "map-pin-remote"
+
+
+@needs_map
+def test_points_are_circles_squares_or_rings_by_work_mode_and_the_legend_explains_them():
+    store = Store(Path(":memory:"))
+    for place, coordinates in (("Madrid", (40.4, -3.7)), ("Barcelona", (41.4, 2.2)), ("Sevilla", (37.4, -6.0))):
+        store.save_place(place, coordinates)
+    jobs = [job(1, "Madrid", mode=WorkMode.ONSITE), job(2, "Barcelona", mode=WorkMode.HYBRID),
+            job(3, "Sevilla", mode=WorkMode.REMOTE)]
+    evaluations = {item.key: evaluation(Fit.HIGH) for item in jobs}
+    page = MapPage(lambda: (jobs, evaluations, None), store, lambda _job: None)
+    page.refresh()
+    shapes = {pin.get_tooltip_text().split(" · ")[0]: [c for c in pin.get_css_classes() if c in ("map-pin-hybrid", "map-pin-remote")]
+              for pin, _popover in page._pins}
+    assert shapes == {"Madrid": [], "Barcelona": ["map-pin-hybrid"], "Sevilla": ["map-pin-remote"]}
+    buttons = []
+    stack = [page._pins[1][1].get_child()]
+    while stack:
+        widget = stack.pop()
+        if isinstance(widget, Gtk.Label):
+            buttons.append(widget.get_text())
+        child = widget.get_first_child()
+        while child is not None:
+            stack.append(child)
+            child = child.get_next_sibling()
+    assert any("Híbrido" in text for text in buttons)                        # la lista dice la modalidad de cada oferta
+    legend = []
+    stack = [page]
+    while stack:
+        widget = stack.pop()
+        if widget.has_css_class("map-legend"):
+            legend.append(widget)
+        child = widget.get_first_child()
+        while child is not None:
+            stack.append(child)
+            child = child.get_next_sibling()
+    assert len(legend) == 1                                                  # una leyenda sobre el mapa

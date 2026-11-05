@@ -47,6 +47,15 @@ CSS = b"""
            color: white; font-weight: bold; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.55); }
 .map-dark { filter: invert(1) hue-rotate(180deg); }
 .map-pin-undo { filter: invert(1) hue-rotate(180deg); }
+.map-pin-hybrid { border-radius: 6px; }
+.map-pin.map-pin-remote { background: white; border-width: 4px; }
+.map-pin.map-pin-remote.map-pin-high { color: rgb(46, 160, 67); border-color: rgb(46, 160, 67); }
+.map-pin.map-pin-remote.map-pin-medium { color: rgb(230, 126, 34); border-color: rgb(230, 126, 34); }
+.map-pin.map-pin-remote.map-pin-low { color: rgb(218, 54, 51); border-color: rgb(218, 54, 51); }
+.map-pin.map-pin-remote.map-pin-unknown { color: rgb(128, 128, 128); border-color: rgb(128, 128, 128); }
+.map-legend { background: rgba(255, 255, 255, 0.88); color: #222; border-radius: 8px; padding: 6px 10px; font-size: 90%; }
+.map-legend-dark { background: rgba(32, 32, 32, 0.88); color: #eee; }
+.map-legend-swatch { min-width: 14px; min-height: 14px; border-width: 2px; box-shadow: none; }
 .map-pin-high { background: rgb(46, 160, 67); }
 .map-pin-medium { background: rgb(230, 126, 34); }
 .map-pin-low { background: rgb(218, 54, 51); }

@@ -1,4 +1,4 @@
-from grepleo.market import build_market, low_fit_jobs, relevant_jobs
+from grepleo.market import build_market, build_rows, low_fit_jobs, relevant_jobs
 from grepleo.matching import evaluate
 from grepleo.models import Fit, Job
 from grepleo.profiles import Profile, RadarAxis, SkillRadar
@@ -41,3 +41,19 @@ def test_without_full_offers_the_market_is_empty_and_relevant_keeps_high_and_med
     weak = job(3, "Requisitos:\n- Kubernetes, Azure y Jenkins en producción real\n" * 4)
     evaluations[weak.key] = evaluate(weak, prof)
     assert evaluations[weak.key].fit is Fit.LOW and [item.key for item in low_fit_jobs([good, bad, weak], evaluations)] == [weak.key]
+
+
+def test_the_breakdown_lists_each_offer_with_its_fit_and_what_you_cover_in_each_radar():
+    prof = profile()
+    full = job(1, "Requisitos:\n- Experiencia con AWS y Azure en producción\n" * 3)
+    poor = job(2, "Trabajamos en un equipo ágil con mucha ilusión. " * 6)
+    summary = job(3, "Solo una ficha resumida", full=False)
+    evaluations = {item.key: evaluate(item, prof) for item in (full, poor, summary)}
+    rows = build_rows([poor, summary, full], evaluations, prof)
+    assert [row.job.key for row in rows] == [full.key, poor.key]               # sin la ficha resumida
+    top = rows[0]
+    assert len(top.overlaps) == len(build_market([full], prof).radars) == 2      # el general y Cloud
+    assert top.overlaps[1] == build_market([full], prof).radars[1].overlap       # lo mismo que el radar de esa oferta
+    assert top.overall is not None and top.fit is evaluations[full.key].fit and top.score == evaluations[full.key].score
+    assert rows[1].overlaps[1] is None and rows[1].overall is not None          # no pide nada del radar Cloud: sin solape
+    assert build_rows([], {}, prof) == []
