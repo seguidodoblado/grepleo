@@ -1,7 +1,7 @@
 """La pestaña «Mapa»: las ofertas que estás viendo, como puntos sobre un mapa, con el color de su encaje.
 
-El mapa lo dibuja libshumate (paquete `gir1.2-shumate-1.0`, recomendado): claro u oscuro según el tema de la aplicación,
-con las imágenes de CARTO sobre datos de OpenStreetMap. Cada ubicación distinta se busca una vez en Nominatim (ver
+El mapa lo dibuja libshumate (paquete `gir1.2-shumate-1.0`, recomendado): claro u oscuro según el tema de la aplicación
+con las imágenes de OpenStreetMap (en el tema oscuro, invertidas). Cada ubicación distinta se busca una vez en Nominatim (ver
 `geocode.py`) y se guarda; un punto con varias ofertas muestra cuántas son y se pone del color de la mejor.
 """
 import math
@@ -25,12 +25,9 @@ from ..models import Evaluation, Fit, Job
 from ..profiles import Profile
 from ..storage import Store
 
-TILES = {
-    "light": ("carto-light", "CARTO Positron", "https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"),
-    "dark": ("carto-dark", "CARTO Dark Matter", "https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png"),
-}
-LICENSE = "© OpenStreetMap contributors © CARTO"
-LICENSE_URI = "https://carto.com/attributions"
+TILES = ("openstreetmap", "OpenStreetMap", "https://tile.openstreetmap.org/{z}/{x}/{y}.png")   # sin clave
+LICENSE = "© OpenStreetMap contributors"
+LICENSE_URI = "https://www.openstreetmap.org/copyright"
 ORDER = (Fit.HIGH, Fit.MEDIUM, Fit.LOW, Fit.UNKNOWN)   # de mejor a peor: un punto con varias ofertas toma el de la mejor
 LISTED = 12                                            # ofertas que se listan al pulsar un punto
 
@@ -80,17 +77,20 @@ class MapPage(Gtk.Box):
                 "Para ver el mapa instala el paquete gir1.2-shumate-1.0 (sudo apt install gir1.2-shumate-1.0) y "
                 "reinicia Grepleo.")))
             return
-        identifier, name, url = TILES["dark" if dark else "light"]
-        source = Shumate.RasterRenderer.new_full_from_url(identifier, name, LICENSE, LICENSE_URI, 0, 18, 256,
+        identifier, name, url = TILES
+        source = Shumate.RasterRenderer.new_full_from_url(identifier, name, LICENSE, LICENSE_URI, 0, 19, 256,
                                                           Shumate.MapProjection.MERCATOR, url)
         self.map = Shumate.SimpleMap(vexpand=True, hexpand=True)
         self.map.set_map_source(source)
+        self.dark = dark
+        if dark:   # las imágenes de OpenStreetMap solo son claras: en el tema oscuro se invierten
+            self.map.get_map().add_css_class("map-dark")
         self._layer = Shumate.MarkerLayer.new(self.map.get_viewport())
         self.map.add_overlay_layer(self._layer)
         self.append(self.map)
         note = Gtk.Label(xalign=0, wrap=True, label=_(
-            "Las imágenes del mapa las sirve CARTO y cada ubicación se busca una vez en Nominatim (OpenStreetMap); no se "
-            "envía nada más de tus ofertas ni de tu perfil."))
+            "Las imágenes del mapa y la búsqueda de cada ubicación (una sola vez) son de OpenStreetMap; no se envía nada "
+            "más de tus ofertas ni de tu perfil."))
         note.add_css_class("dim-label")
         self.append(note)
 
@@ -181,6 +181,8 @@ class MapPage(Gtk.Box):
             pin = Gtk.Label(label=str(len(jobs)) if len(jobs) > 1 else "", halign=Gtk.Align.CENTER,
                             valign=Gtk.Align.CENTER, tooltip_text=f"{place} · {len(jobs)}")
             pin.add_css_class("map-pin")
+            if self.dark:
+                pin.add_css_class("map-pin-undo")   # el mapa está invertido: el punto se invierte otra vez y recupera su color
             pin.add_css_class(f"map-pin-{fit.value}")
             popover = self._popover(place, jobs, pin)
             click = Gtk.GestureClick()

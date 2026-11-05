@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: grepleo 0.1.0\n"
 "Report-Msgid-Bugs-To: jose.antonio.seguido@gmail.com\n"
-"POT-Creation-Date: 2026-11-05 02:54+0100\n"
+"POT-Creation-Date: 2026-11-05 03:02+0100\n"
 "PO-Revision-Date: 2026-11-03 17:00+0100\n"
 "Last-Translator: José Antonio Seguido Doblado <jose.antonio.seguido@gmail."
 "com>\n"
@@ -349,7 +349,7 @@ msgstr[1] "Most requested: {names} (out of {count} offers with details)."
 msgid "Ninguna oferta con detalle cita lo que conoces: {names}."
 msgstr "No offer with details mentions what you know: {names}."
 
-#: src/grepleo/panorama.py:139 src/grepleo/ui/map_page.py:221
+#: src/grepleo/panorama.py:139 src/grepleo/ui/map_page.py:223
 #: src/grepleo/ui/radar_legend.py:128
 #, python-brace-format
 msgid "y {count} más"
@@ -815,11 +815,11 @@ msgstr "Could not save the CV: {error}"
 msgid "CV guardado en {path}."
 msgstr "CV saved to {path}."
 
-#: src/grepleo/ui/common.py:152 src/grepleo/ui/common.py:180
+#: src/grepleo/ui/common.py:154 src/grepleo/ui/common.py:182
 msgid "Aceptar"
 msgstr "OK"
 
-#: src/grepleo/ui/common.py:157 src/grepleo/ui/common.py:179
+#: src/grepleo/ui/common.py:159 src/grepleo/ui/common.py:181
 #: src/grepleo/ui/profile_dialog.py:216 src/grepleo/ui/skills_window.py:213
 #: src/grepleo/ui/tracking_panel.py:79
 msgid "Cancelar"
@@ -1459,18 +1459,21 @@ msgstr "Community Apify Actors for InfoJobs, Indeed, LinkedIn and Tecnoempleo"
 msgid "Michael Page se lee directamente de su web pública, sin Apify"
 msgstr "Michael Page is read directly from its public website, without Apify"
 
-#: src/grepleo/ui/map_page.py:80
+#: src/grepleo/ui/map_page.py:77
 msgid ""
 "Para ver el mapa instala el paquete gir1.2-shumate-1.0 (sudo apt install "
 "gir1.2-shumate-1.0) y reinicia Grepleo."
-msgstr "To see the map install the package gir1.2-shumate-1.0 (sudo apt install gir1.2-shumate-1.0) and restart Grepleo."
+msgstr ""
+"To see the map install the package gir1.2-shumate-1.0 (sudo apt install "
+"gir1.2-shumate-1.0) and restart Grepleo."
 
 #: src/grepleo/ui/map_page.py:92
 msgid ""
-"Las imágenes del mapa las sirve CARTO y cada ubicación se busca una vez en "
-"Nominatim (OpenStreetMap); no se envía nada más de tus ofertas ni de tu "
-"perfil."
-msgstr "The map images are served by CARTO and each location is looked up once in Nominatim (OpenStreetMap); nothing else about your offers or your profile is sent."
+"Las imágenes del mapa y la búsqueda de cada ubicación (una sola vez) son de "
+"OpenStreetMap; no se envía nada más de tus ofertas ni de tu perfil."
+msgstr ""
+"The map images and the lookup of each location (only once) come from "
+"OpenStreetMap; nothing else about your offers or your profile is sent."
 
 #: src/grepleo/ui/map_page.py:157
 #, python-brace-format

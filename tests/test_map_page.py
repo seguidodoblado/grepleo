@@ -131,8 +131,17 @@ def test_a_network_failure_keeps_what_is_known_and_says_so(monkeypatch):
 
 
 @needs_map
-def test_dark_and_light_themes_use_their_own_tiles():
-    dark = MapPage(lambda: ([], {}, None), Store(Path(":memory:")), lambda _job: None, dark=True)
-    light = MapPage(lambda: ([], {}, None), Store(Path(":memory:")), lambda _job: None)
-    assert "dark_all" in dark.map.get_map_source().get_id() or dark.map.get_map_source().get_id() == "carto-dark"
-    assert light.map.get_map_source().get_id() == "carto-light"
+def test_the_tiles_need_no_key_and_the_dark_theme_inverts_them_while_the_pins_keep_their_color():
+    """CARTO pasó a exigir una clave (el mapa se llenaba de «API KEY REQUIRED»): se usan las imágenes de OpenStreetMap, que
+    son claras; en el tema oscuro se invierte el mapa y cada punto se invierte otra vez para conservar su color."""
+    store = Store(Path(":memory:"))
+    store.save_place("Madrid", (40.4, -3.7))
+    jobs = [job(1, "Madrid")]
+    dark = MapPage(lambda: (jobs, {}, None), store, lambda _job: None, dark=True)
+    light = MapPage(lambda: (jobs, {}, None), store, lambda _job: None)
+    assert dark.map.get_map_source().get_id() == "openstreetmap" == light.map.get_map_source().get_id()
+    assert "tile.openstreetmap.org" in map_page.TILES[2] and "carto" not in map_page.TILES[2].lower()
+    assert dark.map.get_map().has_css_class("map-dark") and not light.map.get_map().has_css_class("map-dark")
+    dark.refresh()
+    light.refresh()
+    assert dark._pins[0][0].has_css_class("map-pin-undo") and not light._pins[0][0].has_css_class("map-pin-undo")

@@ -5,7 +5,7 @@
 Última actualización: 5 de noviembre de 2026.
 
 Grepleo es una aplicación de escritorio de uso personal. No tiene servidor ni cuenta propios y su autor no recibe
-ningún dato de quien la usa. Solo se comunica con Apify cuando tú lanzas una búsqueda y, si abres la pestaña **Mapa**, con CARTO y con Nominatim (ver más abajo).
+ningún dato de quien la usa. Solo se comunica con Apify cuando tú lanzas una búsqueda y, si abres la pestaña **Mapa**, con OpenStreetMap (ver más abajo).
 
 ## Qué datos trata
 
@@ -41,7 +41,7 @@ Solo con los servicios que intervienen cuando lanzas una búsqueda:
   ubicación, que se filtra en tu equipo), y la aplicación se identifica con su nombre y versión (`Grepleo/x.y.z`).
   Queda sujeto a las condiciones y a la política de privacidad de Michael Page. No hace falta token ni cuesta nada.
 
-- **Pestaña Mapa** (solo si la abres y tienes instalado `gir1.2-shumate-1.0`): las **imágenes del mapa** las sirve **CARTO** (`basemaps.cartocdn.com`, sobre datos de OpenStreetMap), que recibe tu **dirección IP y la zona del mapa que miras** (no tus ofertas, tu perfil ni tus búsquedas). Para colocar las ofertas, el **texto de cada ubicación distinta** («Madrid», «Arlington, VA») se envía una sola vez a **Nominatim** (`nominatim.openstreetmap.org`, el buscador de OpenStreetMap), que recibe también tu IP y el nombre y la versión de la aplicación (`Grepleo/x.y.z`); no recibe la empresa, el puesto ni nada del perfil. Las respuestas, también las de «no encontrado», se guardan en tu base de datos para no repetir la pregunta, y se respeta su límite de una petición por segundo. Ambos servicios tienen sus propias condiciones y políticas de privacidad. Las ofertas remotas o sin ubicación no se envían.
+- **Pestaña Mapa** (solo si la abres y tienes instalado `gir1.2-shumate-1.0`): las **imágenes del mapa** las sirve **OpenStreetMap** (`tile.openstreetmap.org`), que recibe tu **dirección IP y la zona del mapa que miras** (no tus ofertas, tu perfil ni tus búsquedas). Para colocar las ofertas, el **texto de cada ubicación distinta** («Madrid», «Arlington, VA») se envía una sola vez a **Nominatim** (`nominatim.openstreetmap.org`, el buscador de OpenStreetMap), que recibe también tu IP y el nombre y la versión de la aplicación (`Grepleo/x.y.z`); no recibe la empresa, el puesto ni nada del perfil. Las respuestas, también las de «no encontrado», se guardan en tu base de datos para no repetir la pregunta, y se respeta su límite de una petición por segundo. Ambos servicios son de la Fundación OpenStreetMap, con sus propias condiciones y política de privacidad. Las ofertas remotas o sin ubicación no se envían.
 - **Tu propia CLI de IA** (Claude Code, OpenCode, Codex…): solo si pulsas **Adaptar CV**. Se abre un terminal con la CLI que tú hayas instalado y configurado, con tu cuenta, y se le da una carpeta con la oferta, tu CV construido desde el perfil (nombre, contacto, experiencia, formación…) y tu CV subido. Lo que llegue a su proveedor queda sujeto a las condiciones y a la política de privacidad de ese servicio. Grepleo no ve tus credenciales ni llama a ninguna API.
 
 **Tu perfil, tus criterios, tus notas y las marcas de las ofertas no se envían a ningún servicio de la aplicación**: la

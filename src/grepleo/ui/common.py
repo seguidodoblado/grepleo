@@ -45,6 +45,8 @@ CSS = b"""
 .radar-thumb-none { background: rgba(128, 128, 128, 0.12); opacity: 0.6; }
 .map-pin { min-width: 22px; min-height: 22px; border-radius: 12px; border: 2px solid rgba(255, 255, 255, 0.95);
            color: white; font-weight: bold; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.55); }
+.map-dark { filter: invert(1) hue-rotate(180deg); }
+.map-pin-undo { filter: invert(1) hue-rotate(180deg); }
 .map-pin-high { background: rgb(46, 160, 67); }
 .map-pin-medium { background: rgb(230, 126, 34); }
 .map-pin-low { background: rgb(218, 54, 51); }
