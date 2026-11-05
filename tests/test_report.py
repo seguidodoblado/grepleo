@@ -94,3 +94,13 @@ def test_what_you_master_but_few_offers_mention_is_listed_in_one_conclusion():
     many = Profile(name="p", must=[f"Raro{i}" for i in range(9)])
     long = "\n".join(build_panorama(sample, {}, many).insights)
     assert "y 3 más" in long
+
+
+def test_the_panorama_gives_the_counts_behind_its_conclusions_for_the_bars():
+    sample, prof = jobs(), profile()
+    panorama = build_panorama(sample, evaluations(sample, prof), prof)
+    assert [key for key, _text in panorama.keyed] == [key for key, _text in panorama.keyed]
+    assert panorama.insights == [text for _key, text in panorama.keyed]
+    keys = {key for key, _text in panorama.keyed}
+    assert {"top", "fit", "salary", "summary"} <= keys
+    assert sum(panorama.fit_counts) == 2 and panorama.salary_count == 1 and panorama.remote_count == 0

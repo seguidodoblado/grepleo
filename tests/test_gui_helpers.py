@@ -263,6 +263,18 @@ def test_the_panorama_fills_in_the_gaps_section_in_the_background():
     assert shown.index("Tus puntos fuertes") < shown.index("Lo que se ve en esta muestra")   # el recuadro azul, al final
     assert "<big><b>Lo más pedido" in shown                                                  # la primera línea, resaltada
     from gi.repository import Gtk as _Gtk
+    info = window.panorama_box.get_last_child()                       # el recuadro azul
+    bars, stack = [], [info]
+    while stack:
+        widget = stack.pop()
+        if isinstance(widget, _Gtk.ProgressBar):
+            bars.append(widget)
+        child = widget.get_first_child()
+        while child is not None:
+            stack.append(child)
+            child = child.get_next_sibling()
+    assert len(bars) >= 4 and "Encaje" in shown                      # lo más pedido y el encaje (alto, medio, bajo)
+    assert any(bar.has_css_class("bar-fit-high") for bar in bars)
     stack = [window.panorama_box]
     while stack:                                                  # ningún texto seleccionable: GTK marcaría el primero
         widget = stack.pop()

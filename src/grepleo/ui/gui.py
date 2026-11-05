@@ -1009,19 +1009,61 @@ class MainWindow(Gtk.ApplicationWindow):
         self.panorama_box.append(grid)
         self._build_gaps(active, profile)
         if panorama.insights:
-            self._append_info_card(panorama.insights)
+            self._append_info_card(panorama)
 
-    def _append_info_card(self, insights: list[str]) -> None:
-        """El recuadro azul de abajo del todo con lo que se ve en la muestra; la primera conclusión va resaltada."""
+    def _append_info_card(self, panorama) -> None:
+        """El recuadro azul de abajo del todo con lo que se ve en la muestra: la primera conclusión resaltada, los
+        recuentos con barras (lo más pedido, el encaje, el salario y el remoto) y el resto como viñetas."""
         rows = self._skill_card("info", pick_icon("dialog-information", "help-about"),
                                 _("Lo que se ve en esta muestra"), "")
         while (child := rows.get_first_child()) is not None:
             rows.remove(child)
-        for number, text in enumerate(insights):
-            line = Gtk.Label(xalign=0, wrap=True, use_markup=True)
-            escaped = GLib.markup_escape_text(text)
-            line.set_markup(f"<big><b>{escaped}</b></big>" if number == 0 else f"• {escaped}")
-            rows.append(line)
+        total, detailed = max(panorama.total, 1), max(panorama.detailed, 1)
+        top = [item for item in panorama.requirements if item.count > 0][:3]
+        for number, (key, text) in enumerate(panorama.keyed):
+            if key == "top":
+                rows.append(self._info_line(text, first=number == 0))
+                if top:
+                    rows.append(self._bar_grid([
+                        (item.name, item.count / detailed,
+                         f"{item.count} / {panorama.detailed} ({round(100 * item.count / detailed)} %)", "")
+                        for item in top]))
+            elif key == "fit":
+                high, medium, low = panorama.fit_counts
+                rows.append(self._info_line(_("Encaje"), bold=True))
+                rows.append(self._bar_grid([
+                    (Fit.HIGH.label, high / total, f"{high} ({round(100 * high / total)} %)", "bar-fit-high"),
+                    (Fit.MEDIUM.label, medium / total, f"{medium} ({round(100 * medium / total)} %)", "bar-fit-medium"),
+                    (Fit.LOW.label, low / total, f"{low} ({round(100 * low / total)} %)", "bar-fit-low")]))
+            elif key == "salary":
+                rows.append(self._bar_grid([(_("Con salario"), panorama.salary_count / total, text, "")]))
+            elif key == "remote":
+                rows.append(self._bar_grid([(_("En remoto"), panorama.remote_count / total, text, "")]))
+            else:
+                rows.append(self._info_line(text, first=number == 0))
+
+    @staticmethod
+    def _info_line(text: str, first: bool = False, bold: bool = False) -> Gtk.Label:
+        line = Gtk.Label(xalign=0, wrap=True, use_markup=True)
+        escaped = GLib.markup_escape_text(text)
+        line.set_markup(f"<big><b>{escaped}</b></big>" if first else f"<b>{escaped}</b>" if bold else f"• {escaped}")
+        return line
+
+    @staticmethod
+    def _bar_grid(rows: list[tuple[str, float, str, str]]) -> Gtk.Grid:
+        """Filas «nombre · barra · texto» como las de los cuadros rojo y verde; la clase da el color de la barra."""
+        grid = Gtk.Grid(column_spacing=12, row_spacing=4, margin_start=6)
+        for number, (name, fraction, text, css) in enumerate(rows):
+            title = Gtk.Label(xalign=0)
+            title.set_markup(f"<b>{GLib.markup_escape_text(name)}</b>")
+            grid.attach(title, 0, number, 1, 1)
+            bar = Gtk.ProgressBar(fraction=max(0.0, min(1.0, fraction)), valign=Gtk.Align.CENTER)
+            bar.set_size_request(150, -1)
+            if css:
+                bar.add_css_class(css)
+            grid.attach(bar, 1, number, 1, 1)
+            grid.attach(Gtk.Label(label=text, xalign=0, wrap=True, hexpand=True), 2, number, 1, 1)
+        return grid
 
     def _build_gaps(self, active: list[Job], profile: Profile) -> None:
         """Los cuadros «Qué te falta más veces» y «Tus puntos fuertes»: se calculan en segundo plano porque recorren

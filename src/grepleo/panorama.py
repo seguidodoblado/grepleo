@@ -5,7 +5,7 @@ quiere decir que no se pida.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from statistics import median
 
 from .i18n import _, ngettext
@@ -51,6 +51,10 @@ class Panorama:
     detailed: int              # con descripción completa
     requirements: list[RequirementCount]
     insights: list[str]
+    keyed: list[tuple[str, str]] = field(default_factory=list)   # las mismas conclusiones, con su clave (ver `keyed_insights`)
+    fit_counts: tuple[int, int, int] = (0, 0, 0)                  # ofertas de encaje alto, medio y bajo
+    salary_count: int = 0                                         # ofertas que publican salario
+    remote_count: int = 0                                         # ofertas en remoto
 
 
 def _terms(profile: Profile | None) -> list[str]:
@@ -84,23 +88,34 @@ def build_panorama(jobs: list[Job], evaluations: dict[str, Evaluation],
                    profile: Profile | None = None) -> Panorama:
     requirements = count_requirements(jobs, profile)
     detailed = sum(1 for job in jobs if job.full_description)
-    return Panorama(len(jobs), detailed, requirements, build_insights(jobs, evaluations, requirements, profile))
+    keyed = keyed_insights(jobs, evaluations, requirements, profile)
+    fits = [evaluations[job.key].fit for job in jobs if job.key in evaluations]
+    return Panorama(len(jobs), detailed, requirements, [text for _key, text in keyed], keyed,
+                    (fits.count(Fit.HIGH), fits.count(Fit.MEDIUM), fits.count(Fit.LOW)), len(_annual_salaries(jobs)),
+                    sum(1 for job in jobs if job.work_mode is WorkMode.REMOTE))
 
 
 def build_insights(jobs: list[Job], evaluations: dict[str, Evaluation], requirements: list[RequirementCount],
                    profile: Profile | None) -> list[str]:
     """Conclusiones sencillas con plantillas: lo que se puede afirmar contando, sin interpretar los textos."""
-    insights: list[str] = []
+    return [text for _key, text in keyed_insights(jobs, evaluations, requirements, profile)]
+
+
+def keyed_insights(jobs: list[Job], evaluations: dict[str, Evaluation], requirements: list[RequirementCount],
+                   profile: Profile | None) -> list[tuple[str, str]]:
+    """Las mismas conclusiones con una clave cada una (top, unseen, rare, fit, salary, remote, summary): la interfaz
+    dibuja con barras las que son un recuento."""
+    insights: list[tuple[str, str]] = []
     detailed = sum(1 for job in jobs if job.full_description)
     if not jobs:
         return insights
     top = [item for item in requirements if item.count > 0][:3]
     if top and detailed:
         names = ", ".join(f"«{item.name}»" for item in top)
-        insights.append(ngettext(
+        insights.append(("top", ngettext(
             "Lo más pedido: {names} (sobre {count} oferta con detalle).",
             "Lo más pedido: {names} (sobre {count} ofertas con detalle).", detailed).format(
-                names=names, count=detailed))
+                names=names, count=detailed)))
     if profile and detailed:
         # solo lo que depende de tu perfil: un catálogo genérico daría siempre la misma frase, sin relación contigo
         unseen = []
@@ -109,8 +124,8 @@ def build_insights(jobs: list[Job], evaluations: dict[str, Evaluation], requirem
             if name and not any(job.full_description and mentions(normalize(job.text), names) for job in jobs):
                 unseen.append(name)
         if unseen:
-            insights.append(_("Ninguna oferta con detalle cita lo que conoces: {names}.").format(
-                names=", ".join(f"«{name}»" for name in unseen[:4])))
+            insights.append(("unseen", _("Ninguna oferta con detalle cita lo que conoces: {names}.").format(
+                names=", ".join(f"«{name}»" for name in unseen[:4]))))
         rare = []   # lo que dominas y casi nadie pide: invertir en ello rinde poco en esta muestra
         for spec in profile.all_must:
             name, names = parse_term(spec)
@@ -122,24 +137,25 @@ def build_insights(jobs: list[Job], evaluations: dict[str, Evaluation], requirem
             shown = ", ".join(f"«{name}» ({hits})" for hits, name in rare[:RARE_LISTED])
             if len(rare) > RARE_LISTED:
                 shown += " " + _("y {count} más").format(count=len(rare) - RARE_LISTED)
-            insights.append(_("Lo que dominas y pocas ofertas citan (menos del 20 % de las {detailed} con detalle): "
-                              "{items}.").format(detailed=detailed, items=shown))
+            insights.append(("rare", _("Lo que dominas y pocas ofertas citan (menos del 20 % de las {detailed} con "
+                                       "detalle): {items}.").format(detailed=detailed, items=shown)))
     fits = [evaluations[job.key].fit for job in jobs if job.key in evaluations]
     if fits:
-        insights.append(_("Encaje: {high} alto, {medium} medio y {low} bajo.").format(
-            high=fits.count(Fit.HIGH), medium=fits.count(Fit.MEDIUM), low=fits.count(Fit.LOW)))
+        insights.append(("fit", _("Encaje: {high} alto, {medium} medio y {low} bajo.").format(
+            high=fits.count(Fit.HIGH), medium=fits.count(Fit.MEDIUM), low=fits.count(Fit.LOW))))
     salaries = _annual_salaries(jobs)
     if salaries:
-        insights.append(_("{count} de {total} ofertas publican salario; la mediana es de {median} € al año.").format(
-            count=len(salaries), total=len(jobs), median=f"{median(salaries):,.0f}".replace(",", ".")))
+        insights.append(("salary", _("{count} de {total} ofertas publican salario; la mediana es de {median} € al "
+                                     "año.").format(count=len(salaries), total=len(jobs),
+                                                    median=f"{median(salaries):,.0f}".replace(",", "."))))
     remote = sum(1 for job in jobs if job.work_mode is WorkMode.REMOTE)
     if remote:
-        insights.append(ngettext("{count} oferta es en remoto.", "{count} ofertas son en remoto.", remote)
-                        .format(count=remote))
+        insights.append(("remote", ngettext("{count} oferta es en remoto.", "{count} ofertas son en remoto.", remote)
+                         .format(count=remote)))
     summary_only = len(jobs) - detailed
     if summary_only:
-        insights.append(ngettext(
+        insights.append(("summary", ngettext(
             "{count} oferta es una ficha resumida: no se puede saber qué requisitos no aparecen en ella.",
             "{count} ofertas son fichas resumidas: no se puede saber qué requisitos no aparecen en ellas.",
-            summary_only).format(count=summary_only))
+            summary_only).format(count=summary_only)))
     return insights
