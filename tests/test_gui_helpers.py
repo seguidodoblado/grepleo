@@ -273,3 +273,15 @@ def _all_labels(widget) -> str:
         parts.append(_all_labels(child))
         child = child.get_next_sibling()
     return "\n".join(parts)
+
+
+def test_wide_scrollbars_turn_off_the_thin_overlay_bar():
+    from gi.repository import Gtk
+
+    from grepleo.ui.common import wide_scrollbars
+    if not Gtk.init_check():
+        pytest.skip("sin pantalla para crear widgets")
+    scroll = Gtk.ScrolledWindow()
+    assert scroll.get_overlay_scrolling() is True
+    assert wide_scrollbars(scroll) is scroll
+    assert scroll.get_overlay_scrolling() is False and scroll.has_css_class("wide-scroll")

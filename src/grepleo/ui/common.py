@@ -25,6 +25,8 @@ CSS = b"""
 .row-fit-medium { background: rgba(230, 126, 34, 0.32); }
 .row-fit-low { background: rgba(218, 54, 51, 0.30); }
 .row-fit-unknown { background: rgba(128, 128, 128, 0.18); }
+.wide-scroll scrollbar.vertical { min-width: 18px; }
+.wide-scroll scrollbar.vertical slider { min-width: 12px; min-height: 56px; border-radius: 6px; }
 .radar-card { border-radius: 10px; padding: 10px 14px; background: rgba(128, 128, 128, 0.07);
               border-left: 5px solid rgba(128, 128, 128, 0.5); }
 .radar-card-high { border-left-color: rgba(46, 160, 67, 0.95);
@@ -58,6 +60,13 @@ def source_icon(source_id: str) -> str:
     """El nombre del icono de una fuente de ofertas ('' si no hay)."""
     name = f"grepleo-source-{source_id}"
     return name if (ICONS_DIR / f"{name}.svg").exists() else ""
+
+
+def wide_scrollbars(scroll: Gtk.ScrolledWindow) -> Gtk.ScrolledWindow:
+    """Una barra de desplazamiento ancha y siempre visible (la fina que aparece al pasar el ratón cuesta de coger)."""
+    scroll.set_overlay_scrolling(False)
+    scroll.add_css_class("wide-scroll")
+    return scroll
 
 
 def install_css() -> None:

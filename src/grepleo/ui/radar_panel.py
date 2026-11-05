@@ -9,6 +9,7 @@ from ..ats import AtsEstimate
 from ..i18n import _
 from ..models import Fit
 from ..radar import RadarData, known_axes, total_overlap
+from .common import wide_scrollbars
 from .radar_legend import build_ats, build_legend
 from .radar_minimap import RadarMinimap, overlap_class, percent
 from .radar_view import RadarView
@@ -20,6 +21,7 @@ class RadarPanel(Gtk.ScrolledWindow):
 
     def __init__(self, **properties) -> None:
         super().__init__(hscrollbar_policy=Gtk.PolicyType.NEVER, **properties)
+        wide_scrollbars(self)
         self._box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14, margin_top=6, margin_bottom=10,
                             margin_start=4, margin_end=8)
         self.set_child(self._box)

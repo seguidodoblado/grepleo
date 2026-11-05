@@ -40,6 +40,7 @@ from .common import (
     pick_icon,
     source_icon,
     vte_available,
+    wide_scrollbars,
 )
 from .date_picker import today
 from .detail_view import DetailView
@@ -443,7 +444,7 @@ class MainWindow(Gtk.ApplicationWindow):
                 self.fit_column = column
         self._sort_by_fit()
 
-        scroll = Gtk.ScrolledWindow(vexpand=True, min_content_width=560, min_content_height=280)
+        scroll = wide_scrollbars(Gtk.ScrolledWindow(vexpand=True, min_content_width=560, min_content_height=280))
         scroll.set_child(self.view)
         self.detail = self._build_detail()
         paned = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL, vexpand=True, shrink_start_child=False,
@@ -559,14 +560,14 @@ class MainWindow(Gtk.ApplicationWindow):
         box.append(buttons)
         self.radar = RadarPanel(vexpand=True)
         self.detail_view = DetailView()
-        detail_scroll = Gtk.ScrolledWindow(vexpand=True, hscrollbar_policy=Gtk.PolicyType.NEVER)
+        detail_scroll = wide_scrollbars(Gtk.ScrolledWindow(vexpand=True, hscrollbar_policy=Gtk.PolicyType.NEVER))
         detail_scroll.set_child(self.detail_view)
         self.tracking_panel = TrackingPanel(self.store, self._tracking_changed)
         self.notes_panel = NotesPanel(self._notes_changed)
         # pestañas: la oferta, el radar, el seguimiento del proceso y las notas
         self.detail_tabs = Gtk.Notebook(vexpand=True, scrollable=True)
         # cada pestaña con su propio scroll: así el panel puede encogerse y no fija la altura mínima de la ventana
-        tracking_scroll = Gtk.ScrolledWindow(vexpand=True, hscrollbar_policy=Gtk.PolicyType.NEVER)
+        tracking_scroll = wide_scrollbars(Gtk.ScrolledWindow(vexpand=True, hscrollbar_policy=Gtk.PolicyType.NEVER))
         tracking_scroll.set_child(self.tracking_panel)
         self._tab_pages = {"offer": detail_scroll, "radar": self.radar, "tracking": tracking_scroll,
                            "notes": self.notes_panel}
@@ -593,7 +594,7 @@ class MainWindow(Gtk.ApplicationWindow):
     def _build_panorama_page(self) -> Gtk.ScrolledWindow:
         self.panorama_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12, margin_top=12,
                                     margin_bottom=12, margin_start=12, margin_end=12)
-        scroll = Gtk.ScrolledWindow(vexpand=True)
+        scroll = wide_scrollbars(Gtk.ScrolledWindow(vexpand=True))
         scroll.set_child(self.panorama_box)
         return scroll
 
