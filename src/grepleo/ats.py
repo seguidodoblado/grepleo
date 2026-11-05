@@ -15,7 +15,8 @@ from .matching import experience_requirement, knockout_criteria
 from .models import Job, Status
 from .panorama import DEFAULT_CATALOG
 from .profiles import Profile, parse_term
-from .radar import SOFT_VOCABULARY, term_demand
+from .radar import term_demand
+from .skills import SOFT_VOCABULARY
 from .textutil import mentions, normalize
 
 W_KEYWORDS, W_TITLE, W_FORMAT = 0.60, 0.15, 0.25

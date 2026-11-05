@@ -18,6 +18,16 @@ def parse_term(spec: str) -> tuple[str, list[str]]:
 
 MIN_AXES, MAX_AXES = 3, 8          # un radar necesita entre 3 y 8 elementos para ser legible
 DEFAULT_LEVEL = 5
+# nivel (0 a 10) de una habilidad que no tiene uno propio: lo que se daba a las listas «dominas» y «conoces» antes de que cada
+# habilidad tuviera el suyo (los perfiles antiguos se migran con estos valores o con el nivel técnico general que tuvieran)
+MASTER_LEVEL, KNOW_LEVEL, SOFT_MASTER_LEVEL, SOFT_KNOW_LEVEL = 10, 7, 8, 7
+DOMINANT_FROM = 7   # desde este nivel una habilidad cuenta como «que dominas»; por debajo, «que conoces»
+
+
+def skill_key(spec: str) -> str:
+    """La clave de una habilidad en `Profile.skill_levels`: su nombre, en minúsculas y sin tildes."""
+    from .textutil import normalize
+    return normalize(parse_term(spec)[0])
 
 
 @dataclass
@@ -88,8 +98,22 @@ class Profile:
     experience: str = ""                                      # experiencia profesional: puestos, empresas, fechas, logros
     education: str = ""                                       # formación detallada (centros, titulaciones, cursos)
     cv_file: str = ""                                         # ruta de un CV propio ya hecho (PDF, Word, texto…)
-    radar: dict[str, int] = field(default_factory=dict)       # tu nivel (0 a 10) en cada eje del radar general; vacío: calculado
     radars: list[SkillRadar] = field(default_factory=list)    # tus radares por temas, con sus propios elementos
+    skill_levels: dict[str, int] = field(default_factory=dict)   # tu nivel (0 a 10) en cada habilidad de las listas, por `skill_key`
+
+    def level_of(self, spec: str, default: int) -> int:
+        """El nivel de una habilidad de las listas: el suyo, o `default` si aún no se le ha puesto uno."""
+        return self.skill_levels.get(skill_key(spec), default)
+
+    def technical_levels(self) -> list[tuple[str, int]]:
+        """Tus habilidades técnicas de las listas con su nivel."""
+        return [*((spec, self.level_of(spec, MASTER_LEVEL)) for spec in self.must),
+                *((spec, self.level_of(spec, KNOW_LEVEL)) for spec in self.nice)]
+
+    def soft_levels(self) -> list[tuple[str, int]]:
+        """Tus habilidades blandas con su nivel."""
+        return [*((spec, self.level_of(spec, SOFT_MASTER_LEVEL)) for spec in self.soft_must),
+                *((spec, self.level_of(spec, SOFT_KNOW_LEVEL)) for spec in self.soft_nice)]
 
     @property
     def all_must(self) -> list[str]:
@@ -107,7 +131,7 @@ class Profile:
             "languages": dict(self.languages), "must": list(self.must), "nice": list(self.nice),
             "soft_must": list(self.soft_must), "soft_nice": list(self.soft_nice),
             "avoid": list(self.avoid), "salary_min": self.salary_min, "work_modes": list(self.work_modes),
-            "locations": list(self.locations), "notes": self.notes, "radar": dict(self.radar),
+            "locations": list(self.locations), "notes": self.notes, "skill_levels": dict(self.skill_levels),
             "radars": [{"name": radar.name, "axes": [{"spec": axis.spec, "level": axis.level} for axis in radar.axes]}
                        for radar in self.radars],
             "full_name": self.full_name, "email": self.email, "phone": self.phone, "links": self.links,
@@ -127,7 +151,6 @@ class Profile:
             value = data.get(key)
             return value if isinstance(value, int) and not isinstance(value, bool) and value >= 0 else 0
 
-        radar = data.get("radar")
         networks = data.get("networks")
         radars = []
         for item in data.get("radars") if isinstance(data.get("radars"), list) else []:
@@ -162,9 +185,35 @@ class Profile:
             if isinstance(networks, dict) else {},
             experience=str(data.get("experience") or ""), education=str(data.get("education") or ""),
             cv_file=str(data.get("cv_file") or ""), radars=radars,
-            radar={str(k): v for k, v in radar.items()
-                   if isinstance(v, int) and not isinstance(v, bool) and 0 <= v <= 10} if isinstance(radar, dict) else {},
+            skill_levels=_skill_levels(data),
         )
+
+
+def _skill_levels(data: dict[str, Any]) -> dict[str, int]:
+    """Los niveles por habilidad. Un perfil antiguo, sin ellos, se migra con lo que contaban hasta ahora: lo que
+    dominabas con tu nivel técnico general (10 si no lo habías tocado), lo que conocías con el 70 % de él y las blandas
+    con 8 y 7; así las ofertas puntúan igual antes y después."""
+    stored = data.get("skill_levels")
+    if isinstance(stored, dict):
+        return {str(k): v for k, v in stored.items() if isinstance(v, int) and not isinstance(v, bool) and 0 <= v <= 10}
+
+    def names(key: str) -> list[str]:
+        value = data.get(key)
+        return [skill_key(str(item)) for item in value if skill_key(str(item))] if isinstance(value, list) else []
+
+    old = data.get("radar")
+    general = old.get("technical") if isinstance(old, dict) else None
+    general = general if isinstance(general, int) and not isinstance(general, bool) and 0 <= general <= 10 else 10
+    levels: dict[str, int] = {}
+    for key in names("nice"):
+        levels[key] = round(general * 0.7)
+    for key in names("must"):
+        levels[key] = general
+    for key in names("soft_nice"):
+        levels[key] = SOFT_KNOW_LEVEL
+    for key in names("soft_must"):
+        levels[key] = SOFT_MASTER_LEVEL
+    return levels
 
 
 def split_lines(text: str) -> list[str]:

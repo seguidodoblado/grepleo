@@ -139,3 +139,35 @@ def test_a_stored_event_with_an_unknown_kind_falls_back_to_other():
     store = Store(Path(":memory:"))
     store._db.execute("INSERT INTO events (job_key, day, kind, text) VALUES ('x', '2026-01-01', 'raro', 't')")
     assert store.list_events("x")[0].kind is EventKind.OTHER
+
+
+def test_old_profiles_are_migrated_to_skill_levels_with_a_backup_and_score_the_same(tmp_path):
+    import json
+    import sqlite3
+
+    from grepleo.matching import evaluate
+    from grepleo.models import Job
+    old = {"name": "viejo", "years": 3, "must": ["Docker", "Linux"], "nice": ["Terraform"], "soft_must": ["Liderazgo"],
+           "radar": {"technical": 8, "soft": 3}, "languages": {}}
+    path = tmp_path / "grepleo.db"
+    connection = sqlite3.connect(path)
+    connection.executescript("CREATE TABLE profiles (id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE, data TEXT NOT NULL);")
+    connection.execute("INSERT INTO profiles (name, data) VALUES (?, ?)", ("viejo", json.dumps(old)))
+    connection.commit()
+    connection.close()
+    job = Job(key="x:1", source="x", title="DevOps", full_description=True,
+              description="Requisitos:\n- Experiencia real con Docker y Terraform y Linux en producción\n" * 3)
+    before = evaluate(job, Profile.from_dict(old))
+    store = Store(path)
+    migrated = store.list_profiles()[0][1]
+    assert migrated.skill_levels == {"docker": 8, "linux": 8, "terraform": 6, "liderazgo": 8}   # el deslizador, a cada una
+    assert "radar" not in json.loads(sqlite3.connect(path).execute("SELECT data FROM profiles").fetchone()[0])
+    backup = tmp_path / "grepleo.db.antes-de-niveles"
+    assert backup.exists() and "skill_levels" not in sqlite3.connect(backup).execute(
+        "SELECT data FROM profiles").fetchone()[0]                                            # la copia es la de antes
+    after = evaluate(job, migrated)
+    assert [(c.name, c.status) for c in before.criteria] == [(c.name, c.status) for c in after.criteria]
+    assert abs(before.score - after.score) < 0.03                                              # el redondeo de 5,6 a 6
+    store.close()
+    Store(path).close()                                                                        # reabrir no vuelve a migrar
+    assert backup.stat().st_size > 0

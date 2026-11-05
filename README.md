@@ -33,7 +33,7 @@ su web y no lo necesita).
   lanzan a la vez en InfoJobs, Indeed, LinkedIn y Tecnoempleo (a través de Actors de Apify) y en Michael Page (leída
   directamente de su web, sin coste), y las ofertas repetidas entre fuentes se unifican.
 - **Qué criterios cumples:** cada oferta se evalúa frente a tu **perfil** (habilidades técnicas y blandas,
-  lo que dominas y lo que conoces con sinónimos, experiencia, estudios, idiomas con nivel, salario mínimo, modalidad, ubicación y lo que
+  tus habilidades con un nivel de 0 a 10 cada una (en una ventana con la escala de niveles a la vista) y sinónimos, experiencia, estudios, idiomas con nivel, salario mínimo, modalidad, ubicación y lo que
   prefieres no encontrar) y muestra ✓ cumple, ✗ no cumple o ? no se puede saber, además de un encaje Alto, Medio
   o Bajo.
 - **Honesta con lo que no sabe:** las fichas resumidas (cuando una fuente no trae la descripción completa) no la tienen, así

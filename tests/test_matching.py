@@ -182,15 +182,31 @@ def test_having_the_platform_covers_its_services_and_a_generic_term_is_covered_b
     assert by_name(evaluate(asked, profile(must=["Excel"], nice=[], languages={})), "EC2").status is Status.MISSING
 
 
-def test_your_general_technical_level_is_the_level_of_what_you_listed():
+def test_each_listed_skill_counts_with_its_own_level_and_old_profiles_migrate_to_the_same_score():
     asked = job(description="Requisitos:\n- Experiencia real con Docker y Terraform en producción\n" * 3)
     mine = {"must": ["Docker"], "nice": ["Terraform"], "languages": {}}
-    untouched = evaluate(asked, profile(**mine))
+    untouched = evaluate(asked, profile(**mine))      # sin nivel propio: dominas 10 y conoces 7, como antes
     assert by_name(untouched, "Docker").status is Status.MET and by_name(untouched, "Terraform").status is Status.PARTIAL
-    assert abs(by_name(untouched, "Terraform").credit - 0.7) < 1e-9        # lo que conoces cuenta como 7 de 10
-    modest = evaluate(asked, profile(radar={"technical": 5}, **mine))
+    assert abs(by_name(untouched, "Terraform").credit - 0.7) < 1e-9
+    modest = evaluate(asked, profile(skill_levels={"docker": 5, "terraform": 3}, **mine))
     assert by_name(modest, "Docker").status is Status.PARTIAL and abs(by_name(modest, "Docker").credit - 0.5) < 1e-9
-    assert abs(by_name(modest, "Terraform").credit - 0.35) < 1e-9
-    assert modest.score < untouched.score                                  # un nivel general más bajo resta encaje
-    high = evaluate(asked, profile(radar={"technical": 9}, **mine))
-    assert by_name(high, "Docker").status is Status.MET                    # 9 de 10 frente a un requisito: cubierto
+    assert abs(by_name(modest, "Terraform").credit - 0.3) < 1e-9
+    assert modest.score < untouched.score                                  # niveles más bajos restan encaje
+    assert by_name(evaluate(asked, profile(skill_levels={"docker": 9}, **mine)), "Docker").status is Status.MET
+    old = Profile.from_dict({"name": "viejo", "years": 8, "must": ["Docker"], "nice": ["Terraform"],
+                             "languages": {}, "radar": {"technical": 8}})        # el deslizador de entonces
+    assert old.skill_levels == {"docker": 8, "terraform": 6}                      # se migra a niveles propios
+    migrated = evaluate(asked, old)
+    assert by_name(migrated, "Docker").status is Status.MET                       # 8 de 10 frente a un requisito
+
+
+def test_soft_skills_count_with_their_level_too():
+    asked = job(description="Buscamos a alguien con liderazgo y comunicación. " * 6)
+    full = evaluate(asked, profile(soft_must=["Liderazgo"], soft_nice=["Comunicación"], languages={}))
+    assert by_name(full, "Liderazgo").status is Status.MET and by_name(full, "Comunicación").status is Status.MET
+    modest = evaluate(asked, profile(soft_must=["Liderazgo"], soft_nice=["Comunicación"], languages={},
+                                     skill_levels={"liderazgo": 3, "comunicacion": 5}))
+    assert by_name(modest, "Liderazgo").status is Status.PARTIAL and abs(by_name(modest, "Liderazgo").credit - 3 / 7) < 1e-9
+    assert by_name(modest, "Comunicación").status is Status.PARTIAL
+    missing = evaluate(asked, profile(languages={}))
+    assert by_name(missing, "Liderazgo").status is Status.MISSING

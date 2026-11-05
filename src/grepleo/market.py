@@ -18,9 +18,10 @@ from .radar import (
     RadarData,
     _general_notes,
     axis_labels,
+    data_levels,
     demand_note,
+    general_levels,
     offer_demand,
-    profile_levels,
     term_demand,
 )
 from .textutil import mentions, normalize
@@ -63,18 +64,25 @@ def _mean(values: list[float]) -> float:
 
 
 def _general(jobs: list[Job], profile: Profile) -> RadarData:
-    asked = [offer_demand(job, profile) for job in jobs]
-    levels, labels = profile_levels(profile), axis_labels()
+    """El radar general del mercado: la demanda de cada eje es la media entre las ofertas que lo piden; en técnicas y
+    blandas, tu lado es esa media por la parte que cubres de lo que piden esas ofertas (como en cada oferta)."""
+    labels = axis_labels()
+    per_job = []
+    for job in jobs:
+        asked = offer_demand(job, profile)
+        per_job.append((asked, general_levels(job, profile, asked)))
     demand: dict[str, float | None] = {}
-    notes = []
+    levels = data_levels(profile)
     counts = {}
     for axis in AXES:
-        values = [item[axis] for item in asked if item[axis]]    # las que lo piden (None y 0 quedan fuera)
-        counts[axis] = len(values)
-        demand[axis] = _mean(values)
-    detail = _general_notes(demand)
-    for axis, text in zip(AXES, detail, strict=True):
-        notes.append(_share_note(counts[axis], len(jobs), text))
+        pairs = [(asked[axis], mine[axis]) for asked, mine in per_job if asked[axis]]   # las que lo piden
+        counts[axis] = len(pairs)
+        mean = _mean([value for value, _mine in pairs])
+        demand[axis] = mean
+        if axis in ("technical", "soft"):   # lo que cubres de lo que piden: Σ tu lado / Σ lo que piden, a la altura de la media
+            total = sum(value for value, _mine in pairs)
+            levels[axis] = mean * sum(mine for _value, mine in pairs) / total if total else 0.0
+    notes = [_share_note(counts[axis], len(jobs), text) for axis, text in zip(AXES, _general_notes(demand), strict=True)]
     return RadarData(_("General"), [labels[axis] for axis in AXES], [levels[axis] for axis in AXES],
                      [demand[axis] for axis in AXES], notes, [counts[axis] / len(jobs) for axis in AXES])
 

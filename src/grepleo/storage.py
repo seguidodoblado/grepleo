@@ -98,6 +98,34 @@ class Store:
             if column not in columns:
                 self._db.execute(f"ALTER TABLE jobs ADD COLUMN {column} TEXT NOT NULL DEFAULT ''")
         self._db.commit()
+        self._migrate_skill_levels(path)
+
+    def _migrate_skill_levels(self, path: Path) -> None:
+        """Los perfiles guardados antes de que cada habilidad tuviera su nivel se reescriben con él (ver
+        `profiles._skill_levels`), después de dejar una copia de seguridad de la base de datos: `grepleo.db.antes-de-niveles`
+        (una sola vez; si ya existe, no se toca)."""
+        old = []
+        for identifier, data in self._db.execute("SELECT id, data FROM profiles").fetchall():
+            try:
+                parsed = json.loads(data)
+            except ValueError:
+                continue
+            if isinstance(parsed, dict) and "skill_levels" not in parsed:
+                old.append((identifier, parsed))
+        if not old:
+            return
+        if str(path) != ":memory:":
+            backup = path.with_name(path.name + ".antes-de-niveles")
+            if not backup.exists():
+                copy = sqlite3.connect(str(backup))
+                try:
+                    self._db.backup(copy)
+                finally:
+                    copy.close()
+        with self._db:
+            for identifier, parsed in old:
+                data = json.dumps(Profile.from_dict(parsed).to_dict(), ensure_ascii=False)
+                self._db.execute("UPDATE profiles SET data = ? WHERE id = ?", (data, identifier))
 
     def close(self) -> None:
         self._db.close()

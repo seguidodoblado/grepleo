@@ -39,49 +39,32 @@ def test_the_editor_is_an_independent_resizable_window_that_blocks_the_main_one_
     assert parent.get_sensitive()                    # al cerrarla, la principal vuelve a responder
 
 
-def test_technical_and_soft_skills_are_edited_and_collected_separately():
+def test_the_skills_come_from_the_skills_window_with_their_levels_and_radars():
+    from grepleo.profiles import RadarAxis, SkillRadar
     profile = Profile(name="DevOps", must=["AWS"], nice=["Terraform"], soft_must=["Trabajo en equipo"],
-                      soft_nice=["Comunicación|communication"])
+                      radars=[SkillRadar("Cloud", [RadarAxis("AWS", 8), RadarAxis("Azure", 2), RadarAxis("GCP", 7)])],
+                      skill_levels={"aws": 8, "terraform": 4, "trabajo en equipo": 8})
     window = make_window(profile)
-    assert _text_of(window._must) == "AWS" and _text_of(window._soft_must) == "Trabajo en equipo"
-    window._soft_nice.get_buffer().set_text("Comunicación|communication\nEmpatía", -1)
+    assert "4 habilidades técnicas" in window._skills_summary.get_text() and "1 blandas" in window._skills_summary.get_text()
     collected = window._collect()
-    assert collected.must == ["AWS"] and collected.nice == ["Terraform"]
-    assert collected.soft_must == ["Trabajo en equipo"]
-    assert collected.soft_nice == ["Comunicación|communication", "Empatía"]
+    assert collected.radars == profile.radars and collected.skill_levels["terraform"] == 4
+    assert "Terraform" in collected.nice and "Trabajo en equipo" in collected.soft_must
+    window._skills.group("other").skills[0].level = 9           # lo que cambia la ventana «Habilidades»
+    assert window._collect().skill_levels["terraform"] == 9 and "Terraform" in window._collect().must
 
 
-def test_saving_stores_the_soft_skills_and_needs_a_name():
+def test_saving_stores_the_skills_and_needs_a_name():
+    from grepleo.skills_edit import SkillItem
     saved = []
     window = make_window(None, saved)
     window._on_save(None)
     assert window._error.get_text() and saved == []        # sin nombre no se guarda
     window._name.set_text("Nuevo")
-    window._soft_must.get_buffer().set_text("Liderazgo", -1)
+    window._skills.group("soft").skills.append(SkillItem("Liderazgo", 8))
     window._on_save(None)
     assert len(saved) == 1
     stored = window._store.list_profiles()[0][1]
-    assert stored.soft_must == ["Liderazgo"]
-
-
-def test_the_radar_sliders_start_from_the_profile_and_only_changes_are_stored():
-    profile = Profile(name="R", years=6, must=["AWS", "Docker"])
-    window = make_window(profile)
-    assert window._radar_scales["experience"].get_value() == 6 and window._radar_scales["technical"].get_value() == 2
-    assert window._collect().radar == {}                    # sin tocar nada, sigue calculándose del perfil
-    window._radar_scales["technical"].set_value(9)
-    assert window._collect().radar == {"technical": 9}
-    window._years.set_value(10)                             # el perfil cambia: lo no tocado se recalcula
-    assert window._collect().radar == {"technical": 9}
-    window._reset_radar(None)
-    assert window._radar_scales["technical"].get_value() == 2 and window._radar_scales["experience"].get_value() == 10
-    assert window._collect().radar == {}
-
-
-def test_a_saved_radar_is_restored_in_the_sliders():
-    profile = Profile(name="R", years=6, radar={"soft": 8})
-    window = make_window(profile)
-    assert window._radar_scales["soft"].get_value() == 8
+    assert stored.soft_must == ["Liderazgo"] and stored.skill_levels == {"liderazgo": 8}
 
 
 def test_the_cv_section_is_edited_collected_and_the_uploaded_file_can_be_cleared():
@@ -97,23 +80,6 @@ def test_the_cv_section_is_edited_collected_and_the_uploaded_file_can_be_cleared
     assert collected.cv_file == "/tmp/mi-cv.pdf"
     window._set_cv_file("")
     assert window._collect().cv_file == "" and window._cv_label.get_text() == "Ninguno"
-
-
-def test_topic_radars_are_edited_in_the_dialog_and_stored_with_the_profile():
-    from grepleo.profiles import RadarAxis, SkillRadar
-    profile = Profile(name="R", must=["AWS", "Docker", "Terraform"],
-                      radars=[SkillRadar("Cloud", [RadarAxis("AWS", 8), RadarAxis("Docker", 5), RadarAxis("Helm", 2)])])
-    window = make_window(profile)
-    assert [row.name.get_text() for row in window._topic_radars.rows] == ["Cloud"]
-    window._topic_radars.rows[0].text.get_buffer().set_text("AWS = 9\nDocker = 6\nHelm = 3", -1)
-    assert window._collect().radars[0].axes[0] == RadarAxis("AWS", 9)
-    window._topic_radars.add(SkillRadar("Lenguajes", [RadarAxis("Python", 7), RadarAxis("Bash", 5), RadarAxis("SQL", 4)]))
-    window._name.set_text("Guardado")
-    saved = []
-    window._on_saved = saved.append
-    window._on_save(None)
-    stored = window._store.list_profiles()[0][1]
-    assert [radar.name for radar in stored.radars] == ["Cloud", "Lenguajes"] and saved
 
 
 def test_links_are_edited_one_per_line_and_blank_lines_are_dropped():

@@ -9,7 +9,6 @@ from gi.repository import Gio, GLib, Gtk
 
 from ..i18n import _
 from ..links import DOMAIN_MISMATCH, PLATFORMS, normalize_link
-from ..models import Fit
 from ..profiles import (
     STUDIES,
     Profile,
@@ -21,11 +20,10 @@ from ..profiles import (
     split_commas,
     split_lines,
 )
-from ..radar import AXES, SCALE, axis_labels, default_levels, profile_levels
+from ..skills_edit import apply_state, state_from_profile
 from ..storage import Store
 from .common import block_parent, labeled, link_icon, pick_icon
-from .radar_editor import RadarEditor
-from .radar_view import RadarView
+from .skills_window import SkillsWindow
 
 WORK_MODES = ("remote", "hybrid", "onsite")
 
@@ -116,66 +114,22 @@ class ProfileWindow(Gtk.Window):
         box.append(languages_box)
         self._languages_changed(self._languages)
 
-        box.append(_section(_("Habilidades técnicas")))
-        hint = Gtk.Label(label=_("Lo que sabes hacer, uno por línea; sinónimos con | (Power BI|powerbi). Se compara con lo "
-                                 "que pide cada oferta; si algo está en un radar, manda el nivel del radar."),
-                         xalign=0, wrap=True)
-        hint.add_css_class("dim-label")
-        box.append(hint)
-        scroll_must, self._must = _text_view("\n".join(profile.must), 110)
-        scroll_nice, self._nice = _text_view("\n".join(profile.nice), 110)
-        box.append(_columns(labeled(_("Lo que dominas"), _grown(scroll_must)),
-                            labeled(_("Lo que conoces"), _grown(scroll_nice))))
-
-        box.append(_section(_("Habilidades blandas")))
-        hint = Gtk.Label(label=_("Liderazgo, trabajo en equipo, comunicación…: uno por línea, con sinónimos si quieres"),
-                         xalign=0)
-        hint.add_css_class("dim-label")
-        box.append(hint)
-        scroll_must, self._soft_must = _text_view("\n".join(profile.soft_must), 90)
-        scroll_nice, self._soft_nice = _text_view("\n".join(profile.soft_nice), 90)
-        box.append(_columns(labeled(_("Lo que dominas"), _grown(scroll_must)),
-                            labeled(_("Lo que conoces"), _grown(scroll_nice))))
-
-        box.append(_section(_("Radar general")))
-        hint = Gtk.Label(label=_("Cómo te valoras de 0 a 10 en cada eje; se superpone al de cada oferta. Si no lo "
-                                 "tocas, sale de los datos de arriba. En «Técnicas» es también el nivel con el que "
-                                 "cuenta lo que has puesto en «Lo que dominas» al calcular el encaje."),
-                         xalign=0, wrap=True)
-        hint.add_css_class("dim-label")
-        box.append(hint)
-        levels = profile_levels(profile)
-        sliders = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6, valign=Gtk.Align.CENTER)
-        self._radar_scales: dict[str, Gtk.Scale] = {}
-        self._radar_manual = {axis for axis in profile.radar if axis in AXES}   # los ejes que has fijado tú
-        self._radar_loading = True
-        for axis, title in axis_labels().items():
-            scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0, SCALE, 1)
-            scale.set_value(round(levels[axis]))
-            scale.set_draw_value(True)
-            scale.set_value_pos(Gtk.PositionType.RIGHT)
-            scale.set_hexpand(True)
-            scale.connect("value-changed", self._radar_changed, axis)
-            self._radar_scales[axis] = scale
-            sliders.append(labeled(title, scale))
-        reset = Gtk.Button(label=_("Recalcular desde el perfil"), halign=Gtk.Align.START)
-        reset.connect("clicked", self._reset_radar)
-        sliders.append(reset)
-        self._radar = RadarView()
-        self._radar.set_content_height(250)
-        box.append(_columns(sliders, self._radar))
-        self._radar_loading = False
-        self._radar_changed()
-
-        box.append(_section(_("Radares por temas")))
-        topics_hint = Gtk.Label(xalign=0, wrap=True, label=_(
-            "Cada radar es de un tema (Cloud, Lenguajes, Metodologías…) y sus ejes son cosas concretas que aparecen en "
-            "las ofertas, con tu nivel de 0 a 10 en cada una. En cada oferta se superpone a lo que ella pide y da un "
-            "porcentaje de solape. Cuanto más precisos los elementos (y sus sinónimos), mejor mide."))
-        topics_hint.add_css_class("dim-label")
-        box.append(topics_hint)
-        self._topic_radars = RadarEditor(profile.radars, self._collect_fields)
-        box.append(self._topic_radars)
+        box.append(_section(_("Habilidades y niveles")))
+        skills_hint = Gtk.Label(xalign=0, wrap=True, label=_(
+            "Tus habilidades técnicas y blandas, cada una con un nivel de 0 a 10 y con los radares por temas que se "
+            "comparan con lo que pide cada oferta. Se editan en una ventana aparte, con la escala de niveles a la vista."))
+        skills_hint.add_css_class("dim-label")
+        box.append(skills_hint)
+        self._skills = state_from_profile(profile)
+        skills_row = Gtk.Box(spacing=12)
+        self._skills_summary = Gtk.Label(xalign=0, hexpand=True, wrap=True)
+        edit_skills = Gtk.Button(label=_("Editar habilidades y niveles…"))
+        edit_skills.add_css_class("suggested-action")
+        edit_skills.connect("clicked", self._edit_skills)
+        skills_row.append(self._skills_summary)
+        skills_row.append(edit_skills)
+        box.append(skills_row)
+        self._refresh_skills_summary()
 
         box.append(_section(_("Qué buscas")))
         scroll, self._avoid = _text_view("\n".join(profile.avoid), 60)
@@ -276,21 +230,21 @@ class ProfileWindow(Gtk.Window):
         outer.append(buttons)   # los botones siempre a la vista, aunque la ventana sea pequeña
         self.set_child(outer)
 
-    def _radar_changed(self, _scale=None, axis: str = "") -> None:
-        if axis and not self._radar_loading:
-            self._radar_manual.add(axis)   # lo has movido tú: se guarda; lo demás sigue saliendo del perfil
-        values = {axis: scale.get_value() for axis, scale in self._radar_scales.items()}
-        labels = axis_labels()
-        self._radar.set_data([labels[axis] for axis in AXES], [values[axis] for axis in AXES], None, Fit.UNKNOWN)
+    def _refresh_skills_summary(self) -> None:
+        technical = [group for group in self._skills.groups if group.kind != "soft"]
+        count = sum(len([item for item in group.skills if item.name]) for group in technical)
+        soft = sum(len([item for item in group.skills if item.name]) for group in self._skills.groups
+                   if group.kind == "soft")
+        radars = len([group for group in self._skills.groups if group.kind == "radar"])
+        self._skills_summary.set_text(_("{technical} habilidades técnicas, {soft} blandas y {radars} radares por temas.")
+                                      .format(technical=count, soft=soft, radars=radars))
 
-    def _reset_radar(self, _button: Gtk.Button) -> None:
-        """Vuelve a calcular el radar con lo que hay ahora en el formulario."""
-        self._radar_loading = True
-        for axis, value in default_levels(self._collect(with_radar=False)).items():
-            self._radar_scales[axis].set_value(round(value))
-        self._radar_loading = False
-        self._radar_manual.clear()
-        self._radar_changed()
+    def _edit_skills(self, _button: Gtk.Button) -> None:
+        def applied(state) -> None:
+            self._skills = state
+            self._refresh_skills_summary()
+
+        SkillsWindow(self, self._skills, applied).present()
 
     def _languages_changed(self, entry: Gtk.Entry) -> None:
         """Avisa si se escribe un nivel suelto («A2»): se tomaría por un idioma y las ofertas que piden inglés saldrían como
@@ -341,21 +295,16 @@ class ProfileWindow(Gtk.Window):
             return   # cancelado
         self._set_cv_file(chosen.get_path() or "")
 
-    def _collect(self, with_radar: bool = True) -> Profile:
+    def _collect(self) -> Profile:
         profile = self._collect_fields()
-        if with_radar:   # solo lo que has fijado tú: lo demás sigue saliendo de los datos del perfil
-            profile.radar = {axis: round(self._radar_scales[axis].get_value()) for axis in AXES
-                             if axis in self._radar_manual}
-            profile.radars = self._topic_radars.radars()
+        apply_state(self._skills, profile)   # las habilidades, sus niveles y los radares vienen de la ventana «Habilidades»
         return profile
 
     def _collect_fields(self) -> Profile:
         return Profile(
             name=self._name.get_text().strip(), headline=self._headline.get_text().strip(),
             years=int(self._years.get_value()), studies=STUDIES[self._studies.get_selected()],
-            languages=parse_languages(self._languages.get_text()), must=split_lines(_text_of(self._must)),
-            nice=split_lines(_text_of(self._nice)), soft_must=split_lines(_text_of(self._soft_must)),
-            soft_nice=split_lines(_text_of(self._soft_nice)), avoid=split_lines(_text_of(self._avoid)),
+            languages=parse_languages(self._languages.get_text()), avoid=split_lines(_text_of(self._avoid)),
             salary_min=int(self._salary.get_value()),
             work_modes=[mode for mode, check in self._modes.items() if check.get_active()],
             locations=split_commas(self._locations.get_text()),

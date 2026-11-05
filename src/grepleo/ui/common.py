@@ -27,6 +27,8 @@ CSS = b"""
 .row-fit-unknown { background: rgba(128, 128, 128, 0.18); }
 .wide-scroll scrollbar.vertical { min-width: 18px; }
 .wide-scroll scrollbar.vertical slider { min-width: 12px; min-height: 56px; border-radius: 6px; }
+.level-row { padding: 4px 8px; border-radius: 6px; }
+.level-active { background: rgba(53, 132, 228, 0.28); }
 .radar-card { border-radius: 10px; padding: 10px 14px; background: rgba(128, 128, 128, 0.07);
               border-left: 5px solid rgba(128, 128, 128, 0.5); }
 .radar-card-high { border-left-color: rgba(46, 160, 67, 0.95);

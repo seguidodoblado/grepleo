@@ -33,7 +33,7 @@ does not need it).
   InfoJobs, Indeed, LinkedIn and Tecnoempleo (through Apify Actors) and Michael Page (read directly from its website,
   at no cost), and offers repeated across sources are merged.
 - **Which criteria you meet:** each offer is evaluated against your **profile** (technical and soft skills,
-  what you master and what you know, with synonyms, experience, education, languages with level, minimum salary, work mode, location
+  your skills with a level from 0 to 10 each (in a window with the level scale in view) and synonyms, experience, education, languages with level, minimum salary, work mode, location
   and what you would rather not find) and shows ✓ met, ✗ not met or ? cannot be known, plus a High, Medium or Low
   fit.
 - **Honest about what it does not know:** summary cards (when a source does not bring the full description) do not have it, so

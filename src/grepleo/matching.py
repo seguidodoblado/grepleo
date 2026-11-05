@@ -10,10 +10,17 @@ import re
 
 from .i18n import _
 from .models import CriterionResult, Evaluation, Fit, Job, Status, WorkMode
-from .panorama import DEFAULT_CATALOG
 from .profiles import STUDIES_RANK, Profile, parse_term
-from .radar import DEMAND_NICE, DEMAND_REQUIRED, SCALE, SOFT_VOCABULARY, demand_note, term_demand
-from .similar import PARENT_FACTOR, SIMILAR_FACTOR, aliases, parents_of, similar_to, umbrella_members
+from .radar import DEMAND_NICE, DEMAND_REQUIRED, demand_note, term_demand
+from .skills import (  # noqa: F401 - se reexportan: los huecos y otros módulos los piden aquí
+    FULL_CREDIT,
+    asked_soft_specs,
+    asked_specs,
+    my_skills,
+    my_soft,
+    skill_credit,
+    soft_credit,
+)
 from .textutil import (
     language_requirements,
     level_rank,
@@ -27,8 +34,6 @@ from .textutil import (
 W_REQUIRED, W_NICE_ASK, W_MENTIONED, W_SOFT, W_AVOID = 3, 2, 1, 1, 2
 W_EXPERIENCE, W_SALARY, W_WORK_MODE, W_LOCATION, W_STUDIES, W_LANGUAGE = 3, 2, 2, 2, 1, 2
 
-SECONDARY = 0.7        # lo que conoces (secundario) cuenta con este porcentaje de tu nivel técnico general
-FULL_CREDIT = 0.8      # con este nivel frente a lo que se pide se da por cubierto del todo
 EVIDENCE = 6           # peso de habilidades pedidas por debajo del cual el encaje no se fía de sí mismo
 HIGH_SCORE = 0.80
 MEDIUM_SCORE = 0.55
@@ -38,72 +43,9 @@ def _money(value: float) -> str:
     return f"{value:,.0f} €".replace(",", ".")
 
 
-_LANGUAGE_TERMS = frozenset({"ingles", "english"})   # los idiomas se evalúan aparte, con su nivel
-
-
 def _weight(demand: float) -> int:
     """Lo que pesa una habilidad según cuánto la pide la oferta: requisito 3, deseable 2, solo mencionada 1."""
     return W_REQUIRED if demand >= DEMAND_REQUIRED else W_NICE_ASK if demand >= DEMAND_NICE else W_MENTIONED
-
-
-def my_skills(profile: Profile) -> list[tuple[frozenset[str], float, str]]:
-    """Lo que tienes y con qué nivel (0 a 10): los ejes de tus radares y tus habilidades principales, con tu nivel
-    técnico general del radar general (10 si no lo has tocado), y las secundarias, con el 70 % de él. Va por orden de
-    precisión: si algo está en un radar con tema, manda el nivel de ese eje."""
-    general = float(profile.radar.get("technical", SCALE))   # tu nivel técnico general del radar; sin tocarlo, 10
-    skills = [(aliases(axis.spec), float(axis.level), parse_term(axis.spec)[0]) for radar in profile.radars
-              for axis in radar.axes]
-    skills += [(aliases(spec), general, parse_term(spec)[0]) for spec in profile.must]
-    skills += [(aliases(spec), general * SECONDARY, parse_term(spec)[0]) for spec in profile.nice]
-    return [skill for skill in skills if skill[0]]
-
-
-def asked_specs(profile: Profile) -> list[str]:
-    """Lo que se busca en una oferta: el catálogo de requisitos habituales más lo que aparece en tu perfil y tus
-    radares (cada elemento una vez)."""
-    specs, seen = [], set()
-    candidates = [*DEFAULT_CATALOG, *profile.must, *profile.nice,
-                  *(axis.spec for radar in profile.radars for axis in radar.axes)]
-    for spec in candidates:
-        names = aliases(spec)
-        if names and not names & seen and not names & _LANGUAGE_TERMS:
-            specs.append(spec)
-            seen |= names
-    return specs
-
-
-def skill_credit(spec: str, demand: float, skills: list[tuple[frozenset[str], float, str]]) -> tuple[float, str]:
-    """(crédito de 0 a 1, cómo lo cubres dicho con palabras) de una habilidad pedida."""
-    names = aliases(spec)
-    mine = next((level for have, level, _name in skills if have & names), None)
-    if mine is None:   # un término genérico como «Cloud» lo cubre cualquiera de sus concreciones
-        mine = max((level for have, level, _name in skills if any(have & other for other in umbrella_members(names))),
-                   default=None)
-    if mine is None:   # un par como «CI/CD» lo cubres si tienes «CI» y «CD» por separado
-        for name in names:
-            parts = [part.strip() for part in name.split("/")]
-            levels = [next((level for have, level, _name in skills if part in have), None) for part in parts]
-            if len(parts) > 1 and all(level is not None for level in levels):
-                mine = min(levels)
-                break
-    if mine is not None:
-        credit = min(mine, demand) / demand
-        if credit >= FULL_CREDIT:
-            return 1.0, _("la tienes")
-        return credit, _("tu nivel: {level} de 10").format(level=f"{mine:.0f}")
-    base = max(((level, name) for have, level, name in skills if any(have & parent for parent in parents_of(names))),
-               key=lambda item: item[0], default=None)
-    if base is not None:   # tienes la plataforma o la base de lo que se pide (AWS para EC2)
-        credit = PARENT_FACTOR * min(base[0], demand) / demand
-        text = _("tienes la base: {name}").format(name=base[1])
-        return (1.0 if credit >= FULL_CREDIT else credit), text
-    related = similar_to(names)
-    best = max(((level, name) for have, level, name in skills if any(have & other for other in related)),
-               key=lambda item: item[0], default=None)
-    if best is not None:
-        credit = SIMILAR_FACTOR * min(best[0], demand) / demand
-        return credit, _("tienes algo parecido: {name}").format(name=best[1])
-    return 0.0, _("no la tienes")
 
 
 def _skill_criteria(job: Job, text: str, profile: Profile) -> list[CriterionResult]:
@@ -127,18 +69,15 @@ def _skill_criteria(job: Job, text: str, profile: Profile) -> list[CriterionResu
             credit if status is Status.PARTIAL else None)))
     asked.sort(key=lambda item: (-item[0], normalize(item[1].name)))
     results = [item for _demand, item in asked]
-    mine_soft = [aliases(spec) for spec in (*profile.soft_must, *profile.soft_nice)]
-    for spec in (*SOFT_VOCABULARY, *profile.soft_must, *profile.soft_nice):
+    soft = my_soft(profile)
+    for spec in asked_soft_specs(profile):
         name, names = parse_term(spec)
         if not name or not mentions(text, names):
             continue
-        if any(item.name == name.capitalize() or normalize(item.name) == normalize(name) for item in results
-               if item.group == "soft"):
-            continue
-        have = any(aliases(spec) & other for other in mine_soft)
-        results.append(CriterionResult(name[:1].upper() + name[1:], Status.MET if have else Status.MISSING,
-                                       _("la pide la oferta · la tienes") if have
-                                       else _("la pide la oferta · no la tienes"), W_SOFT, False, "soft"))
+        credit, how = soft_credit(spec, soft)
+        status = Status.MET if credit >= 1 else Status.PARTIAL if credit > 0 else Status.MISSING
+        results.append(CriterionResult(name[:1].upper() + name[1:], status, f"{_('la pide la oferta')} · {how}", W_SOFT,
+                                       False, "soft", credit if status is Status.PARTIAL else None))
     for spec in profile.avoid:
         name, names = parse_term(spec)
         if not name:

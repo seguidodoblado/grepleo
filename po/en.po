@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: grepleo 0.1.0\n"
 "Report-Msgid-Bugs-To: jose.antonio.seguido@gmail.com\n"
-"POT-Creation-Date: 2026-11-05 02:18+0100\n"
+"POT-Creation-Date: 2026-11-05 02:39+0100\n"
 "PO-Revision-Date: 2026-11-03 17:00+0100\n"
 "Last-Translator: José Antonio Seguido Doblado <jose.antonio.seguido@gmail."
 "com>\n"
@@ -31,37 +31,36 @@ msgstr ""
 msgid "El comando del asistente está vacío."
 msgstr "The assistant command is empty."
 
-#: src/grepleo/ats.py:48
+#: src/grepleo/ats.py:49
 msgid "Es probable que pase el filtro"
 msgstr "It is likely to pass the filter"
 
-#: src/grepleo/ats.py:50
+#: src/grepleo/ats.py:51
 msgid "Puede pasar, según lo estricto que sea el filtro"
 msgstr "It may pass, depending on how strict the filter is"
 
-#: src/grepleo/ats.py:51
+#: src/grepleo/ats.py:52
 msgid "Es poco probable que pase el filtro"
 msgstr "It is unlikely to pass the filter"
 
-#: src/grepleo/ats.py:55
+#: src/grepleo/ats.py:56
 msgid "alta"
 msgstr "high"
 
-#: src/grepleo/ats.py:55
+#: src/grepleo/ats.py:56
 msgid "media"
 msgstr "medium"
 
-#: src/grepleo/ats.py:55
+#: src/grepleo/ats.py:56
 msgid "baja"
 msgstr "low"
 
 #: src/grepleo/cv.py:16 src/grepleo/ui/detail_view.py:27
-#: src/grepleo/ui/profile_dialog.py:119
 msgid "Habilidades técnicas"
 msgstr "Hard skills"
 
-#: src/grepleo/cv.py:16 src/grepleo/ui/detail_view.py:27
-#: src/grepleo/ui/profile_dialog.py:130
+#: src/grepleo/cv.py:16 src/grepleo/skills_edit.py:23
+#: src/grepleo/ui/detail_view.py:27
 msgid "Habilidades blandas"
 msgstr "Soft skills"
 
@@ -77,7 +76,7 @@ msgstr "Vocational training"
 msgid "Grado universitario"
 msgstr "University degree"
 
-#: src/grepleo/cv.py:20 src/grepleo/ui/profile_dialog.py:34
+#: src/grepleo/cv.py:20 src/grepleo/ui/profile_dialog.py:32
 msgid "Máster"
 msgstr "Master's"
 
@@ -120,166 +119,135 @@ msgstr ""
 msgid "Requisitos eliminatorios que no cumplo: {names}"
 msgstr "Knock-out requirements I do not meet: {names}"
 
-#: src/grepleo/market.py:39
+#: src/grepleo/market.py:40
 msgid "ninguna oferta lo pide"
 msgstr "no offer asks for it"
 
-#: src/grepleo/market.py:40
+#: src/grepleo/market.py:41
 #, python-format, python-brace-format
 msgid "en el {share} % de las ofertas · {how}"
 msgstr "in {share} % of the offers · {how}"
 
-#: src/grepleo/market.py:78 src/grepleo/radar.py:316
+#: src/grepleo/market.py:86 src/grepleo/radar.py:329
 msgid "General"
 msgstr "General"
 
-#: src/grepleo/matching.py:92
-msgid "la tienes"
-msgstr "you have it"
-
-#: src/grepleo/matching.py:93
-#, python-brace-format
-msgid "tu nivel: {level} de 10"
-msgstr "your level: {level} out of 10"
-
-#: src/grepleo/matching.py:98
-#, python-brace-format
-msgid "tienes la base: {name}"
-msgstr "you have the base: {name}"
-
-#: src/grepleo/matching.py:105
-#, python-brace-format
-msgid "tienes algo parecido: {name}"
-msgstr "you have something similar: {name}"
-
-#: src/grepleo/matching.py:106
-msgid "no la tienes"
-msgstr "you do not have it"
-
-#: src/grepleo/matching.py:140
-msgid "la pide la oferta · la tienes"
-msgstr "the offer asks for it · you have it"
-
-#: src/grepleo/matching.py:141
-msgid "la pide la oferta · no la tienes"
-msgstr "the offer asks for it · you do not have it"
-
-#: src/grepleo/matching.py:146
+#: src/grepleo/matching.py:85
 #, python-brace-format
 msgid "Sin «{term}»"
 msgstr "No “{term}”"
 
-#: src/grepleo/matching.py:148
+#: src/grepleo/matching.py:87
 msgid "La oferta lo menciona"
 msgstr "The offer mentions it"
 
-#: src/grepleo/matching.py:150
+#: src/grepleo/matching.py:89
 msgid "No aparece en la oferta"
 msgstr "Does not appear in the offer"
 
-#: src/grepleo/matching.py:152
+#: src/grepleo/matching.py:91
 msgid "Ficha resumida: no se puede saber"
 msgstr "Summary card: cannot tell"
 
-#: src/grepleo/matching.py:157
+#: src/grepleo/matching.py:96
 #, python-brace-format
 msgid "{count} año"
 msgstr "{count} year"
 
-#: src/grepleo/matching.py:157
+#: src/grepleo/matching.py:96
 #, python-brace-format
 msgid "{count} años"
 msgstr "{count} years"
 
-#: src/grepleo/matching.py:167 src/grepleo/radar.py:120
+#: src/grepleo/matching.py:106 src/grepleo/radar.py:102
 #: src/grepleo/report.py:26
 msgid "Experiencia"
 msgstr "Experience"
 
-#: src/grepleo/matching.py:170
+#: src/grepleo/matching.py:109
 msgid "La oferta no dice cuánta experiencia pide"
 msgstr "The offer does not say how much experience it asks for"
 
-#: src/grepleo/matching.py:171 src/grepleo/matching.py:272
+#: src/grepleo/matching.py:110 src/grepleo/matching.py:211
 #, python-brace-format
 msgid "Pide {needed}, tienes {have}"
 msgstr "Asks for {needed}, you have {have}"
 
-#: src/grepleo/matching.py:204
+#: src/grepleo/matching.py:143
 msgid "Nivel del puesto"
 msgstr "Role level"
 
-#: src/grepleo/matching.py:207
+#: src/grepleo/matching.py:146
 #, python-brace-format
 msgid "El título pide un perfil sénior y tienes {have}"
 msgstr "The title asks for a senior profile and you have {have}"
 
-#: src/grepleo/matching.py:215
+#: src/grepleo/matching.py:154
 msgid "El título es de nivel junior o de entrada"
 msgstr "The title is junior or entry level"
 
-#: src/grepleo/matching.py:220 src/grepleo/report.py:25
+#: src/grepleo/matching.py:159 src/grepleo/report.py:25
 #: src/grepleo/ui/gui.py:432
 msgid "Salario"
 msgstr "Salary"
 
-#: src/grepleo/matching.py:223
+#: src/grepleo/matching.py:162
 msgid "La oferta no publica salario"
 msgstr "The offer does not publish a salary"
 
-#: src/grepleo/matching.py:224
+#: src/grepleo/matching.py:163
 msgid " (estimado por el portal)"
 msgstr " (estimated by the portal)"
 
-#: src/grepleo/matching.py:225
+#: src/grepleo/matching.py:164
 #, python-brace-format
 msgid "Hasta {top} frente a tu mínimo de {wanted}"
 msgstr "Up to {top} against your minimum of {wanted}"
 
-#: src/grepleo/matching.py:231 src/grepleo/report.py:25
+#: src/grepleo/matching.py:170 src/grepleo/report.py:25
 msgid "Modalidad"
 msgstr "Work mode"
 
-#: src/grepleo/matching.py:233
+#: src/grepleo/matching.py:172
 msgid "La oferta no dice la modalidad"
 msgstr "The offer does not say the work mode"
 
-#: src/grepleo/matching.py:239 src/grepleo/report.py:25
+#: src/grepleo/matching.py:178 src/grepleo/report.py:25
 #: src/grepleo/ui/gui.py:349 src/grepleo/ui/gui.py:431
 msgid "Ubicación"
 msgstr "Location"
 
-#: src/grepleo/matching.py:241 src/grepleo/models.py:19
-#: src/grepleo/ui/profile_dialog.py:38
+#: src/grepleo/matching.py:180 src/grepleo/models.py:19
+#: src/grepleo/ui/profile_dialog.py:36
 msgid "Remoto"
 msgstr "Remote"
 
-#: src/grepleo/matching.py:243
+#: src/grepleo/matching.py:182
 msgid "La oferta no dice la ubicación"
 msgstr "The offer does not say the location"
 
-#: src/grepleo/matching.py:250 src/grepleo/radar.py:121
-#: src/grepleo/ui/profile_dialog.py:104
+#: src/grepleo/matching.py:189 src/grepleo/radar.py:103
+#: src/grepleo/ui/profile_dialog.py:102
 msgid "Estudios"
 msgstr "Education"
 
-#: src/grepleo/matching.py:256
+#: src/grepleo/matching.py:195
 msgid "La oferta no pide estudios concretos"
 msgstr "The offer does not ask for specific education"
 
-#: src/grepleo/matching.py:268
+#: src/grepleo/matching.py:207
 msgid "No lo tienes en tu perfil"
 msgstr "It is not in your profile"
 
-#: src/grepleo/matching.py:275
+#: src/grepleo/matching.py:214
 msgid "Cumples el nivel"
 msgstr "You meet the level"
 
-#: src/grepleo/models.py:19 src/grepleo/ui/profile_dialog.py:38
+#: src/grepleo/models.py:19 src/grepleo/ui/profile_dialog.py:36
 msgid "Híbrido"
 msgstr "Hybrid"
 
-#: src/grepleo/models.py:20 src/grepleo/ui/profile_dialog.py:38
+#: src/grepleo/models.py:20 src/grepleo/ui/profile_dialog.py:36
 msgid "Presencial"
 msgstr "On-site"
 
@@ -430,119 +398,124 @@ msgstr[1] ""
 "{count} offers are summary cards: it cannot be known which requirements do "
 "not appear in them."
 
-#: src/grepleo/radar.py:120
+#: src/grepleo/radar.py:102
 msgid "Técnicas"
 msgstr "Technical"
 
-#: src/grepleo/radar.py:120 src/grepleo/radar.py:370
+#: src/grepleo/radar.py:102 src/grepleo/radar.py:383
 msgid "Blandas"
 msgstr "Soft"
 
-#: src/grepleo/radar.py:121
+#: src/grepleo/radar.py:103
 msgid "Idiomas"
 msgstr "Languages"
 
-#: src/grepleo/radar.py:271 src/grepleo/radar.py:283
+#: src/grepleo/radar.py:253 src/grepleo/radar.py:265
 msgid "ficha resumida: no se puede saber"
 msgstr "summary card: cannot be known"
 
-#: src/grepleo/radar.py:273
+#: src/grepleo/radar.py:255
 msgid "la pide como requisito o en el título"
 msgstr "it asks for it as a requirement or in the title"
 
-#: src/grepleo/radar.py:275
+#: src/grepleo/radar.py:257
 msgid "la valora como deseable"
 msgstr "it values it as nice-to-have"
 
-#: src/grepleo/radar.py:277
+#: src/grepleo/radar.py:259
 msgid "solo la menciona"
 msgstr "it only mentions it"
 
-#: src/grepleo/radar.py:278
+#: src/grepleo/radar.py:260
 msgid "no aparece en la oferta"
 msgstr "it does not appear in the offer"
 
-#: src/grepleo/radar.py:288
+#: src/grepleo/radar.py:270
 msgid "no dice cuánta experiencia pide"
 msgstr "it does not say how much experience it asks for"
 
-#: src/grepleo/radar.py:293
+#: src/grepleo/radar.py:275
 #, python-brace-format
 msgid "cita {count} o más tecnologías"
 msgstr "cites {count} or more technologies"
 
-#: src/grepleo/radar.py:295
+#: src/grepleo/radar.py:277
 #, python-brace-format
 msgid "cita {count} tecnología"
 msgid_plural "cita {count} tecnologías"
 msgstr[0] "cites {count} technology"
 msgstr[1] "cites {count} technologies"
 
-#: src/grepleo/radar.py:298
+#: src/grepleo/radar.py:280 src/grepleo/radar.py:285
+#, python-brace-format
+msgid "cubres el {percent} %"
+msgstr "you cover {percent} %"
+
+#: src/grepleo/radar.py:282
 #, python-brace-format
 msgid "cita {count} habilidad blanda"
 msgid_plural "cita {count} habilidades blandas"
 msgstr[0] "cites {count} soft skill"
 msgstr[1] "cites {count} soft skills"
 
-#: src/grepleo/radar.py:301
+#: src/grepleo/radar.py:287
 #, python-brace-format
 msgid "pide {count} año de experiencia"
 msgid_plural "pide {count} años de experiencia"
 msgstr[0] "asks for {count} year of experience"
 msgstr[1] "asks for {count} years of experience"
 
-#: src/grepleo/radar.py:305
+#: src/grepleo/radar.py:291
 #, python-brace-format
 msgid "pide nivel {level}"
 msgstr "asks for level {level}"
 
-#: src/grepleo/radar.py:305
+#: src/grepleo/radar.py:291
 msgid "no pide idiomas"
 msgstr "asks for no languages"
 
-#: src/grepleo/radar.py:307 src/grepleo/ui/profile_dialog.py:34
+#: src/grepleo/radar.py:293 src/grepleo/ui/profile_dialog.py:32
 msgid "FP"
 msgstr "Vocational (FP)"
 
-#: src/grepleo/radar.py:307
+#: src/grepleo/radar.py:293
 msgid "grado"
 msgstr "degree"
 
-#: src/grepleo/radar.py:307
+#: src/grepleo/radar.py:293
 msgid "máster"
 msgstr "master"
 
-#: src/grepleo/radar.py:309
+#: src/grepleo/radar.py:295
 #, python-brace-format
 msgid "pide {level}"
 msgstr "asks for {level}"
 
-#: src/grepleo/radar.py:309
+#: src/grepleo/radar.py:295
 msgid "no pide estudios concretos"
 msgstr "asks for no specific education"
 
-#: src/grepleo/radar.py:344
+#: src/grepleo/radar.py:357
 msgid "Cloud"
 msgstr "Cloud"
 
-#: src/grepleo/radar.py:344
+#: src/grepleo/radar.py:357
 msgid "Lenguajes"
 msgstr "Languages"
 
-#: src/grepleo/radar.py:344
+#: src/grepleo/radar.py:357
 msgid "Datos"
 msgstr "Data"
 
-#: src/grepleo/radar.py:345
+#: src/grepleo/radar.py:358
 msgid "Metodologías y herramientas"
 msgstr "Methodologies and tools"
 
-#: src/grepleo/radar.py:345
+#: src/grepleo/radar.py:358
 msgid "Sistemas y redes"
 msgstr "Systems and networks"
 
-#: src/grepleo/radar.py:366
+#: src/grepleo/radar.py:379 src/grepleo/skills_edit.py:19
 msgid "Otras habilidades"
 msgstr "Other skills"
 
@@ -612,6 +585,107 @@ msgstr ""
 "Summary cards do not include the full description and some offers may be "
 "closed. Salaries marked as estimated are calculated by the portal, not by "
 "the company."
+
+#: src/grepleo/skills_edit.py:94 src/grepleo/ui/gui.py:588
+msgid "Radar"
+msgstr "Radar"
+
+#: src/grepleo/skills_edit.py:118
+msgid "No lo conozco"
+msgstr "I do not know it"
+
+#: src/grepleo/skills_edit.py:118
+msgid "No lo he usado ni sé qué es."
+msgstr "I have not used it and I do not know what it is."
+
+#: src/grepleo/skills_edit.py:119
+msgid "Lo conozco de oídas"
+msgstr "I know it by hearsay"
+
+#: src/grepleo/skills_edit.py:119
+msgid ""
+"Sé qué es y para qué sirve, o lo he visto en una demostración; no lo he "
+"usado."
+msgstr "I know what it is and what it is for, or I have seen a demo; I have not used it."
+
+#: src/grepleo/skills_edit.py:120
+msgid "Lo he probado"
+msgstr "I have tried it"
+
+#: src/grepleo/skills_edit.py:120
+msgid ""
+"Lo he usado en laboratorios o tutoriales, siguiendo guías; con un caso real "
+"necesitaría ayuda."
+msgstr "I have used it in labs or tutorials, following guides; with a real case I would need help."
+
+#: src/grepleo/skills_edit.py:122
+msgid "Lo he usado en trabajo real"
+msgstr "I have used it in real work"
+
+#: src/grepleo/skills_edit.py:122
+msgid ""
+"Con la documentación al lado resuelvo lo habitual; todavía no lo diseño de "
+"cero."
+msgstr "With the documentation at hand I solve the usual; I do not design it from scratch yet."
+
+#: src/grepleo/skills_edit.py:124
+msgid "Lo uso con soltura"
+msgstr "I use it fluently"
+
+#: src/grepleo/skills_edit.py:124
+msgid ""
+"En producción, con autonomía. Cubre del todo lo que una oferta pide como «se "
+"valora»."
+msgstr "In production, with autonomy. It fully covers what an offer asks for as “nice to have”."
+
+#: src/grepleo/skills_edit.py:126
+msgid "Lo diseño y lo mantengo"
+msgstr "I design and maintain it"
+
+#: src/grepleo/skills_edit.py:126
+msgid ""
+"Lo diseño, configuro y mantengo solo y resuelvo incidencias. Cubre un "
+"requisito: me presentaría y lo defendería con casos reales."
+msgstr "I design, configure and maintain it on my own and solve incidents. It covers a requirement: I would apply and defend it with real cases."
+
+#: src/grepleo/skills_edit.py:128
+msgid "Dominio profundo"
+msgstr "Deep mastery"
+
+#: src/grepleo/skills_edit.py:128
+msgid "Arquitectura, optimización y casos complejos; puedo enseñarlo a otros."
+msgstr "Architecture, optimisation and complex cases; I can teach it to others."
+
+#: src/grepleo/skills_edit.py:129
+msgid "Referente"
+msgstr "Reference"
+
+#: src/grepleo/skills_edit.py:129
+msgid "Reconocido en el tema: contribuciones o años de especialización."
+msgstr "Recognised in the field: contributions or years of specialisation."
+
+#: src/grepleo/skills.py:92 src/grepleo/skills.py:117
+msgid "la tienes"
+msgstr "you have it"
+
+#: src/grepleo/skills.py:93 src/grepleo/skills.py:118
+#, python-brace-format
+msgid "tu nivel: {level} de 10"
+msgstr "your level: {level} out of 10"
+
+#: src/grepleo/skills.py:98
+#, python-brace-format
+msgid "tienes la base: {name}"
+msgstr "you have the base: {name}"
+
+#: src/grepleo/skills.py:105
+#, python-brace-format
+msgid "tienes algo parecido: {name}"
+msgstr "you have something similar: {name}"
+
+#: src/grepleo/skills.py:106 src/grepleo/skills.py:114
+msgid "no la tienes"
+msgstr "you do not have it"
 
 #: src/grepleo/sources/apify.py:35
 msgid "El token de Apify no es válido."
@@ -729,12 +803,13 @@ msgstr "Could not save the CV: {error}"
 msgid "CV guardado en {path}."
 msgstr "CV saved to {path}."
 
-#: src/grepleo/ui/common.py:144 src/grepleo/ui/common.py:172
+#: src/grepleo/ui/common.py:146 src/grepleo/ui/common.py:174
 msgid "Aceptar"
 msgstr "OK"
 
-#: src/grepleo/ui/common.py:149 src/grepleo/ui/common.py:171
-#: src/grepleo/ui/profile_dialog.py:262 src/grepleo/ui/tracking_panel.py:79
+#: src/grepleo/ui/common.py:151 src/grepleo/ui/common.py:173
+#: src/grepleo/ui/profile_dialog.py:216 src/grepleo/ui/skills_window.py:208
+#: src/grepleo/ui/tracking_panel.py:79
 msgid "Cancelar"
 msgstr "Cancel"
 
@@ -754,7 +829,7 @@ msgstr "In a week"
 msgid "Sin fecha"
 msgstr "No date"
 
-#: src/grepleo/ui/date_picker.py:44 src/grepleo/ui/profile_dialog.py:250
+#: src/grepleo/ui/date_picker.py:44 src/grepleo/ui/profile_dialog.py:204
 msgid "Quitar"
 msgstr "Clear"
 
@@ -838,7 +913,7 @@ msgstr "Unlikely (< {percent} %)"
 msgid "Modalidad: todas"
 msgstr "Work mode: all"
 
-#: src/grepleo/ui/gui.py:90 src/grepleo/ui/profile_dialog.py:34
+#: src/grepleo/ui/gui.py:90 src/grepleo/ui/profile_dialog.py:32
 msgid "Sin indicar"
 msgstr "Not specified"
 
@@ -965,7 +1040,7 @@ msgstr "Export"
 msgid "Exporta las ofertas que se ven ahora"
 msgstr "Exports the offers shown right now"
 
-#: src/grepleo/ui/gui.py:325 src/grepleo/ui/profile_dialog.py:79
+#: src/grepleo/ui/gui.py:325 src/grepleo/ui/profile_dialog.py:77
 msgid "Perfil"
 msgstr "Profile"
 
@@ -988,7 +1063,7 @@ msgid "Búsquedas guardadas"
 msgstr "Saved searches"
 
 #: src/grepleo/ui/gui.py:336 src/grepleo/ui/preferences.py:106
-#: src/grepleo/ui/profile_dialog.py:263
+#: src/grepleo/ui/profile_dialog.py:217
 msgid "Guardar"
 msgstr "Save"
 
@@ -1087,10 +1162,6 @@ msgstr ""
 #: src/grepleo/ui/gui.py:559 src/grepleo/ui/gui.py:1172
 msgid "Descartar"
 msgstr "Discard"
-
-#: src/grepleo/ui/gui.py:588 src/grepleo/ui/radar_editor.py:126
-msgid "Radar"
-msgstr "Radar"
 
 #: src/grepleo/ui/gui.py:588
 msgid "Seguimiento"
@@ -1513,140 +1584,94 @@ msgstr ""
 "A search is running: wait for it to finish before changing the language or "
 "the theme."
 
-#: src/grepleo/ui/profile_dialog.py:34
+#: src/grepleo/ui/profile_dialog.py:32
 msgid "Grado"
 msgstr "Degree"
 
-#: src/grepleo/ui/profile_dialog.py:89
+#: src/grepleo/ui/profile_dialog.py:87
 msgid "Quién eres"
 msgstr "Who you are"
 
-#: src/grepleo/ui/profile_dialog.py:91
+#: src/grepleo/ui/profile_dialog.py:89
 msgid "Por ejemplo: CRM Manager con Salesforce"
 msgstr "For example: CRM Manager with Salesforce"
 
-#: src/grepleo/ui/profile_dialog.py:94
+#: src/grepleo/ui/profile_dialog.py:92
 msgid "Nombre del perfil"
 msgstr "Profile name"
 
-#: src/grepleo/ui/profile_dialog.py:95
+#: src/grepleo/ui/profile_dialog.py:93
 msgid "Quién eres (cargo actual o resumen)"
 msgstr "Who you are (current role or summary)"
 
-#: src/grepleo/ui/profile_dialog.py:101
+#: src/grepleo/ui/profile_dialog.py:99
 msgid "Años de experiencia"
 msgstr "Years of experience"
 
-#: src/grepleo/ui/profile_dialog.py:107
+#: src/grepleo/ui/profile_dialog.py:105
 msgid "Salario mínimo bruto anual (€, 0 = no importa)"
 msgstr "Minimum gross annual salary (€, 0 = does not matter)"
 
-#: src/grepleo/ui/profile_dialog.py:110
+#: src/grepleo/ui/profile_dialog.py:108
 msgid "Por ejemplo: Inglés C1, Francés B1"
 msgstr "For example: English C1, French B1"
 
-#: src/grepleo/ui/profile_dialog.py:114
+#: src/grepleo/ui/profile_dialog.py:112
 msgid "Idiomas (con nivel A1 a C2)"
 msgstr "Languages (with level A1 to C2)"
 
-#: src/grepleo/ui/profile_dialog.py:120
+#: src/grepleo/ui/profile_dialog.py:117 src/grepleo/ui/skills_window.py:109
+msgid "Habilidades y niveles"
+msgstr "Skills and levels"
+
+#: src/grepleo/ui/profile_dialog.py:119
 msgid ""
-"Lo que sabes hacer, uno por línea; sinónimos con | (Power BI|powerbi). Se "
-"compara con lo que pide cada oferta; si algo está en un radar, manda el "
-"nivel del radar."
-msgstr ""
-"What you can do, one per line; synonyms with | (Power BI|powerbi). It is "
-"compared with what each offer asks for; if something is in a radar, the "
-"radar level rules."
+"Tus habilidades técnicas y blandas, cada una con un nivel de 0 a 10 y con "
+"los radares por temas que se comparan con lo que pide cada oferta. Se editan "
+"en una ventana aparte, con la escala de niveles a la vista."
+msgstr "Your hard and soft skills, each with a level from 0 to 10, and the topic radars that are compared with what each offer asks for. They are edited in a separate window, with the level scale in view."
 
-#: src/grepleo/ui/profile_dialog.py:127 src/grepleo/ui/profile_dialog.py:137
-msgid "Lo que dominas"
-msgstr "What you master"
+#: src/grepleo/ui/profile_dialog.py:126
+msgid "Editar habilidades y niveles…"
+msgstr "Edit skills and levels…"
 
-#: src/grepleo/ui/profile_dialog.py:128 src/grepleo/ui/profile_dialog.py:138
-msgid "Lo que conoces"
-msgstr "What you know"
-
-#: src/grepleo/ui/profile_dialog.py:131
-msgid ""
-"Liderazgo, trabajo en equipo, comunicación…: uno por línea, con sinónimos si "
-"quieres"
-msgstr ""
-"Leadership, teamwork, communication…: one per line, with synonyms if you like"
-
-#: src/grepleo/ui/profile_dialog.py:140
-msgid "Radar general"
-msgstr "General radar"
-
-#: src/grepleo/ui/profile_dialog.py:141
-msgid ""
-"Cómo te valoras de 0 a 10 en cada eje; se superpone al de cada oferta. Si no "
-"lo tocas, sale de los datos de arriba. En «Técnicas» es también el nivel con "
-"el que cuenta lo que has puesto en «Lo que dominas» al calcular el encaje."
-msgstr ""
-"How you rate yourself from 0 to 10 on each axis; it is overlaid on each "
-"offer's. If you do not touch it, it comes from the data above. In "
-"“Technical” it is also the level at which what you put in “What you master” "
-"counts when computing the fit."
-
-#: src/grepleo/ui/profile_dialog.py:161
-msgid "Recalcular desde el perfil"
-msgstr "Recalculate from the profile"
-
-#: src/grepleo/ui/profile_dialog.py:170
-msgid "Radares por temas"
-msgstr "Radars by topic"
-
-#: src/grepleo/ui/profile_dialog.py:172
-msgid ""
-"Cada radar es de un tema (Cloud, Lenguajes, Metodologías…) y sus ejes son "
-"cosas concretas que aparecen en las ofertas, con tu nivel de 0 a 10 en cada "
-"una. En cada oferta se superpone a lo que ella pide y da un porcentaje de "
-"solape. Cuanto más precisos los elementos (y sus sinónimos), mejor mide."
-msgstr ""
-"Each radar is about a topic (Cloud, Languages, Methodologies…) and its axes "
-"are concrete things that appear in offers, with your level from 0 to 10 in "
-"each. In each offer it is overlaid on what the offer asks and gives an "
-"overlap percentage. The more precise the elements (and their synonyms), the "
-"better it measures."
-
-#: src/grepleo/ui/profile_dialog.py:180
+#: src/grepleo/ui/profile_dialog.py:134
 msgid "Qué buscas"
 msgstr "What you are looking for"
 
-#: src/grepleo/ui/profile_dialog.py:188
+#: src/grepleo/ui/profile_dialog.py:142
 msgid "Madrid, Pozuelo"
 msgstr "Madrid, Pozuelo"
 
-#: src/grepleo/ui/profile_dialog.py:190
+#: src/grepleo/ui/profile_dialog.py:144
 msgid "Modalidades que acepto (ninguna marcada = cualquiera)"
 msgstr "Work modes I accept (none ticked = any)"
 
-#: src/grepleo/ui/profile_dialog.py:191
+#: src/grepleo/ui/profile_dialog.py:145
 msgid "Ubicaciones que me valen (separadas por comas)"
 msgstr "Locations that work for me (comma separated)"
 
-#: src/grepleo/ui/profile_dialog.py:192
+#: src/grepleo/ui/profile_dialog.py:146
 msgid "Prefiero que no aparezcan: uno por línea"
 msgstr "I would rather not see: one per line"
 
-#: src/grepleo/ui/profile_dialog.py:194
+#: src/grepleo/ui/profile_dialog.py:148
 msgid "Tipos de oferta y notas"
 msgstr "Offer types and notes"
 
-#: src/grepleo/ui/profile_dialog.py:197
+#: src/grepleo/ui/profile_dialog.py:151
 msgid "Tipos de oferta: «Nombre: palabra, palabra», uno por línea"
 msgstr "Offer types: “Name: word, word”, one per line"
 
-#: src/grepleo/ui/profile_dialog.py:199
+#: src/grepleo/ui/profile_dialog.py:153
 msgid "Notas sobre tu experiencia (para uso futuro)"
 msgstr "Notes about your experience (for future use)"
 
-#: src/grepleo/ui/profile_dialog.py:201
+#: src/grepleo/ui/profile_dialog.py:155
 msgid "Currículum"
 msgstr "Curriculum vitae"
 
-#: src/grepleo/ui/profile_dialog.py:202
+#: src/grepleo/ui/profile_dialog.py:156
 msgid ""
 "Con estos datos se construye tu currículum base y se adapta a cada oferta "
 "con tu propia IA. Todo se queda en tu equipo: solo sale si lanzas el "
@@ -1655,19 +1680,19 @@ msgstr ""
 "This data builds your base CV and tailors it to each offer with your own AI. "
 "It all stays on your computer: it only leaves if you launch the assistant."
 
-#: src/grepleo/ui/profile_dialog.py:211
+#: src/grepleo/ui/profile_dialog.py:165
 msgid "Nombre completo"
 msgstr "Full name"
 
-#: src/grepleo/ui/profile_dialog.py:212
+#: src/grepleo/ui/profile_dialog.py:166
 msgid "Correo"
 msgstr "Email"
 
-#: src/grepleo/ui/profile_dialog.py:213
+#: src/grepleo/ui/profile_dialog.py:167
 msgid "Teléfono"
 msgstr "Phone"
 
-#: src/grepleo/ui/profile_dialog.py:216
+#: src/grepleo/ui/profile_dialog.py:170
 msgid ""
 "Tus perfiles profesionales: basta el nombre de usuario o pegar la dirección, "
 "que se limpia sola."
@@ -1675,23 +1700,23 @@ msgstr ""
 "Your professional profiles: just the username or paste the address, which "
 "cleans itself up."
 
-#: src/grepleo/ui/profile_dialog.py:239
+#: src/grepleo/ui/profile_dialog.py:193
 msgid "Otros enlaces: uno por línea"
 msgstr "Other links: one per line"
 
-#: src/grepleo/ui/profile_dialog.py:243
+#: src/grepleo/ui/profile_dialog.py:197
 msgid "Experiencia profesional: puestos, empresas, fechas y logros"
 msgstr "Work experience: positions, companies, dates and achievements"
 
-#: src/grepleo/ui/profile_dialog.py:244
+#: src/grepleo/ui/profile_dialog.py:198
 msgid "Formación: centros, titulaciones y cursos"
 msgstr "Education: schools, degrees and courses"
 
-#: src/grepleo/ui/profile_dialog.py:248 src/grepleo/ui/profile_dialog.py:328
+#: src/grepleo/ui/profile_dialog.py:202 src/grepleo/ui/profile_dialog.py:282
 msgid "Elegir mi CV…"
 msgstr "Choose my CV…"
 
-#: src/grepleo/ui/profile_dialog.py:254
+#: src/grepleo/ui/profile_dialog.py:208
 msgid ""
 "Un CV que ya tengas (PDF, Word o texto): se le pasa a la IA junto al "
 "construido arriba"
@@ -1699,81 +1724,40 @@ msgstr ""
 "A CV you already have (PDF, Word or text): it is given to the AI along with "
 "the one built above"
 
-#: src/grepleo/ui/profile_dialog.py:301
+#: src/grepleo/ui/profile_dialog.py:239
+#, python-brace-format
+msgid ""
+"{technical} habilidades técnicas, {soft} blandas y {radars} radares por "
+"temas."
+msgstr "{technical} hard skills, {soft} soft skills and {radars} topic radars."
+
+#: src/grepleo/ui/profile_dialog.py:255
 #, python-brace-format
 msgid ""
 "«{level}» es un nivel, no un idioma: escribe, por ejemplo, «Inglés {level}»."
 msgstr ""
 "“{level}” is a level, not a language: write, for example, “English {level}”."
 
-#: src/grepleo/ui/profile_dialog.py:310
+#: src/grepleo/ui/profile_dialog.py:264
 #, python-brace-format
 msgid "Esta dirección no es de {platform}."
 msgstr "This address is not from {platform}."
 
-#: src/grepleo/ui/profile_dialog.py:324
+#: src/grepleo/ui/profile_dialog.py:278
 msgid "Ninguno"
 msgstr "None"
 
-#: src/grepleo/ui/profile_dialog.py:330
+#: src/grepleo/ui/profile_dialog.py:284
 msgid "Documentos (PDF, Word, texto)"
 msgstr "Documents (PDF, Word, text)"
 
-#: src/grepleo/ui/profile_dialog.py:373
+#: src/grepleo/ui/profile_dialog.py:322
 msgid "El perfil necesita un nombre."
 msgstr "The profile needs a name."
 
-#: src/grepleo/ui/profile_dialog.py:378
+#: src/grepleo/ui/profile_dialog.py:327
 msgid "Ya existe un perfil con ese nombre."
 msgstr "A profile with that name already exists."
-
-#: src/grepleo/ui/radar_editor.py:25
-msgid "Nombre del radar (Cloud, Lenguajes…)"
-msgstr "Radar name (Cloud, Languages…)"
-
-#: src/grepleo/ui/radar_editor.py:27
-msgid "Quitar este radar"
-msgstr "Remove this radar"
-
-#: src/grepleo/ui/radar_editor.py:40
-msgid ""
-"Un elemento por línea, con sinónimos y tu nivel de 0 a 10: AWS|amazon web "
-"services = 8"
-msgstr ""
-"One element per line, with synonyms and your level from 0 to 10: AWS|amazon "
-"web services = 8"
-
-#: src/grepleo/ui/radar_editor.py:64
-#, python-brace-format
-msgid "Un radar necesita entre {low} y {high} elementos (ahora hay {count})."
-msgstr ""
-"A radar needs between {low} and {high} elements (there are {count} now)."
-
-#: src/grepleo/ui/radar_editor.py:82
-msgid "Añadir radar"
-msgstr "Add radar"
-
-#: src/grepleo/ui/radar_editor.py:84
-msgid "Proponer radares desde mis habilidades"
-msgstr "Propose radars from my skills"
-
-#: src/grepleo/ui/radar_editor.py:85
-msgid "Agrupa por temas los requisitos de tu perfil; luego los puedes editar"
-msgstr ""
-"Groups your profile's requirements by topic; you can edit them afterwards"
-
-#: src/grepleo/ui/radar_editor.py:112
-#, python-brace-format
-msgid "Radares propuestos: {names}. Revisa los elementos y los niveles."
-msgstr "Proposed radars: {names}. Review the elements and the levels."
-
-#: src/grepleo/ui/radar_editor.py:115
-msgid ""
-"No hay nada que proponer: añade requisitos a tu perfil (al menos tres de un "
-"mismo tema) o ya tienes radares con esos nombres."
-msgstr ""
-"Nothing to propose: add requirements to your profile (at least three of the "
-"same topic) or you already have radars with those names."
 
 #: src/grepleo/ui/radar_legend.py:37
 msgid "tu nivel de 0 a 10 en cada eje"
@@ -2015,6 +1999,101 @@ msgstr "You"
 msgid "Lo que pide la oferta"
 msgstr "What the offer asks"
 
+#: src/grepleo/ui/skills_window.py:57
+msgid "Habilidad (AWS, Python, Scrum…)"
+msgstr "Skill (AWS, Python, Scrum…)"
+
+#: src/grepleo/ui/skills_window.py:58
+msgid "Sinónimos, separados por comas"
+msgstr "Synonyms, separated by commas"
+
+#: src/grepleo/ui/skills_window.py:59
+msgid "Quitar esta habilidad"
+msgstr "Remove this skill"
+
+#: src/grepleo/ui/skills_window.py:131
+msgid "Grupos"
+msgstr "Groups"
+
+#: src/grepleo/ui/skills_window.py:140
+msgid "Añadir radar"
+msgstr "Add radar"
+
+#: src/grepleo/ui/skills_window.py:142
+msgid "Proponer radares"
+msgstr "Propose radars"
+
+#: src/grepleo/ui/skills_window.py:143
+msgid "Agrupa por temas las habilidades que ya tienes; luego los puedes editar"
+msgstr "Groups the skills you already have by topic; you can edit them afterwards"
+
+#: src/grepleo/ui/skills_window.py:145
+msgid "Quitar este radar"
+msgstr "Remove this radar"
+
+#: src/grepleo/ui/skills_window.py:156
+msgid "Nombre del radar (Cloud, Lenguajes…)"
+msgstr "Radar name (Cloud, Languages…)"
+
+#: src/grepleo/ui/skills_window.py:159
+msgid "−1 a todas"
+msgstr "−1 to all"
+
+#: src/grepleo/ui/skills_window.py:159
+msgid "Baja un punto el nivel de todas las habilidades del grupo"
+msgstr "Lowers the level of all the group's skills by one point"
+
+#: src/grepleo/ui/skills_window.py:161
+msgid "+1 a todas"
+msgstr "+1 to all"
+
+#: src/grepleo/ui/skills_window.py:161
+msgid "Sube un punto el nivel de todas las habilidades del grupo"
+msgstr "Raises the level of all the group's skills by one point"
+
+#: src/grepleo/ui/skills_window.py:174
+msgid "Añadir habilidad"
+msgstr "Add skill"
+
+#: src/grepleo/ui/skills_window.py:177
+msgid "Añadir del catálogo…"
+msgstr "Add from the catalogue…"
+
+#: src/grepleo/ui/skills_window.py:183
+msgid ""
+"¿Me presentaría a una oferta que lo pide como requisito y lo defendería en "
+"la entrevista?"
+msgstr "Would I apply to an offer that asks for it as a requirement and defend it in the interview?"
+
+#: src/grepleo/ui/skills_window.py:210
+msgid "Aplicar"
+msgstr "Apply"
+
+#: src/grepleo/ui/skills_window.py:221
+msgid "Buscar…"
+msgstr "Search…"
+
+#: src/grepleo/ui/skills_window.py:355
+#, python-brace-format
+msgid "Radares propuestos: {names}. Revisa los elementos y los niveles."
+msgstr "Proposed radars: {names}. Review the elements and the levels."
+
+#: src/grepleo/ui/skills_window.py:358
+msgid ""
+"No hay nada que proponer: añade habilidades (al menos tres de un mismo tema) "
+"o ya tienes radares con esos nombres."
+msgstr "Nothing to propose: add skills (at least three of the same topic) or you already have radars with those names."
+
+#: src/grepleo/ui/skills_window.py:412
+#, python-brace-format
+msgid "Un radar necesita entre {low} y {high} habilidades (ahora hay {count})."
+msgstr "A radar needs between {low} and {high} skills (there are {count})."
+
+#: src/grepleo/ui/skills_window.py:416
+#, python-brace-format
+msgid "Está en más de un grupo: {names}. Se usa la primera vez que aparece."
+msgstr "It is in more than one group: {names}. The first occurrence is used."
+
 #: src/grepleo/ui/tracking_panel.py:38
 msgid "Fase del proceso"
 msgstr "Process stage"
@@ -2046,6 +2125,77 @@ msgstr "Nothing written down yet."
 #: src/grepleo/ui/tracking_panel.py:178
 msgid "Guardar cambio"
 msgstr "Save change"
+
+#~ msgid "la pide la oferta · la tienes"
+#~ msgstr "the offer asks for it · you have it"
+
+#~ msgid "la pide la oferta · no la tienes"
+#~ msgstr "the offer asks for it · you do not have it"
+
+#~ msgid ""
+#~ "Lo que sabes hacer, uno por línea; sinónimos con | (Power BI|powerbi). Se "
+#~ "compara con lo que pide cada oferta; si algo está en un radar, manda el "
+#~ "nivel del radar."
+#~ msgstr ""
+#~ "What you can do, one per line; synonyms with | (Power BI|powerbi). It is "
+#~ "compared with what each offer asks for; if something is in a radar, the "
+#~ "radar level rules."
+
+#~ msgid "Lo que dominas"
+#~ msgstr "What you master"
+
+#~ msgid "Lo que conoces"
+#~ msgstr "What you know"
+
+#~ msgid ""
+#~ "Liderazgo, trabajo en equipo, comunicación…: uno por línea, con sinónimos "
+#~ "si quieres"
+#~ msgstr ""
+#~ "Leadership, teamwork, communication…: one per line, with synonyms if you "
+#~ "like"
+
+#~ msgid "Radar general"
+#~ msgstr "General radar"
+
+#~ msgid ""
+#~ "Cómo te valoras de 0 a 10 en cada eje; se superpone al de cada oferta. Si "
+#~ "no lo tocas, sale de los datos de arriba. En «Técnicas» es también el "
+#~ "nivel con el que cuenta lo que has puesto en «Lo que dominas» al calcular "
+#~ "el encaje."
+#~ msgstr ""
+#~ "How you rate yourself from 0 to 10 on each axis; it is overlaid on each "
+#~ "offer's. If you do not touch it, it comes from the data above. In "
+#~ "“Technical” it is also the level at which what you put in “What you "
+#~ "master” counts when computing the fit."
+
+#~ msgid "Recalcular desde el perfil"
+#~ msgstr "Recalculate from the profile"
+
+#~ msgid "Radares por temas"
+#~ msgstr "Radars by topic"
+
+#~ msgid ""
+#~ "Cada radar es de un tema (Cloud, Lenguajes, Metodologías…) y sus ejes son "
+#~ "cosas concretas que aparecen en las ofertas, con tu nivel de 0 a 10 en "
+#~ "cada una. En cada oferta se superpone a lo que ella pide y da un "
+#~ "porcentaje de solape. Cuanto más precisos los elementos (y sus "
+#~ "sinónimos), mejor mide."
+#~ msgstr ""
+#~ "Each radar is about a topic (Cloud, Languages, Methodologies…) and its "
+#~ "axes are concrete things that appear in offers, with your level from 0 to "
+#~ "10 in each. In each offer it is overlaid on what the offer asks and gives "
+#~ "an overlap percentage. The more precise the elements (and their "
+#~ "synonyms), the better it measures."
+
+#~ msgid ""
+#~ "Un elemento por línea, con sinónimos y tu nivel de 0 a 10: AWS|amazon web "
+#~ "services = 8"
+#~ msgstr ""
+#~ "One element per line, with synonyms and your level from 0 to 10: AWS|"
+#~ "amazon web services = 8"
+
+#~ msgid "Proponer radares desde mis habilidades"
+#~ msgstr "Propose radars from my skills"
 
 #~ msgid "No está en tu perfil"
 #~ msgstr "It is not in your profile"

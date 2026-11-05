@@ -15,8 +15,8 @@ from functools import lru_cache
 from .detail import BULLET, HEADING, structure_description
 from .i18n import _, ngettext
 from .models import Job
-from .panorama import DEFAULT_CATALOG
 from .profiles import MAX_AXES, MIN_AXES, STUDIES_RANK, Profile, RadarAxis, SkillRadar, parse_term
+from .skills import asked_soft_specs, asked_specs, my_skills, my_soft, skill_credit, soft_credit
 from .textutil import (
     LEVELS,
     language_requirements,
@@ -32,16 +32,7 @@ from .textutil import (
 SCALE = 10.0
 AXES = ("technical", "soft", "experience", "languages", "studies")   # claves estables; la interfaz muestra el texto
 
-SOFT_VOCABULARY = (
-    "trabajo en equipo|teamwork|team player", "liderazgo|leadership", "comunicación|communication",
-    "proactividad|proactive|proactivo", "autonomía|autonomy|autonomous", "resolución de problemas|problem solving",
-    "adaptabilidad|adaptability|capacidad de adaptación", "organización|organization|organisation",
-    "orientación a resultados|results.?oriented", "orientación al cliente|customer focus",
-    "pensamiento crítico|critical thinking", "creatividad|creativity", "empatía|empathy",
-    "gestión del tiempo|time management", "negociación|negotiation", "capacidad analítica|analytical skills",
-    "iniciativa|initiative", "colaboración|collaboration", "flexibilidad|flexibility", "compromiso|commitment",
-    "atención al detalle|attention to detail", "aprendizaje continuo|continuous learning",
-)
+# SOFT_VOCABULARY vive en skills.py (la evaluación y los radares comparten lo que se busca y cómo se cubre)
 
 
 def clamp(value: float) -> float:
@@ -54,31 +45,22 @@ def _hits(text: str, specs: list[str]) -> int:
     return sum(1 for spec in specs if (names := parse_term(spec)[1]) and mentions(normalized, names))
 
 
-def default_levels(profile: Profile) -> dict[str, float]:
-    """Tu radar calculado con los datos del perfil: una habilidad = un punto (las blandas, dos) y el resto por escala."""
+def data_levels(profile: Profile) -> dict[str, float]:
+    """Tu lado de los ejes del radar general que salen de los datos del perfil: experiencia, idiomas y estudios. Los de
+    técnicas y blandas salen, oferta por oferta, de lo que cubres de lo que pide (ver `general_levels`)."""
     best_language = max((level_rank(level) for level in profile.languages.values()), default=0)
     return {
-        "technical": clamp(len({*profile.must, *profile.nice})),
-        "soft": clamp(2 * len({*profile.soft_must, *profile.soft_nice})),
         "experience": clamp(profile.years),
         "languages": clamp(best_language * SCALE / len(LEVELS)),
         "studies": clamp(STUDIES_RANK[profile.studies] * SCALE / 3),
     }
 
 
-def profile_levels(profile: Profile) -> dict[str, float]:
-    """Tu radar: lo que has fijado a mano en el perfil y, donde no, lo que salen de sus datos."""
-    levels = default_levels(profile)
-    levels.update({axis: clamp(float(value)) for axis, value in profile.radar.items() if axis in AXES})
-    return levels
-
-
 def offer_demand(job: Job, profile: Profile) -> dict[str, float | None]:
     """Lo que pide la oferta en cada eje; None si no se puede saber (una ficha resumida no demuestra que no pida algo)."""
     full = job.full_description
-    catalog = [spec for spec in DEFAULT_CATALOG if normalize(parse_term(spec)[0]) != "ingles"]   # el inglés es un idioma
-    technical = [*catalog, *profile.must, *profile.nice]
-    soft = [*SOFT_VOCABULARY, *profile.soft_must, *profile.soft_nice]
+    technical = asked_specs(profile)
+    soft = asked_soft_specs(profile)
     years = required_years(job.experience_text) if job.experience_text else None
     if years is None:
         years = required_years(job.text, strict=True)
@@ -278,7 +260,7 @@ def demand_note(value: float | None) -> str:
     return _("no aparece en la oferta")
 
 
-def _general_notes(asked: dict[str, float | None]) -> list[str]:
+def _general_notes(asked: dict[str, float | None], shares: dict[str, float] | None = None) -> list[str]:
     """Qué hay detrás de cada eje del radar general: tecnologías citadas, años pedidos, nivel de idioma…"""
     unknown = _("ficha resumida: no se puede saber")
     notes = []
@@ -294,9 +276,13 @@ def _general_notes(asked: dict[str, float | None]) -> list[str]:
             else:
                 notes.append(ngettext("cita {count} tecnología", "cita {count} tecnologías", round(value))
                              .format(count=round(value)))
+            if shares is not None and value:
+                notes[-1] += " · " + _("cubres el {percent} %").format(percent=round(100 * shares["technical"]))
         elif axis == "soft":
             notes.append(ngettext("cita {count} habilidad blanda", "cita {count} habilidades blandas", round(value / 2))
                          .format(count=round(value / 2)))
+            if shares is not None and value:
+                notes[-1] += " · " + _("cubres el {percent} %").format(percent=round(100 * shares["soft"]))
         elif axis == "experience":
             notes.append(ngettext("pide {count} año de experiencia", "pide {count} años de experiencia", round(value))
                          .format(count=round(value)))
@@ -310,11 +296,38 @@ def _general_notes(asked: dict[str, float | None]) -> list[str]:
     return notes
 
 
+def coverage_shares(job: Job, profile: Profile) -> dict[str, float]:
+    """Qué parte de lo que la oferta cita de técnicas y de blandas cubres (0 a 1), con el crédito parcial del encaje."""
+    text = normalize(job.text)
+    technical, soft = my_skills(profile), my_soft(profile)
+    credits = []
+    for spec in asked_specs(profile):
+        if mentions(text, parse_term(spec)[1]):
+            demand = term_demand(job, spec) or DEMAND_REQUIRED
+            credits.append(skill_credit(spec, demand, technical)[0])
+    soft_credits = [soft_credit(spec, soft)[0] for spec in asked_soft_specs(profile)
+                    if mentions(text, parse_term(spec)[1])]
+    return {"technical": sum(credits) / len(credits) if credits else 0.0,
+            "soft": sum(soft_credits) / len(soft_credits) if soft_credits else 0.0}
+
+
+def general_levels(job: Job, profile: Profile, asked: dict[str, float | None]) -> dict[str, float]:
+    """Tu lado del radar general para esta oferta: en técnicas y blandas, lo que cubres de lo que cita, a la misma altura
+    que lo que pide (cita 15 y cubres el 60 % marca lo mismo que cita 10 y cubres el 60 %); el resto, de tus datos."""
+    levels = {**data_levels(profile)}
+    shares = coverage_shares(job, profile)
+    for axis in ("technical", "soft"):
+        levels[axis] = (asked[axis] or 0.0) * shares[axis]
+    return levels
+
+
 def general_radar(job: Job, profile: Profile) -> RadarData:
-    mine, asked = profile_levels(profile), offer_demand(job, profile)
+    asked = offer_demand(job, profile)
+    mine = general_levels(job, profile, asked)
     labels = axis_labels()
+    shares = coverage_shares(job, profile)
     return RadarData(_("General"), [labels[axis] for axis in AXES], [mine[axis] for axis in AXES],
-                     [asked[axis] for axis in AXES], _general_notes(asked))
+                     [asked[axis] for axis in AXES], _general_notes(asked, shares))
 
 
 def topic_radar(job: Job, radar: SkillRadar) -> RadarData | None:

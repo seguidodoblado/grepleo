@@ -91,7 +91,7 @@ def test_gaps_use_the_same_coverage_as_the_fit_platform_similar_and_generic_term
 
 def test_a_strength_that_is_a_pair_has_the_level_of_its_weaker_half():
     from grepleo.gaps import find_strengths
-    prof = profile(must=["CI", "CD"], nice=[], radars=[], languages={}, radar={"technical": 8})
+    prof = profile(must=["CI", "CD"], nice=[], radars=[], languages={}, skill_levels={"ci": 8, "cd": 8})
     jobs = [job(1, "Requisitos:\n- CI/CD con pipelines en producción\n" * 3)]
     strengths = {item.name: item for item in find_strengths(jobs, evaluations(jobs, prof), prof)}
     assert strengths["CI/CD"].level == 8

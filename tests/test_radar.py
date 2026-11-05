@@ -1,6 +1,6 @@
 from grepleo.models import Job
 from grepleo.profiles import Profile
-from grepleo.radar import AXES, SCALE, default_levels, offer_demand, profile_levels
+from grepleo.radar import AXES, SCALE, data_levels, offer_demand
 
 TEXT = ("Buscamos DevOps con AWS, Terraform, Docker y Kubernetes. Trabajo en equipo y liderazgo. "
         "Mínimo 3 años de experiencia. Grado en informática. Inglés C1. " * 3)
@@ -12,17 +12,27 @@ def job(**changes):
     return Job(**base)
 
 
-def test_the_profile_radar_is_built_from_the_profile_and_overridden_by_hand():
-    profile = Profile(name="p", years=8, studies="degree", languages={"Inglés": "B2", "Francés": "A2"},
-                      must=["AWS", "Docker"], nice=["Terraform"], soft_must=["Liderazgo"], soft_nice=["Empatía"])
-    levels = default_levels(profile)
-    assert set(levels) == set(AXES)
-    assert levels["technical"] == 3 and levels["soft"] == 4 and levels["experience"] == 8
+def test_your_side_of_experience_languages_and_studies_comes_from_the_profile():
+    profile = Profile(name="p", years=8, studies="degree", languages={"Inglés": "B2", "Francés": "A2"})
+    levels = data_levels(profile)
+    assert set(levels) == {"experience", "languages", "studies"} and levels["experience"] == 8
     assert round(levels["languages"], 1) == round(4 * SCALE / 6, 1) and round(levels["studies"], 1) == 6.7
-    profile.radar = {"technical": 9, "ignorado": 7}
-    assert profile_levels(profile)["technical"] == 9 and "ignorado" not in profile_levels(profile)
-    assert profile_levels(profile)["experience"] == 8       # lo que no se fija a mano sale del perfil
-    assert default_levels(Profile(name="vacío", years=40))["experience"] == SCALE        # nunca pasa de 10
+    assert data_levels(Profile(name="vacío", years=40))["experience"] == SCALE        # nunca pasa de 10
+
+
+def test_technical_and_soft_are_what_you_cover_of_what_the_offer_cites_at_the_same_height():
+    from grepleo.radar import general_radar
+    profile = Profile(name="p", must=["AWS", "Docker"], nice=["Terraform"], soft_must=["Liderazgo"],
+                      skill_levels={"aws": 10, "docker": 10, "terraform": 5, "liderazgo": 10})
+    radar = general_radar(job(), profile)
+    demand = dict(zip(AXES, radar.demand, strict=True))
+    mine = dict(zip(AXES, radar.levels, strict=True))
+    # cita AWS, Terraform, Docker y Kubernetes (4 tecnologías, todas «mencionadas», que pide 5): cubres AWS, Docker y
+    # Terraform (nivel 5 de 5) y Kubernetes no la tienes: 3 de 4, a la altura de lo que pide (4)
+    assert demand["technical"] == 4 and abs(mine["technical"] - 3.0) < 1e-9
+    assert demand["soft"] == 4 and abs(mine["soft"] - 2.0) < 1e-9          # cita liderazgo y trabajo en equipo: cubres uno
+    assert "cubres el 75 %" in radar.notes[0]
+    assert radar.levels[AXES.index("experience")] == 0 and radar.levels[AXES.index("studies")] == 0
 
 
 def test_the_offer_demand_uses_the_same_scale():
