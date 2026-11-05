@@ -339,6 +339,13 @@ def test_the_market_tab_shows_the_profile_radars_against_the_offers_in_the_backg
     assert [view for view in window.market.panel.views] and len(window.market.panel.cards) == 2     # General y Cloud
     assert "1 de 1 ofertas" in window.market.status.get_text()
     assert "Cubres un" in window.market.panel.summary.get_text()
+    for expander in (window.market.plan, window.market.breakdown):             # plegados no reclaman espacio libre
+        expander.set_expanded(False)
+        assert not expander.get_vexpand()
+        expander.set_expanded(True)
+        assert expander.get_vexpand()                                          # desplegados sí: el contenido crece
+        expander.set_expanded(False)
+        assert not expander.get_vexpand()
     window.market.breakdown.set_expanded(True)                                 # el desglose por oferta, al abrirlo
     for _attempt in range(200):
         while context.iteration(False):

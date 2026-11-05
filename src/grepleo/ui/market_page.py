@@ -57,13 +57,17 @@ class MarketPage(Gtk.Box):
         self.append(self.message)
         self.panel = RadarPanel(vexpand=True)
         self.append(self.panel)
-        self.plan = Gtk.Expander(label=_("Plan de estudio: lo que más conviene reforzar"))
+        # un desplegable plegado no debe reclamar espacio: su contenido (con scroll) pide crecer y, aun oculto, hacía que
+        # cada título dejara debajo un hueco en blanco; solo crece mientras está desplegado (`_toggle_expand`)
+        self.plan = Gtk.Expander(label=_("Plan de estudio: lo que más conviene reforzar"), vexpand=False)
+        self.plan.connect("notify::expanded", self._toggle_expand)
         self._plan_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         self._plan_holder = wide_scrollbars(Gtk.ScrolledWindow(min_content_height=200, vexpand=True))
         self._plan_box.append(self._plan_holder)
         self.plan.set_child(self._plan_box)
         self.append(self.plan)
-        self.breakdown = Gtk.Expander(label=_("Desglose por oferta"), margin_bottom=8)
+        self.breakdown = Gtk.Expander(label=_("Desglose por oferta"), margin_bottom=8, vexpand=False)
+        self.breakdown.connect("notify::expanded", self._toggle_expand)
         self.breakdown.connect("notify::expanded", self._breakdown_toggled)
         self._rows_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         self._rows_status = Gtk.Label(xalign=0)
@@ -146,6 +150,10 @@ class MarketPage(Gtk.Box):
         grid.attach(Gtk.Label(label=f"{item.level:.0f} → {item.demand:.0f}", xalign=0), 2, number, 1, 1)
         grid.attach(Gtk.Label(label=_("el {share} %").format(share=round(100 * item.share)), xalign=0), 3, number, 1, 1)
         grid.attach(study_button(item.name), 4, number, 1, 1)
+
+    @staticmethod
+    def _toggle_expand(expander: Gtk.Expander, _param) -> None:
+        expander.set_vexpand(expander.get_expanded())
 
     # --- el desglose por oferta -----------------------------------------------------------------
     def _breakdown_toggled(self, *_args) -> None:
