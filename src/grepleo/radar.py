@@ -190,17 +190,20 @@ class RadarData:
     levels: list[float]                  # tu nivel en cada eje
     demand: list[float | None]           # lo que pide la oferta; None: no se puede saber
     notes: list[str] = field(default_factory=list)   # por eje, con palabras: qué hay detrás del valor que pide la oferta
+    weights: list[float] | None = None   # cuánto pesa cada eje en el solape (el mapa del mercado: la parte de ofertas que lo piden)
 
     @property
     def overlap(self) -> float | None:
         """De 0 a 1: cuánto de lo que pide la oferta cubres. None si la oferta no pide nada medible aquí."""
-        return overlap(self.levels, self.demand)
+        return overlap(self.levels, self.demand, self.weights)
 
 
-def overlap(levels: list[float], demand: list[float | None]) -> float | None:
-    asked = [(have, want) for have, want in zip(levels, demand, strict=True) if want]
-    total = sum(want for _have, want in asked)
-    return sum(min(have, want) for have, want in asked) / total if total else None
+def overlap(levels: list[float], demand: list[float | None], weights: list[float] | None = None) -> float | None:
+    """Σ mín(tu nivel, lo que pide) / Σ lo que pide; con `weights`, cada eje cuenta tanto como su peso."""
+    pesos = weights if weights is not None else [1.0] * len(levels)
+    asked = [(have, want, weight) for have, want, weight in zip(levels, demand, pesos, strict=True) if want]
+    total = sum(want * weight for _have, want, weight in asked)
+    return sum(min(have, want) * weight for have, want, weight in asked) / total if total else None
 
 
 # --- la leyenda de un radar ----------------------------------------------------------------------------
@@ -236,8 +239,10 @@ def legend_rows(radar: RadarData) -> list[LegendRow]:
 
 def coverage_points(radar: RadarData) -> tuple[float, float]:
     """(lo que cubres, lo que pide la oferta) en puntos de la escala 0–10: la cuenta que hay detrás del solape."""
-    asked = [(have, want) for have, want in zip(radar.levels, radar.demand, strict=True) if want]
-    return sum(min(have, want) for have, want in asked), sum(want for _have, want in asked)
+    weights = radar.weights if radar.weights is not None else [1.0] * len(radar.levels)
+    asked = [(have, want, weight) for have, want, weight in zip(radar.levels, radar.demand, weights, strict=True) if want]
+    return (sum(min(have, want) * weight for have, want, weight in asked),
+            sum(want * weight for _have, want, weight in asked))
 
 
 def main_gaps(radar: RadarData, limit: int = 3) -> list[LegendRow]:
@@ -249,7 +254,9 @@ def total_overlap(radars: list[RadarData]) -> float | None:
     """El solape de todos los radares juntos: cada elemento pesa lo que la oferta lo pide."""
     levels = [value for radar in radars for value in radar.levels]
     demand = [value for radar in radars for value in radar.demand]
-    return overlap(levels, demand)
+    weights = ([weight for radar in radars for weight in radar.weights]
+               if all(radar.weights is not None for radar in radars) else None)
+    return overlap(levels, demand, weights)
 
 
 def known_axes(radars: list[RadarData]) -> tuple[int, int]:

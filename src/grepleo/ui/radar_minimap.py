@@ -20,6 +20,14 @@ def percent(value: float | None) -> str:
     return "—" if value is None else f"{round(value * 100)} %"
 
 
+FIT_BY_CLASS = {"high": Fit.HIGH, "medium": Fit.MEDIUM, "low": Fit.LOW, "none": Fit.UNKNOWN}
+
+
+def fit_of_overlap(radar: RadarData) -> Fit:
+    """El color del polígono de un radar según su solape (en el mapa del mercado no hay un encaje de oferta)."""
+    return FIT_BY_CLASS[overlap_class(radar.overlap)]
+
+
 def overlap_class(overlap: float | None) -> str:
     """El color de una miniatura según cuánto cubres de lo que pide la oferta en ese radar."""
     if overlap is None:
@@ -30,12 +38,13 @@ def overlap_class(overlap: float | None) -> str:
 class RadarMinimap(Gtk.FlowBox):
     """Una tira de miniaturas con el nombre y el solape de cada radar; al pulsar una se va a su radar completo."""
 
-    def __init__(self, radars: list[RadarData], fit: Fit, on_pick: Callable[[int], None]) -> None:
+    def __init__(self, radars: list[RadarData], fit: Fit, on_pick: Callable[[int], None],
+                 fit_of: Callable[[RadarData], Fit] | None = None) -> None:
         super().__init__(selection_mode=Gtk.SelectionMode.NONE, homogeneous=False, min_children_per_line=2,
                          max_children_per_line=8, column_spacing=6, row_spacing=6, halign=Gtk.Align.START)
         self.thumbs: list[Gtk.Box] = []
         for index, radar in enumerate(radars):
-            thumb = self._thumb(index, radar, fit, on_pick)
+            thumb = self._thumb(index, radar, fit_of(radar) if fit_of else fit, on_pick)
             self.thumbs.append(thumb)
             self.append(thumb)
 

@@ -44,6 +44,7 @@ from .common import (
 )
 from .date_picker import today
 from .detail_view import DetailView
+from .market_page import MarketPage
 from .notes_panel import NotesPanel
 from .profile_dialog import ProfileWindow
 from .radar_panel import RadarPanel
@@ -259,6 +260,9 @@ class MainWindow(Gtk.ApplicationWindow):
         self.notebook = Gtk.Notebook(vexpand=True)
         self.notebook.append_page(self._build_results_page(), Gtk.Label(label=_("Ofertas")))
         self.notebook.append_page(self._build_panorama_page(), Gtk.Label(label=_("Panorama")))
+        self.market = MarketPage(self._market_data)
+        self.notebook.append_page(self.market, Gtk.Label(label=_("Mercado")))
+        self.notebook.connect("switch-page", self._on_main_tab)
         root.append(self.notebook)
         self.status = Gtk.Label(xalign=0, wrap=True)
         root.append(self.status)
@@ -590,6 +594,15 @@ class MainWindow(Gtk.ApplicationWindow):
                  "notes": bool(job and job.notes)}
         for key, marked in marks.items():
             self.detail_tabs.set_tab_label_text(self._tab_pages[key], self._tab_title(key, marked))
+
+    def _market_data(self) -> tuple[list[Job], dict[str, Evaluation], Profile | None]:
+        """Lo que alimenta la pestaña «Mercado»: las ofertas que pasan los filtros, sus evaluaciones y el perfil."""
+        jobs = [self.filter_model.get_item(index).job for index in range(self.filter_model.get_n_items())]
+        return jobs, self.evaluations, self._current_profile()
+
+    def _on_main_tab(self, _notebook, page, _number) -> None:
+        if page is self.market:
+            GLib.idle_add(self.market.refresh)   # cuando la pestaña ya se ve, sin retrasar el cambio
 
     def _build_panorama_page(self) -> Gtk.ScrolledWindow:
         self.panorama_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12, margin_top=12,
@@ -965,6 +978,9 @@ class MainWindow(Gtk.ApplicationWindow):
             shown=self.filter_model.get_n_items(), total=self.store_model.get_n_items()))
 
     def _update_panorama(self, profile: Profile) -> None:
+        self.market.invalidate()
+        if self.market.get_mapped():   # abierta la pestaña mientras llegan datos: se recalcula
+            GLib.idle_add(self.market.refresh)
         child = self.panorama_box.get_first_child()
         while child is not None:
             following = child.get_next_sibling()

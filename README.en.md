@@ -50,6 +50,7 @@ does not need it).
   companies use to screen CVs, with its verdict, its reliability, the keywords your CV does not cite and the
   knock-out requirements you do not meet. It is a local, explained estimate, not an official figure: each company
   configures its own ATS. Each radar also has a side legend that explains, axis by axis, what you are seeing.
+- **Market:** your radars against what the offers you are looking at ask for on average (or only the high or medium fit ones), to see at a glance on which topics you fall short.
 - **Overview:** which requirements repeat across the sample and what can be concluded by counting (most
   requested, the nice-to-haves of your profile that no offer mentions, **what you lack most often** (a red card with what your offers ask for and you do not cover) and **your strengths** (a green card with what you already have and they ask for most), how many offers publish a salary, how many are remote…).
 - **Export** what you see to a self-contained HTML report or a CSV table.

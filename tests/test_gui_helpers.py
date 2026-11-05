@@ -285,3 +285,42 @@ def test_wide_scrollbars_turn_off_the_thin_overlay_bar():
     assert scroll.get_overlay_scrolling() is True
     assert wide_scrollbars(scroll) is scroll
     assert scroll.get_overlay_scrolling() is False and scroll.has_css_class("wide-scroll")
+
+
+def test_the_market_tab_shows_the_profile_radars_against_the_offers_in_the_background():
+    from pathlib import Path
+
+    from gi.repository import GLib, Gtk
+
+    from grepleo.profiles import Profile, RadarAxis, SkillRadar
+    from grepleo.sources.base import SearchQuery
+    from grepleo.storage import Store
+    from grepleo.ui import gui
+    if not Gtk.init_check():
+        pytest.skip("sin pantalla para crear widgets")
+    text = "Requisitos:\n- Experiencia con AWS, Docker y Terraform en producción\n" * 3
+    store = Store(Path(":memory:"))
+    radar = SkillRadar("Cloud", [RadarAxis("AWS", 8), RadarAxis("Docker", 6), RadarAxis("Terraform", 7)])
+    profile_id = store.save_profile(Profile(name="P", headline="DevOps", must=["AWS"], radars=[radar]))
+    search = store.save_search(gui.LAST_SEARCH, profile_id, SearchQuery("devops"), ["indeed"])
+    store.store_results(search, [Job(key="x:1", source="indeed", title="DevOps", description=text,
+                                     full_description=True)])
+    window = gui.MainWindow(Gtk.Application(application_id="io.github.seguidodoblado.GrepleoMarket"), store)
+    assert window.notebook.get_n_pages() == 3
+    window.notebook.set_current_page(2)
+    context = GLib.MainContext.default()
+    for _attempt in range(200):
+        while context.iteration(False):
+            pass
+        if window.market.panel.cards:
+            break
+        GLib.usleep(10000)
+    assert [view for view in window.market.panel.views] and len(window.market.panel.cards) == 2     # General y Cloud
+    assert "1 de 1 ofertas" in window.market.status.get_text()
+    assert "Cubres un" in window.market.panel.summary.get_text()
+    window.market.source.set_selected(1)                                       # solo encaje alto o medio
+    for _attempt in range(100):
+        while context.iteration(False):
+            pass
+        GLib.usleep(5000)
+    assert window.market.panel.cards

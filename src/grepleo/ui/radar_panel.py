@@ -11,7 +11,7 @@ from ..models import Fit
 from ..radar import RadarData, known_axes, total_overlap
 from .common import wide_scrollbars
 from .radar_legend import build_ats, build_legend
-from .radar_minimap import RadarMinimap, overlap_class, percent
+from .radar_minimap import RadarMinimap, fit_of_overlap, overlap_class, percent
 from .radar_view import RadarView
 
 
@@ -34,12 +34,14 @@ class RadarPanel(Gtk.ScrolledWindow):
         self.ats_box: Gtk.Box | None = None
         self.set_data([], Fit.UNKNOWN)
 
-    def set_data(self, radars: list[RadarData], fit: Fit, ats: AtsEstimate | None = None) -> None:
+    def set_data(self, radars: list[RadarData], fit: Fit, ats: AtsEstimate | None = None, *, market: int = 0) -> None:
+        """Los radares de una oferta; con `market` (cuántas ofertas), el mapa del mercado: cada radar con la demanda media."""
         while (child := self._box.get_first_child()) is not None:
             self._box.remove(child)
         self.views, self.legends, self.cards, self.minimap, self.ats_box = [], [], [], None, None
         if not radars:
-            self._box.append(Gtk.Label(label=_("Elige una oferta para ver sus radares."), xalign=0))
+            self._box.append(Gtk.Label(label=_("No hay ofertas con descripción completa que analizar.") if market
+                                       else _("Elige una oferta para ver sus radares."), xalign=0, wrap=True))
             return
         if ats is not None:
             self.ats_box = build_ats(ats)
@@ -47,15 +49,23 @@ class RadarPanel(Gtk.ScrolledWindow):
             self._box.append(Gtk.Separator())
         overall = total_overlap(radars)
         known, total = known_axes(radars)
-        self.summary.set_text(
-            _("Solape global: {percent}").format(percent=percent(overall)) + " · "
-            + _("con datos en {known} de {total} ejes").format(known=known, total=total) if overall is not None
-            else _("La oferta no pide nada que se pueda medir en tus radares."))
-        self.summary.set_tooltip_text(_("Cuánto de lo que pide la oferta cubres con tus niveles: más solape, más "
-                                        "posibilidades de encaje."))
+        if market:
+            self.summary.set_text(
+                _("Cubres un {percent} de lo que piden de media las {count} ofertas").format(
+                    percent=percent(overall), count=market) if overall is not None
+                else _("Las ofertas no piden nada que se pueda medir en tus radares."))
+            self.summary.set_tooltip_text(_("Cuánto de lo que piden las ofertas cubres con tus niveles, contando cada "
+                                            "elemento según cuántas ofertas lo piden."))
+        else:
+            self.summary.set_text(
+                _("Solape global: {percent}").format(percent=percent(overall)) + " · "
+                + _("con datos en {known} de {total} ejes").format(known=known, total=total) if overall is not None
+                else _("La oferta no pide nada que se pueda medir en tus radares."))
+            self.summary.set_tooltip_text(_("Cuánto de lo que pide la oferta cubres con tus niveles: más solape, más "
+                                            "posibilidades de encaje."))
         self._box.append(self.summary)
         if len(radars) >= 2:   # con un solo radar no hay nada que resumir
-            self.minimap = RadarMinimap(radars, fit, self.scroll_to_radar)
+            self.minimap = RadarMinimap(radars, fit, self.scroll_to_radar, fit_of_overlap if market else None)
             self._box.append(self.minimap)
         for radar in radars:
             overlap = radar.overlap
@@ -68,15 +78,17 @@ class RadarPanel(Gtk.ScrolledWindow):
             title = Gtk.Label(label=radar.title, xalign=0, hexpand=True, ellipsize=Pango.EllipsizeMode.END)
             title.add_css_class("title-4")
             badge = Gtk.Label(label=_("solape {percent}").format(percent=percent(overlap)) if overlap is not None
-                              else _("la oferta no pide nada de esto"), xalign=0)
+                              else (_("ninguna oferta pide nada de esto") if market else _("la oferta no pide nada de esto")),
+                              xalign=0)
             badge.add_css_class("radar-badge")
             head.append(title)
             head.append(badge)
             card.append(head)
+            radar_fit = fit_of_overlap(radar) if market else fit
             view = RadarView(width_request=320)
             view.set_content_height(340)
-            view.set_data(radar.labels, radar.levels, radar.demand, fit, radar.notes)
-            legend = build_legend(radar, fit)
+            view.set_data(radar.labels, radar.levels, radar.demand, radar_fit, radar.notes)
+            legend = build_legend(radar, radar_fit, market=bool(market))
             flow = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, max_children_per_line=2, min_children_per_line=1,
                                homogeneous=False, column_spacing=12, row_spacing=6)
             flow.append(view)

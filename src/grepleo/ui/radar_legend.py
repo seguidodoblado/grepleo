@@ -27,25 +27,35 @@ def _number(value: float) -> str:
     return f"{value:.0f}"
 
 
-def build_legend(radar: RadarData, fit: Fit) -> Gtk.Box:
-    """Lo que se ve en un radar, dicho con palabras: qué es cada polígono, cuánto cubres y qué pide la oferta de cada eje."""
+def build_legend(radar: RadarData, fit: Fit, market: bool = False) -> Gtk.Box:
+    """Lo que se ve en un radar, dicho con palabras: qué es cada polígono, cuánto cubres y qué pide la oferta de cada eje.
+
+    Con `market`, lo que pide son las ofertas en conjunto (la media entre las que lo piden)."""
     box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6, margin_top=6, margin_start=4, margin_end=4,
                   width_request=250, valign=Gtk.Align.START)
     box.append(_label(f"<span foreground='{_BLUE}'>■</span> <b>{_esc(_('Tú'))}</b>: "
                       + _esc(_("tu nivel de 0 a 10 en cada eje"))))
-    box.append(_label(f"<span foreground='{_FIT_HEX[fit]}'>┅</span> <b>{_esc(_('Lo que pide la oferta'))}</b>: "
-                      + _esc(_("0 si no lo pide, 5 si solo lo menciona, 7 si lo valora y 10 si es requisito. "
-                               "Donde tu zona azul llega más lejos que la línea, lo cubres."))))
-    box.append(_label(f"<span foreground='{_GREY}'>○</span> <b>?</b>: " + _esc(_("la oferta no permite saberlo"))))
+    if market:
+        box.append(_label(f"<span foreground='{_FIT_HEX[fit]}'>┅</span> <b>{_esc(_('Lo que piden las ofertas'))}</b>: "
+                          + _esc(_("la media entre las ofertas que lo piden: 5 si solo lo mencionan, 7 si lo valoran y "
+                                   "10 si es requisito. Donde tu zona azul llega más lejos que la línea, lo cubres."))))
+    else:
+        box.append(_label(f"<span foreground='{_FIT_HEX[fit]}'>┅</span> <b>{_esc(_('Lo que pide la oferta'))}</b>: "
+                          + _esc(_("0 si no lo pide, 5 si solo lo menciona, 7 si lo valora y 10 si es requisito. "
+                                   "Donde tu zona azul llega más lejos que la línea, lo cubres."))))
+        box.append(_label(f"<span foreground='{_GREY}'>○</span> <b>?</b>: " + _esc(_("la oferta no permite saberlo"))))
 
     covered, asked = coverage_points(radar)
     overlap = radar.overlap
     if overlap is None:
-        box.append(_label("<b>" + _esc(_("La oferta no pide nada medible en este radar.")) + "</b>", margin_top=6))
+        text = _("Ninguna oferta pide nada medible en este radar.") if market else _(
+            "La oferta no pide nada medible en este radar.")
+        box.append(_label("<b>" + _esc(text) + "</b>", margin_top=6))
     else:
+        text = (_("cubres {covered} de {asked} puntos de lo que piden las ofertas, contando cada eje según cuántas lo piden")
+                if market else _("cubres {covered} de {asked} puntos de lo que pide la oferta"))
         box.append(_label("<b>" + _esc(_("Solape {percent} %").format(percent=round(overlap * 100))) + "</b> · "
-                          + _esc(_("cubres {covered} de {asked} puntos de lo que pide la oferta").format(
-                              covered=_number(covered), asked=_number(asked))), margin_top=6))
+                          + _esc(text.format(covered=_number(covered), asked=_number(asked))), margin_top=6))
     box.append(Gtk.Separator(margin_top=2, margin_bottom=2))
     for row in legend_rows(radar):
         head = f"<b>{_esc(row.label)}</b>  " + _esc(_("tú {mine}").format(mine=_number(row.mine))) + " · " + _esc(
