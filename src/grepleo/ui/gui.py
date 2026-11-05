@@ -1018,7 +1018,7 @@ class MainWindow(Gtk.ApplicationWindow):
         while (child := rows.get_first_child()) is not None:
             rows.remove(child)
         for number, text in enumerate(insights):
-            line = Gtk.Label(xalign=0, wrap=True, selectable=True, use_markup=True)
+            line = Gtk.Label(xalign=0, wrap=True, use_markup=True)
             escaped = GLib.markup_escape_text(text)
             line.set_markup(f"<big><b>{escaped}</b></big>" if number == 0 else f"• {escaped}")
             rows.append(line)

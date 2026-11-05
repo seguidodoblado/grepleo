@@ -262,6 +262,15 @@ def test_the_panorama_fills_in_the_gaps_section_in_the_background():
     assert "Docker" in shown and "Calculando" not in shown
     assert shown.index("Tus puntos fuertes") < shown.index("Lo que se ve en esta muestra")   # el recuadro azul, al final
     assert "<big><b>Lo más pedido" in shown                                                  # la primera línea, resaltada
+    from gi.repository import Gtk as _Gtk
+    stack = [window.panorama_box]
+    while stack:                                                  # ningún texto seleccionable: GTK marcaría el primero
+        widget = stack.pop()
+        assert not (isinstance(widget, _Gtk.Label) and widget.get_selectable())
+        child = widget.get_first_child()
+        while child is not None:
+            stack.append(child)
+            child = child.get_next_sibling()
 
 
 def _all_labels(widget) -> str:

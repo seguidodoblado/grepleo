@@ -10,6 +10,9 @@
 - La columna **Encaje** muestra en su tooltip lo que más te falta («Te falta: Azure, Jenkins»), y el panel de la oferta marca con ◐ lo que cubres en parte
 - La evaluación es más rápida: el catálogo de traducciones se busca una vez por idioma (antes se consultaba el disco en cada texto) y `normalize` no recorre el texto letra a letra
 
+### Corregido
+- El recuadro azul de conclusiones del Panorama ya no sale con la primera línea marcada en naranja: era la selección de texto que GTK hace al enfocar la ventana, así que esas líneas dejan de ser seleccionables
+
 ### Añadido
 - Pestaña **Mercado**, junto a Panorama: los radares de tu perfil (el general y los de tema, en miniaturas y en tarjetas como en la pestaña Radar) frente a lo que piden, **de media, las ofertas que estás viendo**. La demanda de cada eje es la media **entre las ofertas que lo piden** (así lo que cita poca gente pero siempre como requisito no se diluye), la nota de cada eje dice en qué porcentaje de ofertas aparece y ese porcentaje es el peso del eje en el solape («Cubres un 83 % de lo que piden de media…»). Se puede elegir entre las ofertas que ves y solo las de encaje alto o medio; se calcula en segundo plano al abrir la pestaña. Sirve también para ver qué radares te aportan y cuáles salen casi vacíos
 - **Tu nivel técnico general** (el control «Técnicas» del radar general) pasa a ser el nivel con el que cuenta, al calcular el encaje, lo que has puesto en «Lo que dominas» (y el 70 % de él para «Lo que conoces»); si no lo tocas, cuenta como 10. Lo que está en un radar por tema sigue mandando con el nivel de su eje
