@@ -45,6 +45,11 @@ def relevant_jobs(jobs: list[Job], evaluations: dict[str, Evaluation]) -> list[J
     return [job for job in jobs if job.key in evaluations and evaluations[job.key].fit in (Fit.HIGH, Fit.MEDIUM)]
 
 
+def low_fit_jobs(jobs: list[Job], evaluations: dict[str, Evaluation]) -> list[Job]:
+    """Las ofertas de encaje bajo: lo que piden y te falta, que es lo que hay que estudiar para llegar a ellas."""
+    return [job for job in jobs if job.key in evaluations and evaluations[job.key].fit is Fit.LOW]
+
+
 def build_market(jobs: list[Job], profile: Profile) -> Market:
     """Los radares del perfil (el general y los de tema) con la demanda media de las ofertas dadas."""
     detailed = [job for job in jobs if job.full_description]

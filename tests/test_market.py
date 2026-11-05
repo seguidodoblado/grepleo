@@ -1,4 +1,4 @@
-from grepleo.market import build_market, relevant_jobs
+from grepleo.market import build_market, low_fit_jobs, relevant_jobs
 from grepleo.matching import evaluate
 from grepleo.models import Fit, Job
 from grepleo.profiles import Profile, RadarAxis, SkillRadar
@@ -38,3 +38,6 @@ def test_without_full_offers_the_market_is_empty_and_relevant_keeps_high_and_med
     evaluations = {item.key: evaluate(item, prof) for item in (good, bad)}
     assert evaluations[good.key].fit in (Fit.HIGH, Fit.MEDIUM) and evaluations[bad.key].fit not in (Fit.HIGH, Fit.MEDIUM)
     assert [item.key for item in relevant_jobs([good, bad], evaluations)] == [good.key]
+    weak = job(3, "Requisitos:\n- Kubernetes, Azure y Jenkins en producción real\n" * 4)
+    evaluations[weak.key] = evaluate(weak, prof)
+    assert evaluations[weak.key].fit is Fit.LOW and [item.key for item in low_fit_jobs([good, bad, weak], evaluations)] == [weak.key]

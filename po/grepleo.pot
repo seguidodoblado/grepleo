@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: grepleo 0.1.0\n"
 "Report-Msgid-Bugs-To: jose.antonio.seguido@gmail.com\n"
-"POT-Creation-Date: 2026-11-05 02:10+0100\n"
+"POT-Creation-Date: 2026-11-05 02:13+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -125,7 +125,7 @@ msgstr ""
 msgid "en el {share} % de las ofertas · {how}"
 msgstr ""
 
-#: src/grepleo/market.py:73 src/grepleo/radar.py:316
+#: src/grepleo/market.py:78 src/grepleo/radar.py:316
 msgid "General"
 msgstr ""
 
@@ -906,7 +906,7 @@ msgstr ""
 msgid "(est.)"
 msgstr ""
 
-#: src/grepleo/ui/gui.py:261 src/grepleo/ui/market_page.py:35
+#: src/grepleo/ui/gui.py:261 src/grepleo/ui/market_page.py:36
 msgid "Ofertas"
 msgstr ""
 
@@ -1248,7 +1248,7 @@ msgid ""
 "entrevistas."
 msgstr ""
 
-#: src/grepleo/ui/gui.py:1108 src/grepleo/ui/market_page.py:71
+#: src/grepleo/ui/gui.py:1108 src/grepleo/ui/market_page.py:73
 msgid "Calculando…"
 msgstr ""
 
@@ -1350,11 +1350,15 @@ msgstr ""
 msgid "Solo encaje alto o medio"
 msgstr ""
 
-#: src/grepleo/ui/market_page.py:43
+#: src/grepleo/ui/market_page.py:20
+msgid "Solo encaje bajo (plan de estudio)"
+msgstr ""
+
+#: src/grepleo/ui/market_page.py:44
 msgid "Elige un perfil para ver su mapa del mercado."
 msgstr ""
 
-#: src/grepleo/ui/market_page.py:83
+#: src/grepleo/ui/market_page.py:85
 #, python-brace-format
 msgid "{count} de {seen} ofertas con descripción completa"
 msgstr ""

@@ -8,20 +8,21 @@ gi.require_version("Gtk", "4.0")
 from gi.repository import GLib, Gtk
 
 from ..i18n import _
-from ..market import Market, build_market, relevant_jobs
+from ..market import Market, build_market, low_fit_jobs, relevant_jobs
 from ..models import Evaluation, Fit, Job
 from ..profiles import Profile
 from .radar_panel import RadarPanel
 
-SOURCES = ("visible", "relevant")   # las que ves ahora / solo las de encaje alto o medio
+SOURCES = ("visible", "relevant", "low")   # las que ves ahora / solo encaje alto o medio / solo encaje bajo
 
 
 def source_labels() -> list[str]:
-    return [_("Las que veo ahora"), _("Solo encaje alto o medio")]
+    return [_("Las que veo ahora"), _("Solo encaje alto o medio"), _("Solo encaje bajo (plan de estudio)")]
 
 
 class MarketPage(Gtk.Box):
-    """Un selector de qué ofertas cuentan y, debajo, los radares del perfil con la demanda media del mercado.
+    """Un selector de qué ofertas cuentan (las que ves, solo las de encaje alto o medio, o solo las de encaje bajo: lo que
+    te falta, como plan de estudio) y, debajo, los radares del perfil con la demanda media del mercado.
 
     `provider()` da lo que se ve ahora: las ofertas, sus evaluaciones y el perfil. Se calcula en segundo plano cuando se
     abre la pestaña (los filtros se cambian en la otra) y se vuelve a calcular solo si algo ha cambiado."""
@@ -60,9 +61,10 @@ class MarketPage(Gtk.Box):
             return
         self.message.set_visible(False)
         self.panel.set_visible(True)
-        relevant = SOURCES[self.source.get_selected()] == "relevant"
-        chosen = relevant_jobs(jobs, evaluations) if relevant else jobs
-        key = (tuple(job.key for job in chosen), repr(profile.to_dict()), relevant)
+        which = SOURCES[self.source.get_selected()]
+        chosen = (relevant_jobs(jobs, evaluations) if which == "relevant"
+                  else low_fit_jobs(jobs, evaluations) if which == "low" else jobs)
+        key = (tuple(job.key for job in chosen), repr(profile.to_dict()), which)
         if key == self._key:
             return
         self._key = key
