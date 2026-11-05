@@ -85,4 +85,4 @@ equipo**. Qué se guarda y dónde está en la **[política de privacidad](PRIVAC
 
 ## Licencia
 
-Este proyecto se distribuye bajo la GNU General Public License, versión 3 o posterior (ver `COPYING`).
+Este proyecto se distribuye bajo la [PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0) (ver `COPYING`): puedes usarlo, copiarlo y modificarlo para fines **no comerciales**; el uso comercial requiere permiso del autor. Es una licencia de «código disponible», no de software libre según la definición de la FSF/OSI.

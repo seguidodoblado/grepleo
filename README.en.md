@@ -87,4 +87,4 @@ computer**. What is stored and where is in the **[privacy policy](PRIVACY.en.md)
 
 ## License
 
-This project is distributed under the GNU General Public License, version 3 or later (see `COPYING`).
+This project is distributed under the [PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0) (see `COPYING`): you may use, copy and modify it for **noncommercial** purposes; commercial use needs the author's permission. It is a “source-available” licence, not free software as defined by the FSF/OSI.

@@ -26,4 +26,4 @@ respuestas de ejemplo; no hagas pruebas contra Apify ni contra los portales.
 
 Los cambios deben mantener la calidad y las convenciones establecidas para el proyecto.
 
-Este proyecto se distribuye bajo licencia [GPL-3.0 o posterior](COPYING).
+Este proyecto se distribuye bajo la licencia [PolyForm Noncommercial 1.0.0](COPYING): uso, copia y modificación libres para fines no comerciales. Al contribuir aceptas que tu aportación se ofrezca bajo esa misma licencia.

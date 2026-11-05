@@ -7,7 +7,7 @@ name = "grepleo"
 version = "0.1.0"
 description = "Búsqueda de empleo con evaluación de criterios (InfoJobs, Indeed, LinkedIn, Tecnoempleo y Michael Page)"
 readme = "README.md"
-license = "GPL-3.0-or-later"
+license = "PolyForm-Noncommercial-1.0.0"
 requires-python = ">=3.10"
 dependencies = ["keyring>=23"]
 [project.optional-dependencies]

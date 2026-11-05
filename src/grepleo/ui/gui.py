@@ -56,6 +56,8 @@ from .tracking_panel import TrackingPanel
 AUTHOR = "Jose Antonio Seguido Doblado"
 AUTHOR_EMAIL = "jose.antonio.seguido@gmail.com"
 REPO_URL = "https://github.com/seguidodoblado/grepleo"
+LICENSE_URL = "https://polyformproject.org/licenses/noncommercial/1.0.0"
+LICENSE_NOTICE = f"PolyForm Noncommercial License 1.0.0\n{LICENSE_URL}\n\nRequired Notice: Copyright 2026 {AUTHOR}"
 LAST_SEARCH = "·última·"          # nombre reservado de la búsqueda que se guarda sola
 CONFIRM_ABOVE_USD = 0.25          # por encima de este coste estimado se pide confirmación
 STATE_ICONS = {   # nombres del tema, del preferido al de reserva
@@ -1321,7 +1323,8 @@ class MainWindow(Gtk.ApplicationWindow):
             comments=_("Busca empleo en InfoJobs, Indeed, LinkedIn, Tecnoempleo y Michael Page, y comprueba qué criterios cumples en cada oferta."),
             website=REPO_URL, website_label=REPO_URL.removeprefix("https://"),
             authors=[f"{AUTHOR} <{AUTHOR_EMAIL}>"], copyright=f"© 2026 {AUTHOR}",
-            license_type=Gtk.License.GPL_3_0, translator_credits=_("translator-credits"))
+            license_type=Gtk.License.CUSTOM, license=LICENSE_NOTICE, wrap_license=True,
+            translator_credits=_("translator-credits"))
         theme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default())
         if theme.has_icon("grepleo"):
             about.set_logo_icon_name("grepleo")

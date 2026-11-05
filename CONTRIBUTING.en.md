@@ -26,4 +26,4 @@ responses; do not test against Apify or the job sites.
 
 Changes must keep the quality and conventions established for the project.
 
-This project is distributed under the [GPL-3.0 or later](COPYING) license.
+This project is distributed under the [PolyForm Noncommercial 1.0.0](COPYING) license: free use, copying and modification for noncommercial purposes. By contributing you agree that your contribution is offered under that same license.
