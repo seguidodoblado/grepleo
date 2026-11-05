@@ -5,7 +5,7 @@ from threading import Thread
 import gi
 
 gi.require_version("Gtk", "4.0")
-from gi.repository import GLib, Gtk
+from gi.repository import Gio, GLib, GObject, Gtk, Pango
 
 from ..i18n import _
 from ..market import Market, OfferRow, build_market, build_rows, low_fit_jobs, relevant_jobs
@@ -19,6 +19,60 @@ from .study_links import study_button
 
 FIT_TINT = {Fit.HIGH: "high", Fit.MEDIUM: "medium", Fit.LOW: "low"}   # el color de la celda de encaje
 SOURCES = ("visible", "relevant", "low")   # las que ves ahora / solo encaje alto o medio / solo encaje bajo
+
+
+class _RowItem(GObject.Object):
+    """Una fila del desglose: la oferta con sus valores."""
+
+    def __init__(self, row: OfferRow) -> None:
+        super().__init__()
+        self.row = row
+
+
+def row_cells(row: OfferRow) -> list[tuple[str, str, float]]:
+    """Las celdas de una fila: (texto, color de fondo, valor para ordenar), en el orden de las columnas (oferta, encaje,
+    solape global y el de cada radar)."""
+    score = f" {round(row.score * 100)} %" if row.score is not None else ""
+    cells = [(f"{row.job.company} · {row.job.title}", "", 0.0),
+             (f"{row.fit.label}{score}", FIT_TINT.get(row.fit, "none"), row.score if row.score is not None else -1.0)]
+    for value in (row.overall, *row.overlaps):
+        cells.append((percent(value), overlap_class(value), value if value is not None else -1.0))
+    return cells
+
+
+def _column(title: str, index: int, expand: bool = False) -> Gtk.ColumnViewColumn:
+    """Una columna del desglose: se ordena al pulsar su cabecera y la cabecera no se mueve al bajar."""
+    factory = Gtk.SignalListItemFactory()
+
+    def setup(_factory, item) -> None:
+        label = Gtk.Label(xalign=0 if index == 0 else 0.5, ellipsize=Pango.EllipsizeMode.END, max_width_chars=40)
+        if index:
+            label.add_css_class("radar-thumb")
+        item.set_child(label)
+
+    def bind(_factory, item) -> None:
+        label = item.get_child()
+        text, tint, _key = row_cells(item.get_item().row)[index]
+        label.set_text(text)
+        if index == 0:
+            label.set_tooltip_text(item.get_item().row.job.title)
+        for old in [name for name in label.get_css_classes() if name.startswith("radar-thumb-")]:
+            label.remove_css_class(old)
+        if tint:
+            label.add_css_class(f"radar-thumb-{tint}")
+
+    factory.connect("setup", setup)
+    factory.connect("bind", bind)
+    column = Gtk.ColumnViewColumn(title=title, factory=factory, resizable=True, expand=expand)
+    if index == 0:
+        column.set_sorter(Gtk.CustomSorter.new(
+            lambda a, b, _data: (a.row.job.company.casefold() > b.row.job.company.casefold())
+            - (a.row.job.company.casefold() < b.row.job.company.casefold()), None))
+    else:
+        column.set_sorter(Gtk.CustomSorter.new(
+            lambda a, b, _data: (row_cells(a.row)[index][2] > row_cells(b.row)[index][2])
+            - (row_cells(a.row)[index][2] < row_cells(b.row)[index][2]), None))
+    return column
 
 
 def source_labels() -> list[str]:
@@ -179,27 +233,20 @@ class MarketPage(Gtk.Box):
         self._rows_key = key
         titles = [radar.title for radar in self._market.radars] if self._market is not None else []
         self._rows_status.set_text(_("{count} ofertas, de la que más cubres a la que menos").format(count=len(rows)))
-        grid = Gtk.Grid(column_spacing=8, row_spacing=3, margin_start=4, margin_end=8, margin_top=4)
-        headers = [_("Oferta"), _("Encaje"), _("Solape global"), *titles]
-        for column, text in enumerate(headers):
-            head = Gtk.Label(label=text, xalign=0 if column == 0 else 0.5, ellipsize=3, max_width_chars=12 if column else 40)
-            head.add_css_class("heading")
-            head.set_tooltip_text(text)
-            grid.attach(head, column, 0, 1, 1)
-        for number, row in enumerate(rows, start=1):
-            button = Gtk.Button(css_classes=["flat"], halign=Gtk.Align.FILL, tooltip_text=row.job.title)
-            button.set_child(Gtk.Label(label=f"{row.job.company} · {row.job.title}", xalign=0, ellipsize=3, max_width_chars=40))
-            button.connect("clicked", lambda _button, job=row.job: self._on_pick(job))
-            grid.attach(button, 0, number, 1, 1)
-            score = f" {round(row.score * 100)} %" if row.score is not None else ""
-            fit = Gtk.Label(label=f"{row.fit.label}{score}")
-            fit.add_css_class(f"radar-thumb-{FIT_TINT.get(row.fit, 'none')}")
-            fit.add_css_class("radar-thumb")
-            grid.attach(fit, 1, number, 1, 1)
-            for column, value in enumerate((row.overall, *row.overlaps), start=2):
-                cell = Gtk.Label(label=percent(value))
-                cell.add_css_class("radar-thumb")
-                cell.add_css_class(f"radar-thumb-{overlap_class(value)}")
-                grid.attach(cell, column, number, 1, 1)
-        self._grid_holder.set_child(grid)
+        store = Gio.ListStore.new(_RowItem)
+        for row in rows:
+            store.append(_RowItem(row))
+        # una ColumnView: su cabecera se queda fija al bajar y las columnas siguen alineadas con ella; cada columna se ordena
+        view = Gtk.ColumnView(show_row_separators=True, single_click_activate=True)
+        columns = [_column(_("Oferta"), 0, expand=True)]
+        columns += [_column(title, index) for index, title in
+                    enumerate((_("Encaje"), _("Solape global"), *titles), start=1)]
+        for column in columns:
+            view.append_column(column)
+        sort_model = Gtk.SortListModel(model=store, sorter=view.get_sorter())
+        view.set_model(Gtk.NoSelection(model=sort_model))
+        view.connect("activate", lambda _view, position: self._on_pick(sort_model.get_item(position).row.job))
+        view.sort_by_column(columns[2], Gtk.SortType.DESCENDING)   # de la que más cubres a la que menos
+        self._rows_view, self._rows_store = view, store
+        self._grid_holder.set_child(view)
         return False

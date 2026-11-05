@@ -354,11 +354,16 @@ def test_the_market_tab_shows_the_profile_radars_against_the_offers_in_the_backg
             break
         GLib.usleep(10000)
     assert "1 ofertas" in window.market._rows_status.get_text()
-    texts = _all_labels(window.market._grid_holder)
-    assert all(word in texts for word in ("Oferta", "Encaje", "Solape global", "General", "%"))
+    view = window.market._rows_view                                            # una ColumnView: su cabecera no se mueve
+    assert isinstance(view, Gtk.ColumnView) and window.market._rows_store.get_n_items() == 1
+    titles = [column.get_title() for column in view.get_columns()]
+    assert titles[:3] == ["Oferta", "Encaje", "Solape global"] and "General" in titles and "Cloud" in titles
+    assert all(column.get_sorter() is not None for column in view.get_columns())    # se ordena por cualquier columna
+    from grepleo.ui.market_page import row_cells
+    cells = row_cells(window.market._rows_store.get_item(0).row)
+    assert len(cells) == len(titles) and "%" in cells[2][0] and cells[0][0].endswith("DevOps")
     window.notebook.set_current_page(2)
-    first = window.market._grid_holder.get_child().get_child().get_child_at(0, 1)           # el botón de la primera oferta
-    first.emit("clicked")
+    view.emit("activate", 0)                                                   # pulsar la oferta lleva a ella en la lista
     assert window.notebook.get_current_page() == 0 and window.selection.get_selected_item().job.key == "x:1"
     window.notebook.set_current_page(2)
     window.market.source.set_selected(1)                                       # solo encaje alto o medio
