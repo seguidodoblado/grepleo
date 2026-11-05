@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Cambiado
+- **CONTRIBUTING (ES/EN):** quien contribuye, además de ofrecer su aportación bajo PolyForm Noncommercial, concede al autor una licencia perpetua e irrevocable para usarla también con fines comerciales y bajo otras licencias, y conserva su autoría.
+
 ## [0.1.0] - 2026-11-05
 
 ### Cambiado

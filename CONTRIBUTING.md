@@ -26,4 +26,4 @@ respuestas de ejemplo; no hagas pruebas contra Apify ni contra los portales.
 
 Los cambios deben mantener la calidad y las convenciones establecidas para el proyecto.
 
-Este proyecto se distribuye bajo la licencia [PolyForm Noncommercial 1.0.0](COPYING): uso, copia y modificación libres para fines no comerciales. Al contribuir aceptas que tu aportación se ofrezca bajo esa misma licencia.
+Este proyecto se distribuye bajo la licencia [PolyForm Noncommercial 1.0.0](COPYING): uso, copia y modificación libres para fines no comerciales. Al contribuir aceptas que tu aportación se ofrezca bajo esa misma licencia y, además, concedes al autor del proyecto una licencia perpetua, mundial e irrevocable para usar, modificar y distribuir tu aportación, también con fines comerciales y bajo otras licencias (por ejemplo, si algún día se ofrece una versión comercial). Conservas la autoría de lo que escribas. Si no estás de acuerdo, abre una issue en lugar de una pull request.

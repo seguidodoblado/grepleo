@@ -26,4 +26,4 @@ responses; do not test against Apify or the job sites.
 
 Changes must keep the quality and conventions established for the project.
 
-This project is distributed under the [PolyForm Noncommercial 1.0.0](COPYING) license: free use, copying and modification for noncommercial purposes. By contributing you agree that your contribution is offered under that same license.
+This project is distributed under the [PolyForm Noncommercial 1.0.0](COPYING) license: free use, copying and modification for noncommercial purposes. By contributing you agree that your contribution is offered under that same license and, in addition, you grant the project author a perpetual, worldwide, irrevocable license to use, modify and distribute your contribution, including for commercial purposes and under other licenses (for example, if a commercial version is ever offered). You keep the authorship of what you write. If you do not agree, open an issue instead of a pull request.
