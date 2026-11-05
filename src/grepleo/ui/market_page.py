@@ -201,7 +201,10 @@ class MarketPage(Gtk.Box):
         name.set_markup(f"<b>{GLib.markup_escape_text(item.name)}</b>")
         grid.attach(name, 0, number, 1, 1)
         grid.attach(Gtk.Label(label=item.radar, xalign=0), 1, number, 1, 1)
-        grid.attach(Gtk.Label(label=f"{item.level:.0f} → {item.demand:.0f}", xalign=0), 2, number, 1, 1)
+        coverage = Gtk.Label(label=f"{item.level:.0f} → {item.demand:.0f}", xalign=0.5, halign=Gtk.Align.START)
+        coverage.add_css_class("plan-level")
+        coverage.add_css_class(f"row-fit-{overlap_class(item.level / item.demand if item.demand else None)}")
+        grid.attach(coverage, 2, number, 1, 1)
         grid.attach(Gtk.Label(label=_("el {share} %").format(share=round(100 * item.share)), xalign=0), 3, number, 1, 1)
         grid.attach(study_button(item.name), 4, number, 1, 1)
 

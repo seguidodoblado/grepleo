@@ -23,6 +23,7 @@ APPEARANCE = Appearance()
 CSS = b"""
 .row-fit-high { background: rgba(46, 160, 67, 0.30); }
 .row-fit-medium { background: rgba(230, 126, 34, 0.32); }
+.plan-level { padding: 2px 10px; border-radius: 6px; font-weight: bold; }
 .row-fit-low { background: rgba(218, 54, 51, 0.30); }
 .row-fit-unknown { background: rgba(128, 128, 128, 0.18); }
 .wide-scroll scrollbar.vertical { min-width: 18px; }
