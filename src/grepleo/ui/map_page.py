@@ -29,7 +29,8 @@ TILES = ("openstreetmap", "OpenStreetMap", "https://tile.openstreetmap.org/{z}/{
 LICENSE = "© OpenStreetMap contributors"
 LICENSE_URI = "https://www.openstreetmap.org/copyright"
 ORDER = (Fit.HIGH, Fit.MEDIUM, Fit.LOW, Fit.UNKNOWN)   # de mejor a peor: un punto con varias ofertas toma el de la mejor
-LISTED = 12                                            # ofertas que se listan al pulsar un punto
+LISTED = 12                                                     # ofertas que se listan al pulsar un punto
+POPOVER_HEIGHT = 300                                            # alto máximo del globo; si no cabe, se desplaza
 
 
 def dominant_mode(jobs: list[Job]) -> WorkMode:
@@ -247,11 +248,12 @@ class MapPage(Gtk.Box):
             self.map.get_map().go_to_full(lat, lon, zoom)
 
     def _popover(self, place: str, jobs: list[Job], parent: Gtk.Widget) -> Gtk.Popover:
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2, margin_top=6, margin_bottom=6, margin_start=6,
-                      margin_end=6)
+        outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4, margin_top=6, margin_bottom=6,
+                        margin_start=6, margin_end=6)
         title = Gtk.Label(xalign=0, use_markup=True)
         title.set_markup(f"<b>{GLib.markup_escape_text(place)}</b>")
-        box.append(title)
+        outer.append(title)
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
         popover = Gtk.Popover()
         ranked = sorted(jobs, key=lambda job: (-(self._evaluations[job.key].score or 0)
                                                 if job.key in self._evaluations else 0))
@@ -269,6 +271,11 @@ class MapPage(Gtk.Box):
         if len(jobs) > LISTED:
             box.append(Gtk.Label(label=_("y {count} más").format(count=len(jobs) - LISTED), xalign=0,
                                  css_classes=["dim-label"]))
-        popover.set_child(box)
+        # Con muchas ofertas el contenido no cabe en el mapa y GTK no llega a mostrar el globo: se desplaza.
+        scroll = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER, propagate_natural_height=True,
+                                    max_content_height=POPOVER_HEIGHT)
+        scroll.set_child(box)
+        outer.append(scroll)
+        popover.set_child(outer)
         popover.set_parent(parent)
         return popover

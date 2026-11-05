@@ -29,6 +29,23 @@ def evaluation(fit):
     return Evaluation(fit, {Fit.HIGH: 0.9, Fit.MEDIUM: 0.6, Fit.LOW: 0.2, Fit.UNKNOWN: None}[fit])
 
 
+def popover_buttons(popover):
+    """Los botones de oferta del globo, en el orden en que se ven (están dentro de la zona con desplazamiento)."""
+    found = []
+
+    def walk(widget):
+        child = widget.get_first_child()
+        while child is not None:
+            if isinstance(child, Gtk.Button):
+                found.append(child)
+            else:
+                walk(child)
+            child = child.get_next_sibling()
+
+    walk(popover.get_child())
+    return found
+
+
 def settle(times=40):
     context = GLib.MainContext.default()
     for _attempt in range(times):
@@ -74,11 +91,7 @@ def test_the_map_shows_one_pin_per_known_place_coloured_by_fit_and_a_popover_wit
     assert page._pins[0][0].get_text() == "2" and page._pins[1][0].get_text() == ""     # el número, solo si hay varias
     assert "3 de 5 ofertas en el mapa" in page.status.get_text() and "1 sin ubicación" in page.status.get_text()
     madrid = page._pins[0][1]
-    buttons, child = [], madrid.get_child().get_first_child()
-    while child is not None:                                                  # en el orden en que se ven
-        if isinstance(child, Gtk.Button):
-            buttons.append(child)
-        child = child.get_next_sibling()
+    buttons = popover_buttons(madrid)
     assert len(buttons) == 2 and "Empresa 2" in buttons[0].get_child().get_text()       # la de mejor encaje, primero
     buttons[0].emit("clicked")
     assert [item.key for item in picked] == ["x:2"]
@@ -192,3 +205,26 @@ def test_points_are_circles_squares_or_rings_by_work_mode_and_the_legend_explain
             stack.append(child)
             child = child.get_next_sibling()
     assert len(legend) == 1                                                  # una leyenda sobre el mapa
+
+
+@needs_map
+def test_a_point_with_many_offers_still_opens_its_popover_and_scrolls():
+    store = Store(Path(":memory:"))
+    store.save_place("Madrid", (40.4168, -3.7038))
+    store.save_place("Toledo", (39.8628, -4.0273))
+    jobs = [job(number, "Madrid", title="Ingeniero DevOps Senior Kubernetes", mode=WorkMode.HYBRID)
+            for number in range(90)] + [job(900, "Toledo")]
+    evaluations = {item.key: evaluation(Fit.HIGH) for item in jobs}
+    page = MapPage(lambda: (jobs, evaluations, None), store, lambda _job: None)
+    window = Gtk.Window(default_width=1200, default_height=1000)
+    window.set_child(page)
+    window.present()
+    settle()
+    page.refresh()
+    settle()
+    popover = next(popover for pin, popover in page._pins if pin.get_tooltip_text().startswith("Madrid"))
+    popover.popup()
+    settle()
+    assert popover.get_visible() and popover.get_mapped()                      # con 12 filas o más no llegaba a abrirse
+    assert len(popover_buttons(popover)) == map_page.LISTED
+    window.destroy()
