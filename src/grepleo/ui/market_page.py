@@ -11,9 +11,11 @@ from ..i18n import _
 from ..market import Market, OfferRow, build_market, build_rows, low_fit_jobs, relevant_jobs
 from ..models import Evaluation, Fit, Job
 from ..profiles import Profile
+from ..study import StudyItem, study_plan
 from .common import wide_scrollbars
 from .radar_minimap import overlap_class, percent
 from .radar_panel import RadarPanel
+from .study_links import study_button
 
 FIT_TINT = {Fit.HIGH: "high", Fit.MEDIUM: "medium", Fit.LOW: "low"}   # el color de la celda de encaje
 SOURCES = ("visible", "relevant", "low")   # las que ves ahora / solo encaje alto o medio / solo encaje bajo
@@ -55,6 +57,12 @@ class MarketPage(Gtk.Box):
         self.append(self.message)
         self.panel = RadarPanel(vexpand=True)
         self.append(self.panel)
+        self.plan = Gtk.Expander(label=_("Plan de estudio: lo que más conviene reforzar"))
+        self._plan_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        self._plan_holder = wide_scrollbars(Gtk.ScrolledWindow(min_content_height=200, vexpand=True))
+        self._plan_box.append(self._plan_holder)
+        self.plan.set_child(self._plan_box)
+        self.append(self.plan)
         self.breakdown = Gtk.Expander(label=_("Desglose por oferta"), margin_bottom=8)
         self.breakdown.connect("notify::expanded", self._breakdown_toggled)
         self._rows_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
@@ -109,7 +117,35 @@ class MarketPage(Gtk.Box):
             _("{count} de {seen} ofertas con descripción completa").format(count=market.offers, seen=market.seen))
         self.panel.set_data(market.radars, Fit.UNKNOWN, market=market.offers)
         self._market = market
+        self._show_plan(market)
         return False
+
+    def _show_plan(self, market: Market) -> None:
+        """El plan de estudio: lo que más piden las ofertas por encima de tu nivel, con certificaciones y cursos."""
+        items = study_plan(market)
+        self.plan.set_expanded(SOURCES[self.source.get_selected()] == "low" and bool(items))   # con el filtro de plan, abierto
+        if not items:
+            self._plan_holder.set_child(Gtk.Label(label=_("Con estas ofertas no hay nada que reforzar: tu nivel llega a "
+                                                          "lo que piden."), xalign=0, margin_top=6, wrap=True))
+            return
+        grid = Gtk.Grid(column_spacing=12, row_spacing=4, margin_start=4, margin_end=8, margin_top=4)
+        for column, text in enumerate((_("Habilidad"), _("Radar"), _("Tu nivel → lo que piden"), _("Ofertas"), "")):
+            head = Gtk.Label(label=text, xalign=0)
+            head.add_css_class("heading")
+            grid.attach(head, column, 0, 1, 1)
+        for number, item in enumerate(items, start=1):
+            self._attach_plan_row(grid, number, item)
+        self._plan_holder.set_child(grid)
+
+    @staticmethod
+    def _attach_plan_row(grid: Gtk.Grid, number: int, item: StudyItem) -> None:
+        name = Gtk.Label(xalign=0)
+        name.set_markup(f"<b>{GLib.markup_escape_text(item.name)}</b>")
+        grid.attach(name, 0, number, 1, 1)
+        grid.attach(Gtk.Label(label=item.radar, xalign=0), 1, number, 1, 1)
+        grid.attach(Gtk.Label(label=f"{item.level:.0f} → {item.demand:.0f}", xalign=0), 2, number, 1, 1)
+        grid.attach(Gtk.Label(label=_("el {share} %").format(share=round(100 * item.share)), xalign=0), 3, number, 1, 1)
+        grid.attach(study_button(item.name), 4, number, 1, 1)
 
     # --- el desglose por oferta -----------------------------------------------------------------
     def _breakdown_toggled(self, *_args) -> None:

@@ -360,3 +360,59 @@ def test_the_market_tab_shows_the_profile_radars_against_the_offers_in_the_backg
             pass
         GLib.usleep(5000)
     assert window.market.panel.cards
+
+
+def test_the_gap_card_and_the_market_plan_offer_study_links():
+    from pathlib import Path
+
+    from gi.repository import GLib, Gtk
+
+    from grepleo.profiles import Profile, RadarAxis, SkillRadar
+    from grepleo.sources.base import SearchQuery
+    from grepleo.storage import Store
+    from grepleo.ui import gui
+    if not Gtk.init_check():
+        pytest.skip("sin pantalla para crear widgets")
+    text = "Requisitos:\n- Experiencia real con Terraform, Jenkins y Azure en producción\n" * 3
+    store = Store(Path(":memory:"))
+    radar = SkillRadar("Cloud", [RadarAxis("Azure", 2), RadarAxis("Terraform", 3), RadarAxis("Jenkins", 4)])
+    profile_id = store.save_profile(Profile(name="P", headline="DevOps", must=["Linux"], radars=[radar]))
+    search = store.save_search(gui.LAST_SEARCH, profile_id, SearchQuery("devops"), ["indeed"])
+    store.store_results(search, [Job(key="x:1", source="indeed", title="DevOps", description=text, full_description=True)])
+    window = gui.MainWindow(Gtk.Application(application_id="io.github.seguidodoblado.GrepleoStudy"), store)
+    context = GLib.MainContext.default()
+
+    def settle(until):
+        for _attempt in range(200):
+            while context.iteration(False):
+                pass
+            if until():
+                return
+            GLib.usleep(10000)
+
+    def find_all(root, kind):
+        found, stack = [], [root]
+        while stack:
+            widget = stack.pop()
+            if isinstance(widget, kind):
+                found.append(widget)
+            child = widget.get_first_child()
+            while child is not None:
+                stack.append(child)
+                child = child.get_next_sibling()
+        return found
+
+    settle(lambda: "Calculando" not in _all_labels(window.panorama_box) and find_all(window.panorama_box, Gtk.MenuButton))
+    buttons = find_all(window.panorama_box, Gtk.MenuButton)
+    assert buttons and buttons[0].get_label() == "Estudiar"                    # un botón por habilidad que falta
+    popover_text = _all_labels(buttons[0].get_popover().get_child())
+    assert "Buscar cursos de" in popover_text and "Udemy" in popover_text and "Coursera" in popover_text
+    links = [button.get_uri() for button in find_all(buttons[0].get_popover().get_child(), Gtk.LinkButton)]
+    assert any("udemy.com/courses/search" in uri and "lang=es" in uri for uri in links)
+    assert any("coursera.org/search" in uri and "language=English" in uri for uri in links)
+    window.market.source.set_selected(2)                                       # solo encaje bajo: el plan se abre
+    window.notebook.set_current_page(2)
+    settle(lambda: window.market._market is not None and find_all(window.market._plan_holder, Gtk.MenuButton))
+    plan = _all_labels(window.market._plan_holder)
+    assert "Habilidad" in plan and "Azure" in plan and "2 → " in plan
+    assert find_all(window.market._plan_holder, Gtk.MenuButton)

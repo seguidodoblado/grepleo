@@ -51,6 +51,7 @@ does not need it).
   knock-out requirements you do not meet. It is a local, explained estimate, not an official figure: each company
   configures its own ATS. Each radar also has a side legend that explains, axis by axis, what you are seeing.
 - **Map:** the offers you see as points on a light or dark map, in the colour of their fit (needs `gir1.2-shumate-1.0`; the images and the location lookup come from OpenStreetMap, see the privacy policy).
+- **Study plan:** in the Overview gaps and in Market, each skill you lack links to official certifications and to course searches on Udemy and Coursera (in Spanish and English).
 - **Market:** your radars against what the offers you are looking at ask for on average (or only the high or medium fit ones), to see at a glance on which topics you fall short.
 - **Overview:** which requirements repeat across the sample and what can be concluded by counting (most
   requested, what you know that no offer mentions, what you master that few offers ask for, **what you lack most often** (a red card with what your offers ask for and you do not cover) and **your strengths** (a green card with what you already have and they ask for most), how many offers publish a salary, how many are remote…).

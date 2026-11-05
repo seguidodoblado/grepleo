@@ -49,6 +49,7 @@ from .market_page import MarketPage
 from .notes_panel import NotesPanel
 from .profile_dialog import ProfileWindow
 from .radar_panel import RadarPanel
+from .study_links import study_button
 from .theming import is_dark_theme, theme_variant
 from .tracking_panel import TrackingPanel
 
@@ -1133,14 +1134,15 @@ class MainWindow(Gtk.ApplicationWindow):
         if token != self._gaps_token:
             return False   # el panorama se ha vuelto a dibujar mientras tanto
         self._fill_skill_rows(gaps_box, [(gap.name, gap.relevant or gap.offers, gap_text(gap)) for gap in gaps],
-                              _("No hay huecos que destacar con las ofertas que tienen descripción completa."))
+                              _("No hay huecos que destacar con las ofertas que tienen descripción completa."),
+                              study=True)
         self._fill_skill_rows(strengths_box, [(item.name, item.relevant or item.offers, strength_text(item))
                                               for item in strengths],
                               _("Ninguna oferta con descripción completa cita lo que tienes en el perfil."))
         return False
 
     @staticmethod
-    def _fill_skill_rows(box: Gtk.Box, rows: list[tuple[str, int, str]], empty: str) -> None:
+    def _fill_skill_rows(box: Gtk.Box, rows: list[tuple[str, int, str]], empty: str, study: bool = False) -> None:
         while (child := box.get_first_child()) is not None:
             box.remove(child)
         if not rows:
@@ -1156,6 +1158,8 @@ class MainWindow(Gtk.ApplicationWindow):
             bar.set_size_request(120, -1)
             grid.attach(bar, 1, number, 1, 1)
             grid.attach(Gtk.Label(label=text, xalign=0, wrap=True, hexpand=True), 2, number, 1, 1)
+            if study:   # lo que te falta: certificaciones oficiales y cursos para reforzarlo
+                grid.attach(study_button(name), 3, number, 1, 1)
         box.append(grid)
 
     # --- detalle y estados -------------------------------------------------------------------------
