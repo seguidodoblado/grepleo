@@ -39,7 +39,7 @@ Section: misc
 Priority: optional
 Architecture: all
 Depends: python3, python3-gi, python3-gi-cairo, gir1.2-gtk-4.0 (>= 4.10), python3-keyring
-Recommends: gir1.2-vte-3.91
+Recommends: gir1.2-vte-3.91, gir1.2-shumate-1.0
 Maintainer: Jose Antonio Seguido Doblado <jose.antonio.seguido@gmail.com>
 Homepage: https://github.com/seguidodoblado/grepleo
 Description: Búsqueda de empleo con evaluación de criterios
