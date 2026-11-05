@@ -32,8 +32,8 @@ does not need it).
 - **One search, five sources:** the position or keywords, the location and the posting date are sent at once to
   InfoJobs, Indeed, LinkedIn and Tecnoempleo (through Apify Actors) and Michael Page (read directly from its website,
   at no cost), and offers repeated across sources are merged.
-- **Which criteria you meet:** each offer is evaluated against your **profile** (technical and soft skills,
-  your skills with a level from 0 to 10 each (in a window with the level scale in view) and synonyms, experience, education, languages with level, minimum salary, work mode, location
+- **Which criteria you meet:** each offer is evaluated against your **profile** (your technical and soft skills, **each with a
+  level from 0 to 10** that you set in a window with the level scale in view, and synonyms, experience, education, languages with level, minimum salary, work mode, location
   and what you would rather not find) and shows ✓ met, ✗ not met or ? cannot be known, plus a High, Medium or Low
   fit.
 - **Honest about what it does not know:** summary cards (when a source does not bring the full description) do not have it, so
@@ -75,6 +75,8 @@ Actors may stop working or change without notice.
 computer, only the search and offer routes its `robots.txt` allows, with pauses between requests and a cap on the
 number of offers per search. It does not go through Apify and costs nothing, but it depends on that website's
 design and may stop working if it changes.
+
+**OpenStreetMap** (only if you open the Map tab): its servers serve the map images and the lookup of each distinct location, once (Nominatim), within its limit of one request per second; they do not receive your offers, profile or searches, only your IP, the area you look at and the text of each location.
 
 ## Privacy
 

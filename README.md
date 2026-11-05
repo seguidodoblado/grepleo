@@ -32,8 +32,8 @@ su web y no lo necesita).
 - **Una búsqueda, cinco fuentes:** el puesto o las palabras clave, la ubicación y la fecha de publicación se
   lanzan a la vez en InfoJobs, Indeed, LinkedIn y Tecnoempleo (a través de Actors de Apify) y en Michael Page (leída
   directamente de su web, sin coste), y las ofertas repetidas entre fuentes se unifican.
-- **Qué criterios cumples:** cada oferta se evalúa frente a tu **perfil** (habilidades técnicas y blandas,
-  tus habilidades con un nivel de 0 a 10 cada una (en una ventana con la escala de niveles a la vista) y sinónimos, experiencia, estudios, idiomas con nivel, salario mínimo, modalidad, ubicación y lo que
+- **Qué criterios cumples:** cada oferta se evalúa frente a tu **perfil** (tus habilidades técnicas y blandas, **cada una con un
+  nivel de 0 a 10** que pones en una ventana con la escala de niveles a la vista, y sinónimos, experiencia, estudios, idiomas con nivel, salario mínimo, modalidad, ubicación y lo que
   prefieres no encontrar) y muestra ✓ cumple, ✗ no cumple o ? no se puede saber, además de un encaje Alto, Medio
   o Bajo.
 - **Honesta con lo que no sabe:** las fichas resumidas (cuando una fuente no trae la descripción completa) no la tienen, así
@@ -73,6 +73,8 @@ de quien lo lanza. Los Actors pueden dejar de funcionar o cambiar sin avisar.
 **Michael Page** es la excepción: la aplicación lee directamente su web pública (michaelpage.es) desde tu equipo, solo
 las rutas de búsqueda y de ficha que su `robots.txt` permite, con pausas entre peticiones y un máximo de ofertas por
 búsqueda. No pasa por Apify ni cuesta nada, pero depende del diseño de esa web y puede dejar de funcionar si cambia.
+
+**OpenStreetMap** (solo si abres la pestaña Mapa): sus servidores sirven las imágenes del mapa y la búsqueda de cada ubicación distinta, una sola vez (Nominatim), con su límite de una petición por segundo; no reciben tus ofertas, tu perfil ni tus búsquedas, solo tu IP, la zona que miras y el texto de cada ubicación.
 
 ## Privacidad
 
