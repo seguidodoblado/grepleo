@@ -36,6 +36,9 @@ DEFAULT_CATALOG: tuple[str, ...] = (
 )
 
 
+RARE_LISTED = 6   # cuántas de «lo que dominas y pocas ofertas citan» se nombran
+
+
 @dataclass
 class RequirementCount:
     name: str
@@ -106,14 +109,21 @@ def build_insights(jobs: list[Job], evaluations: dict[str, Evaluation], requirem
             if name and not any(job.full_description and mentions(normalize(job.text), names) for job in jobs):
                 unseen.append(name)
         if unseen:
-            insights.append(_("Ninguna oferta con detalle cita tus deseables: {names}.").format(
+            insights.append(_("Ninguna oferta con detalle cita lo que conoces: {names}.").format(
                 names=", ".join(f"«{name}»" for name in unseen[:4])))
+        rare = []   # lo que dominas y casi nadie pide: invertir en ello rinde poco en esta muestra
         for spec in profile.all_must:
             name, names = parse_term(spec)
             hits = sum(1 for job in jobs if job.full_description and mentions(normalize(job.text), names))
             if name and hits * 5 < detailed:
-                insights.append(_("Tu requisito «{name}» solo aparece en {hits} de {detailed} ofertas con detalle.")
-                                .format(name=name, hits=hits, detailed=detailed))
+                rare.append((hits, name))
+        if rare:
+            rare.sort(key=lambda item: (item[0], normalize(item[1])))
+            shown = ", ".join(f"«{name}» ({hits})" for hits, name in rare[:RARE_LISTED])
+            if len(rare) > RARE_LISTED:
+                shown += " " + _("y {count} más").format(count=len(rare) - RARE_LISTED)
+            insights.append(_("Lo que dominas y pocas ofertas citan (menos del 20 % de las {detailed} con detalle): "
+                              "{items}.").format(detailed=detailed, items=shown))
     fits = [evaluations[job.key].fit for job in jobs if job.key in evaluations]
     if fits:
         insights.append(_("Encaje: {high} alto, {medium} medio y {low} bajo.").format(

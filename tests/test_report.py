@@ -40,7 +40,7 @@ def test_the_panorama_states_only_what_counting_can_support():
     panorama = build_panorama(sample, evaluations(sample, prof), prof)
     assert (panorama.total, panorama.detailed) == (2, 1)
     text = "\n".join(panorama.insights)
-    assert "Lo más pedido" in text and "Ninguna oferta con detalle cita tus deseables: «Snowflake»" in text
+    assert "Lo más pedido" in text and "Ninguna oferta con detalle cita lo que conoces: «Snowflake»" in text
     assert "«CRM»" not in text and "«Tableau»" not in text     # el catálogo genérico ya no genera conclusiones
     assert "Encaje:" in text and "1 de 2 ofertas publican salario" in text and "1 oferta es una ficha resumida" in text
     assert build_panorama([], {}, prof).insights == []
@@ -83,3 +83,14 @@ def test_the_catalog_covers_infrastructure_and_dotnet_terms():
     found = {item.name for item in count_requirements([Job(key="x:1", source="x", title="t", description=text,
                                                            full_description=True)]) if item.count}
     assert {"Terraform", "Ansible", "CI/CD", "C#", ".NET", "Node.js", "Cloud"} <= found
+
+
+def test_what_you_master_but_few_offers_mention_is_listed_in_one_conclusion():
+    prof = Profile(name="p", must=["Scrum", "Cobol", "Fortran"], nice=[])
+    sample = [Job(key=f"x:{i}", source="x", title="PO", description=TEXT, full_description=True) for i in range(10)]
+    text = "\n".join(build_panorama(sample, {}, prof).insights)
+    assert "Lo que dominas y pocas ofertas citan (menos del 20 % de las 10 con detalle): «Cobol» (0), «Fortran» (0)" in text
+    assert "«Scrum»" not in text.split("Lo que dominas")[1]          # lo que sí piden muchas no sale en esa lista
+    many = Profile(name="p", must=[f"Raro{i}" for i in range(9)])
+    long = "\n".join(build_panorama(sample, {}, many).insights)
+    assert "y 3 más" in long

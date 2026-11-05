@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: grepleo 0.1.0\n"
 "Report-Msgid-Bugs-To: jose.antonio.seguido@gmail.com\n"
-"POT-Creation-Date: 2026-11-05 01:54+0100\n"
+"POT-Creation-Date: 2026-11-05 02:03+0100\n"
 "PO-Revision-Date: 2026-11-03 17:00+0100\n"
 "Last-Translator: José Antonio Seguido Doblado <jose.antonio.seguido@gmail."
 "com>\n"
@@ -369,33 +369,38 @@ msgstr "Offer"
 msgid "Otro"
 msgstr "Other"
 
-#: src/grepleo/panorama.py:98
+#: src/grepleo/panorama.py:101
 #, python-brace-format
 msgid "Lo más pedido: {names} (sobre {count} oferta con detalle)."
 msgid_plural "Lo más pedido: {names} (sobre {count} ofertas con detalle)."
 msgstr[0] "Most requested: {names} (out of {count} offer with details)."
 msgstr[1] "Most requested: {names} (out of {count} offers with details)."
 
-#: src/grepleo/panorama.py:109
+#: src/grepleo/panorama.py:112
 #, python-brace-format
-msgid "Ninguna oferta con detalle cita tus deseables: {names}."
-msgstr "No offer with details mentions your nice-to-haves: {names}."
+msgid "Ninguna oferta con detalle cita lo que conoces: {names}."
+msgstr "No offer with details mentions what you know: {names}."
 
-#: src/grepleo/panorama.py:115
+#: src/grepleo/panorama.py:124 src/grepleo/ui/radar_legend.py:128
 #, python-brace-format
+msgid "y {count} más"
+msgstr "and {count} more"
+
+#: src/grepleo/panorama.py:125
+#, python-format, python-brace-format
 msgid ""
-"Tu requisito «{name}» solo aparece en {hits} de {detailed} ofertas con "
-"detalle."
+"Lo que dominas y pocas ofertas citan (menos del 20 % de las {detailed} con "
+"detalle): {items}."
 msgstr ""
-"Your requirement “{name}” only appears in {hits} of {detailed} offers with "
-"details."
+"What you master and few offers mention (under 20 % of the {detailed} with "
+"detail): {items}."
 
-#: src/grepleo/panorama.py:119
+#: src/grepleo/panorama.py:129
 #, python-brace-format
 msgid "Encaje: {high} alto, {medium} medio y {low} bajo."
 msgstr "Fit: {high} high, {medium} medium and {low} low."
 
-#: src/grepleo/panorama.py:123
+#: src/grepleo/panorama.py:133
 #, python-brace-format
 msgid ""
 "{count} de {total} ofertas publican salario; la mediana es de {median} € al "
@@ -403,14 +408,14 @@ msgid ""
 msgstr ""
 "{count} of {total} offers publish a salary; the median is {median} € a year."
 
-#: src/grepleo/panorama.py:127
+#: src/grepleo/panorama.py:137
 #, python-brace-format
 msgid "{count} oferta es en remoto."
 msgid_plural "{count} ofertas son en remoto."
 msgstr[0] "{count} offer is remote."
 msgstr[1] "{count} offers are remote."
 
-#: src/grepleo/panorama.py:132
+#: src/grepleo/panorama.py:142
 #, python-brace-format
 msgid ""
 "{count} oferta es una ficha resumida: no se puede saber qué requisitos no "
@@ -1770,7 +1775,10 @@ msgid ""
 "la media entre las ofertas que lo piden: 5 si solo lo mencionan, 7 si lo "
 "valoran y 10 si es requisito. Donde tu zona azul llega más lejos que la "
 "línea, lo cubres."
-msgstr "the average among the offers that ask for it: 5 if they only mention it, 7 if they value it and 10 if it is a requirement. Where your blue area reaches further than the line, you cover it."
+msgstr ""
+"the average among the offers that ask for it: 5 if they only mention it, 7 "
+"if they value it and 10 if it is a requirement. Where your blue area reaches "
+"further than the line, you cover it."
 
 #: src/grepleo/ui/radar_legend.py:44
 msgid ""
@@ -1798,7 +1806,9 @@ msgstr "The offer asks for nothing measurable in this radar."
 msgid ""
 "cubres {covered} de {asked} puntos de lo que piden las ofertas, contando "
 "cada eje según cuántas lo piden"
-msgstr "you cover {covered} of {asked} points of what the offers ask for, counting each axis by how many ask for it"
+msgstr ""
+"you cover {covered} of {asked} points of what the offers ask for, counting "
+"each axis by how many ask for it"
 
 #: src/grepleo/ui/radar_legend.py:56
 #, python-brace-format
@@ -1903,11 +1913,6 @@ msgid_plural "{count} requisitos no se pueden saber con esta oferta."
 msgstr[0] "{count} requirement cannot be known with this offer."
 msgstr[1] "{count} requirements cannot be known with this offer."
 
-#: src/grepleo/ui/radar_legend.py:128
-#, python-brace-format
-msgid "y {count} más"
-msgstr "and {count} more"
-
 #: src/grepleo/ui/radar_legend.py:129
 msgid "Palabras clave que tu CV no cita"
 msgstr "Keywords your CV does not cite"
@@ -1958,7 +1963,9 @@ msgstr "The offers ask for nothing that can be measured in your radars."
 msgid ""
 "Cuánto de lo que piden las ofertas cubres con tus niveles, contando cada "
 "elemento según cuántas ofertas lo piden."
-msgstr "How much of what the offers ask for you cover with your levels, counting each element by how many offers ask for it."
+msgstr ""
+"How much of what the offers ask for you cover with your levels, counting "
+"each element by how many offers ask for it."
 
 #: src/grepleo/ui/radar_panel.py:61
 #, python-brace-format
@@ -2030,6 +2037,14 @@ msgstr "Nothing written down yet."
 #: src/grepleo/ui/tracking_panel.py:178
 msgid "Guardar cambio"
 msgstr "Save change"
+
+#, python-brace-format
+#~ msgid ""
+#~ "Tu requisito «{name}» solo aparece en {hits} de {detailed} ofertas con "
+#~ "detalle."
+#~ msgstr ""
+#~ "Your requirement “{name}” only appears in {hits} of {detailed} offers "
+#~ "with details."
 
 #~ msgid "Uno por línea; sinónimos con | (Power BI|powerbi)"
 #~ msgstr "One per line; synonyms with | (Power BI|powerbi)"

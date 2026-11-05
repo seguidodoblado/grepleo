@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: grepleo 0.1.0\n"
 "Report-Msgid-Bugs-To: jose.antonio.seguido@gmail.com\n"
-"POT-Creation-Date: 2026-11-05 01:54+0100\n"
+"POT-Creation-Date: 2026-11-05 02:03+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -365,45 +365,50 @@ msgstr ""
 msgid "Otro"
 msgstr ""
 
-#: src/grepleo/panorama.py:98
+#: src/grepleo/panorama.py:101
 #, python-brace-format
 msgid "Lo más pedido: {names} (sobre {count} oferta con detalle)."
 msgid_plural "Lo más pedido: {names} (sobre {count} ofertas con detalle)."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/grepleo/panorama.py:109
+#: src/grepleo/panorama.py:112
 #, python-brace-format
-msgid "Ninguna oferta con detalle cita tus deseables: {names}."
+msgid "Ninguna oferta con detalle cita lo que conoces: {names}."
 msgstr ""
 
-#: src/grepleo/panorama.py:115
+#: src/grepleo/panorama.py:124 src/grepleo/ui/radar_legend.py:128
 #, python-brace-format
+msgid "y {count} más"
+msgstr ""
+
+#: src/grepleo/panorama.py:125
+#, python-format, python-brace-format
 msgid ""
-"Tu requisito «{name}» solo aparece en {hits} de {detailed} ofertas con "
-"detalle."
+"Lo que dominas y pocas ofertas citan (menos del 20 % de las {detailed} con "
+"detalle): {items}."
 msgstr ""
 
-#: src/grepleo/panorama.py:119
+#: src/grepleo/panorama.py:129
 #, python-brace-format
 msgid "Encaje: {high} alto, {medium} medio y {low} bajo."
 msgstr ""
 
-#: src/grepleo/panorama.py:123
+#: src/grepleo/panorama.py:133
 #, python-brace-format
 msgid ""
 "{count} de {total} ofertas publican salario; la mediana es de {median} € al "
 "año."
 msgstr ""
 
-#: src/grepleo/panorama.py:127
+#: src/grepleo/panorama.py:137
 #, python-brace-format
 msgid "{count} oferta es en remoto."
 msgid_plural "{count} ofertas son en remoto."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/grepleo/panorama.py:132
+#: src/grepleo/panorama.py:142
 #, python-brace-format
 msgid ""
 "{count} oferta es una ficha resumida: no se puede saber qué requisitos no "
@@ -1821,11 +1826,6 @@ msgid "{count} requisito no se puede saber con esta oferta."
 msgid_plural "{count} requisitos no se pueden saber con esta oferta."
 msgstr[0] ""
 msgstr[1] ""
-
-#: src/grepleo/ui/radar_legend.py:128
-#, python-brace-format
-msgid "y {count} más"
-msgstr ""
 
 #: src/grepleo/ui/radar_legend.py:129
 msgid "Palabras clave que tu CV no cita"
