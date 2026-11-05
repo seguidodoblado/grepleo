@@ -25,6 +25,10 @@
   Search for jobs on InfoJobs, Indeed, LinkedIn, Tecnoempleo and Michael Page, and check which criteria you meet in each offer.
 </p>
 
+<p align="center">
+  <img src="docs/screenshot.png" alt="Screenshot of Grepleo">
+</p>
+
 Desktop application (GTK 4 + PyGObject, interface in Spanish and English), for personal use: no server or account
 of its own, only your [Apify](https://apify.com/) token to run the searches (Michael Page is read directly from its website and
 does not need it).

@@ -25,6 +25,10 @@
   Busca empleo en InfoJobs, Indeed, LinkedIn, Tecnoempleo y Michael Page, y comprueba qué criterios cumples en cada oferta.
 </p>
 
+<p align="center">
+  <img src="docs/screenshot.png" alt="Captura de Grepleo">
+</p>
+
 Aplicación de escritorio (GTK 4 + PyGObject, interfaz en español e inglés), de uso personal: sin servidor ni cuenta
 propios, solo tu token de [Apify](https://apify.com/) para lanzar las búsquedas (Michael Page se lee directamente de
 su web y no lo necesita).
