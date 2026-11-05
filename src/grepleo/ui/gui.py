@@ -145,9 +145,13 @@ def fit_text(item: "JobItem") -> str:
 
 
 def fit_tooltip(item: "JobItem") -> str:
-    """Qué significa el porcentaje y cuántos criterios se cumplen."""
-    return _("Puntuación ponderada: cada criterio pesa distinto.\nCumples {count} criterios (los «no se sabe» no cuentan).").format(
+    """Qué significa el porcentaje, cuántos criterios se cumplen y qué es lo que más falta."""
+    text = _("Puntuación ponderada: cada criterio pesa distinto.\nCumples {count} criterios (los «no se sabe» no cuentan).").format(
         count=item.evaluation.summary)
+    gaps = item.evaluation.main_gaps()
+    if gaps:
+        text += "\n" + _("Te falta: {names}").format(names=", ".join(gaps))
+    return text
 
 
 def _demand_text(offers: int, required: int, relevant: int) -> str:

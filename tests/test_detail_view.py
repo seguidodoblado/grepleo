@@ -33,7 +33,8 @@ def test_show_job_writes_every_section_and_highlights_the_profile():
     job = Job(key="x:1", source="x", title="Cloud Engineer", company="ACME", location="Madrid",
               work_mode=WorkMode.HYBRID, contract="Indefinido", experience_text="3 años", posted="2026-11-04",
               description=TEXT, full_description=True)
-    profile = Profile(name="p", years=4, must=["Azure|azure"], nice=["Terraform"], avoid=["guardias"])
+    profile = Profile(name="p", years=4, must=["Azure|azure", "Kubernetes", "Linux"], nice=["Terraform"],
+                      avoid=["guardias"])
     view = DetailView()
     view.show_job(job, evaluate(job, profile), profile, "36.000–48.000 €")
     buffer = view.get_buffer()
@@ -58,25 +59,25 @@ def test_show_job_without_description_and_the_placeholder():
     assert buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), False) == "Elige una oferta"
 
 
-def test_a_missing_required_criterion_is_painted_red():
-    job = Job(key="x:3", source="x", title="Backend", description="Trabajo con Java y Spring en equipo. " * 6,
+def test_a_required_skill_you_lack_is_painted_red():
+    job = Job(key="x:3", source="x", title="Backend",
+              description="Requisitos:\n- Experiencia real con Kubernetes y Terraform en producción\n" * 3,
               full_description=True)
-    profile = Profile(name="p", must=["Kubernetes"], nice=["Spring"])
+    profile = Profile(name="p", must=["Terraform"])
     view = DetailView()
     evaluation = evaluate(job, profile)
     view.show_job(job, evaluation, profile, "—")
     buffer = view.get_buffer()
     text = buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), False)
     row = text.index("Kubernetes")
-    assert {"missing-text", "critical"} <= tag_names_at(view, row)
+    assert {"missing-text", "critical"} <= tag_names_at(view, row)      # lo piden como requisito y no lo tienes
     assert "imprescindible" in text
-    met = text.index("Spring —") if "Spring —" in text else text.index("Spring")
-    assert "missing-text" not in tag_names_at(view, met) or "critical" not in tag_names_at(view, met)
+    assert "critical" not in tag_names_at(view, text.index("Terraform —"))   # lo que sí tienes no se pinta de rojo
 
 
 def test_criteria_are_split_into_hard_skills_soft_skills_and_conditions():
     job = Job(key="x:4", source="x", title="Backend", location="Madrid",
-              description="Python, trabajo en equipo y liderazgo en un entorno ágil. " * 6, full_description=True)
+              description="Python, comunicación y liderazgo en un entorno ágil. " * 6, full_description=True)
     profile = Profile(name="p", must=["Python"], soft_must=["Liderazgo"], soft_nice=["Comunicación|communication"],
                       locations=["Madrid"], languages={"Inglés": "B2"})
     view = DetailView()
@@ -95,18 +96,18 @@ def test_criteria_are_split_into_hard_skills_soft_skills_and_conditions():
 
 
 def test_met_criteria_are_green_missing_ones_red_and_unknown_ones_keep_the_normal_color():
-    job = Job(key="x:5", source="x", title="Backend", description="Trabajo con Java y Spring en equipo. " * 6,
+    job = Job(key="x:5", source="x", title="Backend", description="Requisitos: Java, Spring y Docker en equipo. " * 4,
               full_description=True)
-    profile = Profile(name="p", must=["Java", "Kubernetes"])
+    profile = Profile(name="p", must=["Java"], avoid=["guardias"])
     view = DetailView()
     view.show_job(job, evaluate(job, profile), profile, "—")
     buffer = view.get_buffer()
     text = buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), False)
-    met, missing = text.index("Java —"), text.index("Kubernetes")        # el imprescindible que falta lleva su marca
-    assert "met-text" in tag_names_at(view, met) and "met-text" in tag_names_at(view, met + len("Java — Apar"))
+    met, missing = text.index("Java —"), text.index("Docker")           # lo que piden y no tienes lleva su marca
+    assert "met-text" in tag_names_at(view, met) and "met-text" in tag_names_at(view, met + len("Java — la pi"))
     assert "missing-text" in tag_names_at(view, missing) and "met-text" not in tag_names_at(view, missing)
     summary = Job(key="x:6", source="x", title="t", description="Scrum", full_description=False)
     view.show_job(summary, evaluate(summary, profile), profile, "—")
     text = buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), False)
-    unknown = text.index("Java —")
+    unknown = text.index("Sin «guardias»")
     assert not {"met-text", "missing-text"} & tag_names_at(view, unknown)      # «?» no se pinta

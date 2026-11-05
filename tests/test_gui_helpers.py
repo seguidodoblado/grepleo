@@ -223,9 +223,10 @@ def test_fit_column_shows_the_weighted_score_that_sorts_and_the_count_in_the_too
     from grepleo.ui.gui import fit_text, fit_tooltip
 
     class Item:
-        evaluation = Evaluation(Fit.MEDIUM, 0.624, [CriterionResult("a", Status.MET, "", 1.0),
-                                                   CriterionResult("b", Status.MISSING, "", 1.0)])
+        evaluation = Evaluation(Fit.MEDIUM, 0.624, [CriterionResult("a", Status.MET, "", 1.0, group="hard"),
+                                                   CriterionResult("b", Status.MISSING, "", 1.0, group="hard")])
     assert fit_text(Item).endswith("62 %") and "1/2" in fit_tooltip(Item)
+    assert "Te falta: b" in fit_tooltip(Item)
     Item.evaluation = Evaluation(Fit.UNKNOWN, None)
     assert "%" not in fit_text(Item)
 

@@ -50,7 +50,7 @@ td{padding:10px 12px;border-top:1px solid #eceff4;vertical-align:top}
 .fit-high{background:#d8f1e1;color:#1c6b3a}.fit-medium{background:#fdf0c9;color:#7a5a00}
 .fit-low{background:#fbdcdc;color:#8a2323}.fit-unknown{background:#e6e9ef;color:#59627a}
 .tag{display:inline-block;margin:2px 3px 0 0;padding:0 7px;border-radius:5px;font:12px monospace}
-.met{background:#d8f1e1}.missing{background:#fbdcdc}.unknown{background:#e6e9ef}
+.met{background:#d8f1e1}.partial{background:#fdecc8}.missing{background:#fbdcdc}.unknown{background:#e6e9ef}
 .muted{color:#59627a;font-size:13px}
 """
 

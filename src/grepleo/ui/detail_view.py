@@ -13,7 +13,7 @@ from ..profiles import Profile, parse_term
 
 _GREEN, _RED, _ORANGE, _GREY = (0.18, 0.63, 0.26), (0.85, 0.21, 0.20), (0.90, 0.49, 0.13), (0.5, 0.5, 0.5)
 _FIT_COLORS = {Fit.HIGH: _GREEN, Fit.MEDIUM: _ORANGE, Fit.LOW: _RED, Fit.UNKNOWN: _GREY}
-_STATUS_COLORS = {Status.MET: _GREEN, Status.MISSING: _RED, Status.UNKNOWN: _GREY}
+_STATUS_COLORS = {Status.MET: _GREEN, Status.MISSING: _RED, Status.UNKNOWN: _GREY, Status.PARTIAL: _ORANGE}
 
 
 def _rgba(color: tuple[float, float, float], alpha: float = 1.0) -> Gdk.RGBA:
@@ -52,6 +52,7 @@ class DetailView(Gtk.TextView):
         buffer.create_tag("bad", background_rgba=_rgba(_RED, 0.30))
         buffer.create_tag("missing-text", foreground_rgba=_rgba(_RED))
         buffer.create_tag("met-text", foreground_rgba=_rgba(_GREEN))
+        buffer.create_tag("partial-text", foreground_rgba=_rgba(_ORANGE))
         buffer.create_tag("critical", background_rgba=_rgba(_RED, 0.22))
         for status, color in _STATUS_COLORS.items():
             buffer.create_tag(f"status-{status.value}", weight=Pango.Weight.BOLD, foreground_rgba=_rgba(color))
@@ -116,7 +117,8 @@ class DetailView(Gtk.TextView):
 
     def _write_criterion(self, criterion: CriterionResult) -> None:
         missing = criterion.status is Status.MISSING
-        color = ["missing-text"] if missing else ["met-text"] if criterion.status is Status.MET else []
+        color = (["missing-text"] if missing else ["met-text"] if criterion.status is Status.MET
+                 else ["partial-text"] if criterion.status is Status.PARTIAL else [])
         start = self._add(criterion.status.symbol, f"status-{criterion.status.value}", "criterion")
         self._add("  ")
         self._add(criterion.name, "bold", *color)

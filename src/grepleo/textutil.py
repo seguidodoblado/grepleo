@@ -3,23 +3,37 @@ from __future__ import annotations
 
 import re
 import unicodedata
+from functools import lru_cache
 
 from .models import WorkMode
 
+_COMBINING = re.compile("[\u0300-\u036f\u1ab0-\u1aff\u1dc0-\u1dff\u20d0-\u20ff\ufe20-\ufe2f]")   # las marcas de acento
 
+
+@lru_cache(maxsize=1024)
 def normalize(text: str) -> str:
     """Minúsculas y sin acentos, para comparar sin que importen las tildes ni las mayúsculas."""
-    decomposed = unicodedata.normalize("NFKD", text.casefold())
-    return "".join(char for char in decomposed if not unicodedata.combining(char))
+    folded = text.casefold()
+    if folded.isascii():
+        return folded
+    return _COMBINING.sub("", unicodedata.normalize("NFKD", folded))
 
 
+@lru_cache(maxsize=4096)
 def term_pattern(term: str) -> re.Pattern[str]:
     """Expresión que encuentra el término completo (no dentro de otra palabra) en un texto ya normalizado."""
     return re.compile(r"(?<!\w)" + re.escape(normalize(term).strip()) + r"(?!\w)")
 
 
+@lru_cache(maxsize=4096)
+def _needle(term: str) -> str:
+    return normalize(term).strip()
+
+
 def mentions(text_normalized: str, terms: list[str]) -> bool:
-    return any(term_pattern(term).search(text_normalized) for term in terms if term.strip())
+    # buscar antes el texto literal (rapidísimo) y solo si está, comprobar que es una palabra completa
+    return any(_needle(term) in text_normalized and term_pattern(term).search(text_normalized)
+               for term in terms if term.strip())
 
 
 _YEARS_PATTERNS = (

@@ -30,7 +30,7 @@ def test_enum_values_stay_stable_keys():
     """El código, la base de datos y las pruebas comparan estos valores: traducirlos los rompería."""
     assert [m.value for m in WorkMode] == ["remote", "hybrid", "onsite", "unknown"]
     assert [f.value for f in Fit] == ["high", "medium", "low", "unknown"]
-    assert [s.value for s in Status] == ["met", "missing", "unknown"]
+    assert [s.value for s in Status] == ["met", "missing", "unknown", "partial"]
     assert [s.value for s in JobState] == ["new", "favorite", "applied", "discarded"]
 
 

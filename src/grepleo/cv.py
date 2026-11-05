@@ -93,14 +93,13 @@ def offer_markdown(job: Job, evaluation: Evaluation, ats=None) -> str:
         lines.append(_("Publicada el {date}").format(date=job.posted))
     lines += ["", f"## {_('Descripción')}", job.description.strip() or _("(La fuente solo da una ficha resumida.)"),
               "", f"## {_('Encaje con mi perfil (evaluación local)')}", _("Encaje: {fit}").format(fit=evaluation.fit.label)]
-    symbols = {Status.MET: "✓", Status.MISSING: "✗", Status.UNKNOWN: "?"}
     for group, title in _group_titles():
         items = [item for item in evaluation.criteria if item.group == group]
         if items:
             lines += ["", f"### {title}"]
             for item in items:
-                required = f" ({_('imprescindible')})" if item.required and item.status is Status.MISSING else ""
-                lines.append(f"- {symbols[item.status]} {item.name}{required}" + (f": {item.detail}" if item.detail else ""))
+                required = f" ({_('imprescindible')})" if item.required and item.status in (Status.MISSING, Status.PARTIAL) else ""
+                lines.append(f"- {item.status.symbol} {item.name}{required}" + (f": {item.detail}" if item.detail else ""))
     if ats is not None:
         lines += ["", f"## {_('Estimación ATS de mi CV base')}",
                   _("Compatibilidad estimada: {percent} %").format(percent=ats.percent)]

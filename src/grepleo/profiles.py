@@ -70,10 +70,10 @@ class Profile:
     years: int = 0
     studies: str = ""
     languages: dict[str, str] = field(default_factory=dict)   # {«Inglés»: «C1»}
-    must: list[str] = field(default_factory=list)             # habilidades técnicas imprescindibles (con sinónimos)
-    nice: list[str] = field(default_factory=list)             # habilidades técnicas deseables
-    soft_must: list[str] = field(default_factory=list)        # habilidades blandas imprescindibles
-    soft_nice: list[str] = field(default_factory=list)        # habilidades blandas deseables
+    must: list[str] = field(default_factory=list)             # habilidades técnicas que dominas (con sinónimos)
+    nice: list[str] = field(default_factory=list)             # habilidades técnicas que conoces
+    soft_must: list[str] = field(default_factory=list)        # habilidades blandas que dominas
+    soft_nice: list[str] = field(default_factory=list)        # habilidades blandas que conoces
     avoid: list[str] = field(default_factory=list)            # cosas que no quieres encontrar
     salary_min: int = 0                                       # euros brutos anuales; 0: no importa
     work_modes: list[str] = field(default_factory=list)       # remote, hybrid, onsite; vacío: cualquiera

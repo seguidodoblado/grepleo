@@ -117,13 +117,15 @@ class ProfileWindow(Gtk.Window):
         self._languages_changed(self._languages)
 
         box.append(_section(_("Habilidades técnicas")))
-        hint = Gtk.Label(label=_("Uno por línea; sinónimos con | (Power BI|powerbi)"), xalign=0)
+        hint = Gtk.Label(label=_("Lo que sabes hacer, uno por línea; sinónimos con | (Power BI|powerbi). Se compara con lo "
+                                 "que pide cada oferta; si algo está en un radar, manda el nivel del radar."),
+                         xalign=0, wrap=True)
         hint.add_css_class("dim-label")
         box.append(hint)
         scroll_must, self._must = _text_view("\n".join(profile.must), 110)
         scroll_nice, self._nice = _text_view("\n".join(profile.nice), 110)
-        box.append(_columns(labeled(_("Imprescindibles"), _grown(scroll_must)),
-                            labeled(_("Deseables"), _grown(scroll_nice))))
+        box.append(_columns(labeled(_("Lo que dominas"), _grown(scroll_must)),
+                            labeled(_("Lo que conoces"), _grown(scroll_nice))))
 
         box.append(_section(_("Habilidades blandas")))
         hint = Gtk.Label(label=_("Liderazgo, trabajo en equipo, comunicación…: uno por línea, con sinónimos si quieres"),
@@ -132,8 +134,8 @@ class ProfileWindow(Gtk.Window):
         box.append(hint)
         scroll_must, self._soft_must = _text_view("\n".join(profile.soft_must), 90)
         scroll_nice, self._soft_nice = _text_view("\n".join(profile.soft_nice), 90)
-        box.append(_columns(labeled(_("Imprescindibles"), _grown(scroll_must)),
-                            labeled(_("Deseables"), _grown(scroll_nice))))
+        box.append(_columns(labeled(_("Lo que dominas"), _grown(scroll_must)),
+                            labeled(_("Lo que conoces"), _grown(scroll_nice))))
 
         box.append(_section(_("Radar general")))
         hint = Gtk.Label(label=_("Cómo te valoras de 0 a 10 en cada eje; se superpone al de cada oferta. Si no lo "

@@ -42,10 +42,11 @@ class Status(Enum):
     MET = "met"          # ✓ cumple
     MISSING = "missing"  # ✗ no cumple, o no aparece en una descripción completa
     UNKNOWN = "unknown"  # ? la oferta no da el dato (ficha resumida)
+    PARTIAL = "partial"  # ◐ lo cubres en parte: tu nivel es menor que lo que pide, o tienes algo parecido
 
     @property
     def symbol(self) -> str:
-        return {Status.MET: "✓", Status.MISSING: "✗", Status.UNKNOWN: "?"}[self]
+        return {Status.MET: "✓", Status.MISSING: "✗", Status.UNKNOWN: "?", Status.PARTIAL: "◐"}[self]
 
 
 class JobState(Enum):
@@ -156,8 +157,18 @@ class CriterionResult:
     status: Status
     detail: str = ""
     weight: int = 1
-    required: bool = False   # imprescindible: si falta, el encaje no puede ser Alto
+    required: bool = False   # la oferta lo pide como requisito (o en el título): si falta, es un hueco importante
     group: str = "conditions"   # hard (técnica), soft (blanda) o conditions (experiencia, salario, modalidad…)
+    credit: float | None = None   # cuánto cubres (0 a 1) cuando el estado es PARTIAL
+
+    @property
+    def value(self) -> float:
+        """Cuánto aporta a la puntuación: 1 si se cumple, 0 si no, y lo que cubras si es parcial."""
+        if self.status is Status.MET:
+            return 1.0
+        if self.status is Status.PARTIAL:
+            return self.credit or 0.0
+        return 0.0
 
 
 @dataclass
@@ -169,6 +180,12 @@ class Evaluation:
 
     def count(self, status: Status) -> int:
         return sum(1 for item in self.criteria if item.status is status)
+
+    def main_gaps(self, limit: int = 3) -> list[str]:
+        """Las habilidades que pide la oferta y no cubres del todo, de las que más restan a las que menos."""
+        lost = [(item.weight * (1 - item.value), item.name) for item in self.criteria
+                if item.group == "hard" and item.status in (Status.MISSING, Status.PARTIAL)]
+        return [name for _points, name in sorted(lost, key=lambda pair: (-pair[0], pair[1].casefold()))[:limit]]
 
     @property
     def summary(self) -> str:
