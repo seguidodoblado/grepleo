@@ -180,3 +180,17 @@ def test_having_the_platform_covers_its_services_and_a_generic_term_is_covered_b
     other = evaluate(asked, profile(must=["Azure"], nice=[], languages={}))
     assert by_name(other, "EC2").status is Status.PARTIAL and "Azure" in by_name(other, "EC2").detail   # otra nube
     assert by_name(evaluate(asked, profile(must=["Excel"], nice=[], languages={})), "EC2").status is Status.MISSING
+
+
+def test_your_general_technical_level_is_the_level_of_what_you_listed():
+    asked = job(description="Requisitos:\n- Experiencia real con Docker y Terraform en producción\n" * 3)
+    mine = {"must": ["Docker"], "nice": ["Terraform"], "languages": {}}
+    untouched = evaluate(asked, profile(**mine))
+    assert by_name(untouched, "Docker").status is Status.MET and by_name(untouched, "Terraform").status is Status.PARTIAL
+    assert abs(by_name(untouched, "Terraform").credit - 0.7) < 1e-9        # lo que conoces cuenta como 7 de 10
+    modest = evaluate(asked, profile(radar={"technical": 5}, **mine))
+    assert by_name(modest, "Docker").status is Status.PARTIAL and abs(by_name(modest, "Docker").credit - 0.5) < 1e-9
+    assert abs(by_name(modest, "Terraform").credit - 0.35) < 1e-9
+    assert modest.score < untouched.score                                  # un nivel general más bajo resta encaje
+    high = evaluate(asked, profile(radar={"technical": 9}, **mine))
+    assert by_name(high, "Docker").status is Status.MET                    # 9 de 10 frente a un requisito: cubierto

@@ -209,3 +209,10 @@ def test_the_general_radar_says_what_is_behind_each_axis():
     english = job(description=OFFER + "\nSe requiere inglés C1. Titulación: grado universitario.\n", full_description=True)
     notes = dict(zip(general.labels, build_radars(english, profile)[0].notes, strict=True))
     assert notes["Idiomas"] == "pide nivel C1" and notes["Estudios"] == "pide grado"
+
+
+def test_the_technical_axis_says_how_many_technologies_the_offer_cites_and_that_ten_is_a_cap():
+    from grepleo.radar import _general_notes
+    notes = _general_notes({"technical": 10.0, "soft": 0.0, "experience": 3.0, "languages": 0.0, "studies": 0.0})
+    assert notes[0] == "cita 10 o más tecnologías"
+    assert _general_notes({"technical": 4.0, "soft": 0.0, "experience": 3.0, "languages": 0.0, "studies": 0.0})[0] == "cita 4 tecnologías"

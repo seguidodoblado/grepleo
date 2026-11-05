@@ -139,7 +139,9 @@ class ProfileWindow(Gtk.Window):
 
         box.append(_section(_("Radar general")))
         hint = Gtk.Label(label=_("Cómo te valoras de 0 a 10 en cada eje; se superpone al de cada oferta. Si no lo "
-                                 "tocas, sale de los datos de arriba."), xalign=0, wrap=True)
+                                 "tocas, sale de los datos de arriba. En «Técnicas» es también el nivel con el que "
+                                 "cuenta lo que has puesto en «Lo que dominas» al calcular el encaje."),
+                         xalign=0, wrap=True)
         hint.add_css_class("dim-label")
         box.append(hint)
         levels = profile_levels(profile)

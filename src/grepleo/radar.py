@@ -282,8 +282,11 @@ def _general_notes(asked: dict[str, float | None]) -> list[str]:
         elif value is None:
             notes.append(unknown)
         elif axis == "technical":
-            notes.append(ngettext("cita {count} tecnología", "cita {count} tecnologías", round(value))
-                         .format(count=round(value)))
+            if round(value) >= SCALE:   # el eje se corta en 10: no se sabe si son diez o más
+                notes.append(_("cita {count} o más tecnologías").format(count=round(SCALE)))
+            else:
+                notes.append(ngettext("cita {count} tecnología", "cita {count} tecnologías", round(value))
+                             .format(count=round(value)))
         elif axis == "soft":
             notes.append(ngettext("cita {count} habilidad blanda", "cita {count} habilidades blandas", round(value / 2))
                          .format(count=round(value / 2)))

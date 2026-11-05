@@ -75,7 +75,7 @@ class RadarPanel(Gtk.ScrolledWindow):
             card.append(head)
             view = RadarView(width_request=320)
             view.set_content_height(340)
-            view.set_data(radar.labels, radar.levels, radar.demand, fit)
+            view.set_data(radar.labels, radar.levels, radar.demand, fit, radar.notes)
             legend = build_legend(radar, fit)
             flow = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, max_children_per_line=2, min_children_per_line=1,
                                homogeneous=False, column_spacing=12, row_spacing=6)

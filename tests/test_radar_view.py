@@ -38,6 +38,9 @@ def test_the_radar_draws_with_and_without_an_offer_and_with_missing_data():
     assert empty > 0 and alone > empty and both > alone       # cada capa añade dibujo
     assert "Técnicas: tú 8 · oferta 6" in view.get_tooltip_text()
     assert "Blandas: tú 5 · oferta ?" in view.get_tooltip_text()
+    view.set_data(LABELS, levels, [10, 4, 3, 8, 0], Fit.HIGH, ["cita 10 o más tecnologías", "", "pide 3 años"])
+    assert "Técnicas: tú 8 · oferta 10 (cita 10 o más tecnologías)" in view.get_tooltip_text()   # qué hay detrás
+    assert "Blandas: tú 5 · oferta 4\n" in view.get_tooltip_text() + "\n" and "(pide 3 años)" in view.get_tooltip_text()
 
 
 def test_any_number_of_axes_from_three_to_eight_can_be_drawn():

@@ -36,7 +36,7 @@ class RadarView(Gtk.DrawingArea):
         self.set_draw_func(self._draw)
 
     def set_data(self, labels: list[str], levels: list[float], demand: list[float | None] | None,
-                 fit: Fit = Fit.UNKNOWN) -> None:
+                 fit: Fit = Fit.UNKNOWN, notes: list[str] | None = None) -> None:
         """`labels`, `levels` (tu nivel) y `demand` (lo que pide la oferta; None en un eje = no se sabe) van por ejes."""
         self._labels, self._levels, self._demand, self._fit = labels, levels, demand or [], fit
         if self._compact:
@@ -45,8 +45,11 @@ class RadarView(Gtk.DrawingArea):
         lines = []
         for index, label in enumerate(labels):
             asked = self._demand[index] if index < len(self._demand) else None
-            lines.append(_("{axis}: tú {mine} · oferta {asked}").format(
-                axis=label, mine=f"{levels[index]:.0f}", asked="?" if asked is None else f"{asked:.0f}"))
+            line = _("{axis}: tú {mine} · oferta {asked}").format(
+                axis=label, mine=f"{levels[index]:.0f}", asked="?" if asked is None else f"{asked:.0f}")
+            if notes and index < len(notes) and notes[index]:
+                line += f" ({notes[index]})"   # qué hay detrás: «cita 10 o más tecnologías», «pide 3 años»…
+            lines.append(line)
         self.set_tooltip_text("\n".join(lines) or None)
         self.queue_draw()
 

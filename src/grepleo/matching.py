@@ -12,7 +12,7 @@ from .i18n import _
 from .models import CriterionResult, Evaluation, Fit, Job, Status, WorkMode
 from .panorama import DEFAULT_CATALOG
 from .profiles import STUDIES_RANK, Profile, parse_term
-from .radar import DEMAND_NICE, DEMAND_REQUIRED, SOFT_VOCABULARY, demand_note, term_demand
+from .radar import DEMAND_NICE, DEMAND_REQUIRED, SCALE, SOFT_VOCABULARY, demand_note, term_demand
 from .similar import PARENT_FACTOR, SIMILAR_FACTOR, aliases, parents_of, similar_to, umbrella_members
 from .textutil import (
     language_requirements,
@@ -27,6 +27,7 @@ from .textutil import (
 W_REQUIRED, W_NICE_ASK, W_MENTIONED, W_SOFT, W_AVOID = 3, 2, 1, 1, 2
 W_EXPERIENCE, W_SALARY, W_WORK_MODE, W_LOCATION, W_STUDIES, W_LANGUAGE = 3, 2, 2, 2, 1, 2
 
+SECONDARY = 0.7        # lo que conoces (secundario) cuenta con este porcentaje de tu nivel técnico general
 FULL_CREDIT = 0.8      # con este nivel frente a lo que se pide se da por cubierto del todo
 EVIDENCE = 6           # peso de habilidades pedidas por debajo del cual el encaje no se fía de sí mismo
 HIGH_SCORE = 0.80
@@ -46,12 +47,14 @@ def _weight(demand: float) -> int:
 
 
 def _my_skills(profile: Profile) -> list[tuple[frozenset[str], float, str]]:
-    """Lo que tienes y con qué nivel (0 a 10): los ejes de tus radares, tus habilidades principales (nivel 10) y las
-    secundarias (7). Va por orden de precisión: si algo está en un radar manda su nivel."""
+    """Lo que tienes y con qué nivel (0 a 10): los ejes de tus radares y tus habilidades principales, con tu nivel
+    técnico general del radar general (10 si no lo has tocado), y las secundarias, con el 70 % de él. Va por orden de
+    precisión: si algo está en un radar con tema, manda el nivel de ese eje."""
+    general = float(profile.radar.get("technical", SCALE))   # tu nivel técnico general del radar; sin tocarlo, 10
     skills = [(aliases(axis.spec), float(axis.level), parse_term(axis.spec)[0]) for radar in profile.radars
               for axis in radar.axes]
-    skills += [(aliases(spec), 10.0, parse_term(spec)[0]) for spec in profile.must]
-    skills += [(aliases(spec), 7.0, parse_term(spec)[0]) for spec in profile.nice]
+    skills += [(aliases(spec), general, parse_term(spec)[0]) for spec in profile.must]
+    skills += [(aliases(spec), general * SECONDARY, parse_term(spec)[0]) for spec in profile.nice]
     return [skill for skill in skills if skill[0]]
 
 
