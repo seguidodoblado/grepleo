@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-05
+
 ### Cambiado
 - **Licencia: de GPL-3.0 o posterior a PolyForm Noncommercial 1.0.0** (uso, copia y modificación libres para fines no comerciales). Cambia `COPYING`, `debian/copyright`, `pyproject.toml`, el «Acerca de» (licencia personalizada), README, CONTRIBUTING y la wiki. No hay ninguna versión publicada con la licencia anterior.
 - En el **plan de estudio** de Mercado, cada **fila entera** se colorea según el **porcentaje de ofertas que la piden** respecto al mayor: **rojo** desde 2/3, **naranja** desde 1/3 y **verde** por debajo; cuantas más ofertas la piden, más roja.
