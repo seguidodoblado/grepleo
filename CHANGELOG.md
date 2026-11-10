@@ -4,6 +4,7 @@
 
 ### Cambiado
 - **CONTRIBUTING (ES/EN):** quien contribuye, además de ofrecer su aportación bajo PolyForm Noncommercial, concede al autor una licencia perpetua e irrevocable para usarla también con fines comerciales y bajo otras licencias, y conserva su autoría.
+- **Documentos en doble idioma:** `CONTRIBUTING`, `PRIVACY`, `README`, `SECURITY` y `SUPPORT` pasan a ser un único fichero con español e inglés (como `CODE_OF_CONDUCT.md`) y desaparecen sus versiones `.en.md`. En el README, el logotipo y los badges van una sola vez.
 
 ## [0.1.0] - 2026-11-05
 
