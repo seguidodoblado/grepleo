@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="grepleo.svg" alt="Logotipo de Grepleo" width="128">
+  <img src="src/grepleo/assets/grepleo.svg" alt="Logotipo de Grepleo" width="128">
 </p>
 
 <h1 align="center">Grepleo</h1>
@@ -16,7 +16,7 @@
   <a href="https://github.com/seguidodoblado/grepleo/issues"><img src="https://img.shields.io/github/issues/seguidodoblado/grepleo" alt="issues"></a>
   <a href="https://github.com/seguidodoblado/grepleo"><img src="https://img.shields.io/github/languages/top/seguidodoblado/grepleo" alt="language"></a>
   <a href="https://codetime.dev"><img alt="CodeTime Badge" src="https://shields.jannchie.com/endpoint?style=flat&color=0284c7&url=https%3A%2F%2Fcodetime.dev%2Fv3%2Fusers%2Fshield%3Fuid%3D36830"></a>
-  <a href="https://wakatime.com/badge/user/3e1e3093-120d-4ccc-b6ba-3fe8de3407dd/project/951eb18e-49c4-4ffd-9927-24948a1871da"><img src="https://wakatime.com/badge/user/3e1e3093-120d-4ccc-b6ba-3fe8de3407dd/project/951eb18e-49c4-4ffd-9927-24948a1871da.svg" alt="wakatime"></a>
+  <a href="https://wakatime.com/badge/github/seguidodoblado/grepleo"><img src="https://wakatime.com/badge/github/seguidodoblado/grepleo.svg" alt="wakatime"></a>
 </p>
 
 ## 🇪🇸 Español

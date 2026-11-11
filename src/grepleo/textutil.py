@@ -31,6 +31,12 @@ def _needle(term: str) -> str:
 
 
 def mentions(text_normalized: str, terms: list[str]) -> bool:
+    return _mentions(text_normalized, tuple(terms))
+
+
+@lru_cache(maxsize=262144)
+def _mentions(text_normalized: str, terms: tuple[str, ...]) -> bool:
+    """Con memoria: el encaje, los radares, los huecos y la estimación ATS preguntan lo mismo de cada oferta una y otra vez."""
     # buscar antes el texto literal (rapidísimo) y solo si está, comprobar que es una palabra completa
     return any(_needle(term) in text_normalized and term_pattern(term).search(text_normalized)
                for term in terms if term.strip())

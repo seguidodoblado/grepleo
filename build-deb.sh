@@ -21,7 +21,7 @@ cp -a "$base/src/grepleo" "$stage/usr/share/grepleo/"
 find "$stage/usr/share/grepleo" -type d -name __pycache__ -prune -exec rm -rf {} +
 cp "$base/debian/grepleo-launcher" "$stage/usr/bin/grepleo"
 cp "$base/debian/grepleo.desktop" "$stage/usr/share/applications/"
-cp "$base/grepleo.svg" "$stage/usr/share/icons/hicolor/scalable/apps/"
+cp "$base/src/grepleo/assets/grepleo.svg" "$stage/usr/share/icons/hicolor/scalable/apps/"
 cp "$base/debian/copyright" "$doc/copyright"
 gzip -9n -c "$base/debian/changelog" > "$doc/changelog.Debian.gz"
 # Páginas de manual (inglés en man1, español en es/man1); la versión se rellena aquí

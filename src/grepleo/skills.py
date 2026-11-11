@@ -7,6 +7,8 @@ tienes nada. Sin GTK ni red.
 """
 from __future__ import annotations
 
+from functools import lru_cache
+
 from .i18n import _
 from .panorama import DEFAULT_CATALOG
 from .profiles import Profile, parse_term
@@ -74,6 +76,13 @@ def asked_soft_specs(profile: Profile) -> list[str]:
 
 def skill_credit(spec: str, demand: float, skills: list[Skill]) -> tuple[float, str]:
     """(crédito de 0 a 1, cómo lo cubres dicho con palabras) de una habilidad pedida."""
+    return _skill_credit(spec, demand, tuple(skills))
+
+
+@lru_cache(maxsize=65536)
+def _skill_credit(spec: str, demand: float, skills: tuple[Skill, ...]) -> tuple[float, str]:
+    """Con memoria: es una función pura de lo pedido y de tus habilidades, y se repite por cada oferta, radar y hueco.
+    (El texto depende del idioma, que solo cambia al reiniciar.)"""
     names = aliases(spec)
     mine = next((level for have, level, _name in skills if have & names), None)
     if mine is None:   # un término genérico como «Cloud» lo cubre cualquiera de sus concreciones

@@ -1329,7 +1329,7 @@ class MainWindow(Gtk.ApplicationWindow):
         if theme.has_icon("grepleo"):
             about.set_logo_icon_name("grepleo")
         else:
-            logo = Path(__file__).resolve().parents[3] / "grepleo.svg"   # solo al ejecutar desde el repositorio
+            logo = Path(__file__).resolve().parents[1] / "assets" / "grepleo.svg"
             if logo.exists():
                 about.set_logo(Gdk.Texture.new_from_filename(str(logo)))
         about.add_credit_section(_("Servicios de terceros"), [
