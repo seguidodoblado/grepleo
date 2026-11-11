@@ -17,6 +17,9 @@ dev = ["pytest>=7", "ruff>=0.6"]
 grepleo = "grepleo.__main__:main"
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+grepleo = ["assets/*.svg"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]

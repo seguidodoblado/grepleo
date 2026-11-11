@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Cambiado
+- El logotipo (`grepleo.svg`) pasa de la raíz del repositorio a `src/grepleo/assets/`, como en Bloguero y GnoMilestone: cambian las rutas del README, de `build-deb.sh` y de `pyproject.toml` (`package-data`). El «Acerca de» lo encuentra también al ejecutar desde el código fuente sin depender de la raíz.
 - **CONTRIBUTING (ES/EN):** quien contribuye, además de ofrecer su aportación bajo PolyForm Noncommercial, concede al autor una licencia perpetua e irrevocable para usarla también con fines comerciales y bajo otras licencias, y conserva su autoría.
 
 ## [0.1.0] - 2026-11-05

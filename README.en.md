@@ -1,7 +1,7 @@
 <p align="right"><a href="README.md">🇪🇸 Español</a></p>
 
 <p align="center">
-  <img src="grepleo.svg" alt="Grepleo logo" width="128">
+  <img src="src/grepleo/assets/grepleo.svg" alt="Grepleo logo" width="128">
 </p>
 
 <h1 align="center">Grepleo</h1>

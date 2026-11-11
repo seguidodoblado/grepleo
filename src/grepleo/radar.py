@@ -134,9 +134,9 @@ def _prepared(description: str) -> tuple[tuple[bool, float | None, str, float | 
 
 
 @lru_cache(maxsize=1024)
-def _patterns(spec: str) -> tuple[re.Pattern[str], ...]:
-    """Las expresiones que buscan un elemento y sus sinónimos en un texto ya normalizado."""
-    return tuple(term_pattern(name) for name in parse_term(spec)[1] if name.strip())
+def _patterns(spec: str) -> tuple[tuple[str, re.Pattern[str]], ...]:
+    """(texto literal, expresión) de un elemento y sus sinónimos, para buscarlos en un texto ya normalizado."""
+    return tuple((normalize(name).strip(), term_pattern(name)) for name in parse_term(spec)[1] if name.strip())
 
 
 @lru_cache(maxsize=2048)
@@ -147,19 +147,27 @@ def _normalized(text: str) -> str:
 def term_demand(job: Job, spec: str) -> float | None:
     """Cuánto pide la oferta un elemento: 10 si lo cita como requisito o en el título, 7 como deseable, 5 si solo lo
     menciona, 0 si no aparece y None si no se puede saber (ficha resumida que no lo cita)."""
+    return _term_demand(job.title, bool(job.full_description), job.description, spec)
+
+
+@lru_cache(maxsize=262144)
+def _term_demand(job_title: str, full_description: bool, description: str, spec: str) -> float | None:
+    """Con memoria: depende solo de la oferta y del elemento, y cada radar, hueco y estimación ATS lo vuelve a pedir."""
     patterns = _patterns(spec)
     if not patterns:
         return None
-    title = _normalized(job.title)
+    needles = tuple(needle for needle, _pattern in patterns)   # el texto literal, antes de la expresión (mucho más barato)
+    patterns = tuple(pattern for _needle, pattern in patterns)
+    title = _normalized(job_title)
     if any(pattern.search(title) for pattern in patterns):
         return DEMAND_REQUIRED
-    if not job.full_description:
+    if not full_description:
         return None
     best, section = 0.0, DEMAND_MENTIONED
-    for is_heading, heading_cue, normalized, own in _prepared(job.description):
+    for is_heading, heading_cue, normalized, own in _prepared(description):
         if is_heading:
             section = heading_cue or DEMAND_MENTIONED
-        elif any(pattern.search(normalized) for pattern in patterns):
+        elif any(needle in normalized and pattern.search(normalized) for needle, pattern in zip(needles, patterns)):
             best = max(best, own or section)
     return best
 
